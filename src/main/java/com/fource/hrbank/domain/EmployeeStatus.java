@@ -8,7 +8,7 @@ import lombok.Getter;
 public enum EmployeeStatus {
     ACTIVE("재직중"),
     ON_LEAVE("휴직중"),
-    RETIRED("퇴사");
+    RESIGNED("퇴사");
 
     private final String label;
 }
