@@ -67,7 +67,9 @@ public class BackupServiceTest {
         List<BackupDto> result = backupService.findAll();
 
         // then
-        Assertions.assertEquals(1, result.size());
+        assertThat(result.size()).isEqualTo(1);
+        assertThat(result.get(0).fileId()).isNotNull();
+        assertThat(result.get(0).status()).isEqualTo(BackupStatus.COMPLETED);
     }
 
     @Test
