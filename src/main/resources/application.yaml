@@ -1,22 +1,32 @@
 server:
   port: 8080
+
 logging:
   level:
     root: INFO
 #    org.hibernate.sql: debug
 #    org.hibernate.jdbc.bind: trace
 
-#spring:
-#  jpa:
-#    generate-ddl: false
-#    database: postgresql
-#    database-platform: org.hibernate.dialect.PostgreSQLDialect
-#    properties:
-#      hibernate:
-#        format_sql: true
-#        highlight_sql: true
-#        use_sql_comments: false
-#        dialect: org.hibernate.dialect.PostgreSQLDialect
-#        show_sql: true
-#    # OSIV ????
-#    open-in-view: false
+# DB
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/hrbank_db
+    username: fource
+    password: fource1234
+    driver-class-name: org.postgresql.Driver
+    # PostgreSQL createClob() 경고 메시지 제거
+    hikari:
+      connection-init-sql: SET SESSION hibernate.jdbc.lob.non_contextual_creation=true
+  jpa:
+    generate-ddl: false
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
+        use_sql_comments: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: true
+    # OSIV 비활성화
+    open-in-view: false
