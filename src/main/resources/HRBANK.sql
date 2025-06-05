@@ -76,7 +76,7 @@ CREATE TABLE tbl_backup_history
     started_at TIMESTAMPTZ   NOT NULL,
     ended_at   TIMESTAMPTZ   NOT NULL,
     status     VARCHAR       NOT NULL,
-    file_id    INT           NOT NULL
+    file_id    INT
 );
 
 -- FK 제약 조건
@@ -106,11 +106,11 @@ ALTER TABLE tbl_change_detail
         FOREIGN KEY (change_log_id)
             REFERENCES tbl_change_log(id)
             ON DELETE CASCADE;
-
-insert into tbl_department values (1, '개발팀', '백엔드', '2025-01-01', now(), now());
-insert into tbl_department values (2, '개발팀1', '백엔드1', '2025-12-2', now(), now());
-
-insert into tbl_file_metadata values (1, now(), 'profile.jpg', 'jpg', 1000);
-
-insert into tbl_employees values (1, 1, 1, 'test', 'test@na.com', 'EMP-111-111', '사원', '2025-06-05', '재직중', now(), now());
-
+--
+-- insert into tbl_department values (1, '개발팀', '백엔드', '2025-01-01', now(), now());
+-- insert into tbl_department values (2, '개발팀1', '백엔드1', '2025-12-2', now(), now());
+--
+-- insert into tbl_file_metadata values (1, now(), 'profile.jpg', 'jpg', 1000);
+--
+-- insert into tbl_employees values (1, 1, 1, 'test', 'test@na.com', 'EMP-111-111', '사원', '2025-06-05', '재직중', now(), now());
+--
