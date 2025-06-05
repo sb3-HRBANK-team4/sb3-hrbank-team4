@@ -37,6 +37,6 @@ public class BackupLog extends BaseEntity {
     private BackupStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "file_id", nullable = false)
+    @JoinColumn(name = "file_id")
     private FileMetadata backupFile;
 }
