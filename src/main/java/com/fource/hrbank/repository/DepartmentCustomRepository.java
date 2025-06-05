@@ -5,6 +5,7 @@ import com.fource.hrbank.domain.Department;
 import java.util.List;
 
 public interface DepartmentCustomRepository {
+
     List<Department> findByCursorCondition(
             String keyword,
             Long lastId,
@@ -13,4 +14,6 @@ public interface DepartmentCustomRepository {
             String sortField,
             String sortDirection
     );
+
+    long countByKeyword(String keyword);
 }
