@@ -39,7 +39,7 @@ CREATE TABLE tbl_file_metadata
 CREATE TABLE tbl_employees
 (
     id               SERIAL PRIMARY KEY,
-    profile_image_id INT             NOT NULL,
+    profile_image_id INT,
     department_id    INT             NOT NULL,
     name             VARCHAR         NOT NULL,
     email            VARCHAR         NOT NULL,
