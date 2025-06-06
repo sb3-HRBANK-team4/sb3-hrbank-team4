@@ -5,6 +5,13 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA hrbank TO fource;
 
 ALTER ROLE fource SET search_path TO hrbank, public;
 
+ALTER TABLE tbl_employees
+    ALTER COLUMN profile_image_id DROP NOT NULL;
+
+-- 추후 지우도록 하겠습니당
+ALTER TABLE tbl_employees
+    ALTER COLUMN department_id DROP NOT NULL;
+
 show search_path;
 
 -- 부서 테이블
