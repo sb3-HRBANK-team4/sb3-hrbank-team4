@@ -5,6 +5,13 @@ GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA hrbank TO fource;
 
 ALTER ROLE fource SET search_path TO hrbank, public;
 
+ALTER TABLE tbl_employees
+    ALTER COLUMN profile_image_id DROP NOT NULL;
+
+-- 추후 지우도록 하겠습니당
+ALTER TABLE tbl_employees
+    ALTER COLUMN department_id DROP NOT NULL;
+
 show search_path;
 
 -- 부서 테이블
@@ -32,7 +39,7 @@ CREATE TABLE tbl_file_metadata
 CREATE TABLE tbl_employees
 (
     id               SERIAL PRIMARY KEY,
-    profile_image_id INT             NOT NULL,
+    profile_image_id INT,
     department_id    INT             NOT NULL,
     name             VARCHAR         NOT NULL,
     email            VARCHAR         NOT NULL,

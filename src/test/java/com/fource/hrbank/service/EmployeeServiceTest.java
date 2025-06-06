@@ -1,0 +1,121 @@
+package com.fource.hrbank.service;
+
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+
+import com.fource.hrbank.domain.Department;
+import com.fource.hrbank.domain.Employee;
+import com.fource.hrbank.domain.EmployeeStatus;
+import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
+import com.fource.hrbank.dto.employee.EmployeeDto;
+import com.fource.hrbank.repository.EmployeeRepository;
+import com.fource.hrbank.service.employee.EmployeeService;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Date;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Transactional;
+
+@SpringBootTest
+@Transactional
+class EmployeeServiceTest {
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+    @Autowired
+    private EmployeeService employeeService;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @BeforeEach
+    void setUp() {
+        // 테이블 삭제
+        employeeRepository.deleteAll();
+
+        // 시퀀스 초기화
+        jdbcTemplate.execute("""
+            SELECT setval('tbl_employees_id_seq',
+                          COALESCE((SELECT MAX(id) FROM tbl_employees), 0) + 1,
+                          false)
+        """);
+    }
+
+    @Test
+    void findById_정상조회() {
+        Employee emp1 = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", new Date(), EmployeeStatus.ACTIVE, Instant.now());
+        Employee savedEmp1 = employeeRepository.save(emp1);
+
+        EmployeeDto result = employeeService.findById(savedEmp1.getId());
+
+        assertThat(result).isNotNull();
+        assertThat(result.name()).isEqualTo("김가");
+    }
+
+
+    @Test
+    void findAll_검색조건없음_커서페이지네이션_정상작동() {
+        // 테스트를 위해 tbl_employee의 department_id를 null처리 했습니다
+        Employee emp1 = new Employee(null, null, "가", "a@email.com", "EMP-001", "주임", new Date(), EmployeeStatus.ACTIVE, Instant.now());
+        Employee emp2 = new Employee(null, null, "나", "b@email.com", "EMP-002", "주임", new Date(), EmployeeStatus.ACTIVE, Instant.now());
+        Employee emp3 = new Employee(null, null, "다", "c@email.com", "EMP-003", "주임", new Date(), EmployeeStatus.ACTIVE, Instant.now());
+
+        employeeRepository.saveAll(List.of(emp1, emp2, emp3));
+
+        // 검색 및 정렬 조건 없음(기본 정렬: 이름 오름차순)
+        String nameOrEmail = null;
+        String departmentName = null;
+        String position = null;
+        EmployeeStatus status = null;
+        String sortField = "name";
+        String sortDirection = "asc";
+        String cursor = null;
+        Long idAfter = null;
+        int size = 2;
+
+        // when
+        CursorPageResponseEmployeeDto result = employeeService.findAll(
+            nameOrEmail, departmentName, position, status,
+            sortField, sortDirection, cursor, idAfter, size
+        );
+
+        // then
+        assertThat(result.content().size()).isEqualTo(2);
+        assertThat(result.content().get(0).name()).startsWith("가"); // 이름순 정렬 확인
+        assertThat(result.hasNext()).isTrue();
+        assertThat(result.nextCursor()).isNotNull();
+        assertThat(result.nextIdAfter()).isNotNull();
+    }
+
+    @Test
+    void findAll_이름내림차순정렬_확인() {
+
+        employeeRepository.saveAll(List.of(
+            new Employee(null, null, "가", "a@email.com", "EMP-001", "주임", new Date(), EmployeeStatus.ACTIVE, Instant.now()),
+            new Employee(null, null, "나", "b@email.com", "EMP-002", "사원", new Date(), EmployeeStatus.ACTIVE, Instant.now()),
+            new Employee(null, null, "다", "c@email.com", "EMP-003", "과장", new Date(), EmployeeStatus.ACTIVE, Instant.now())
+        ));
+
+        // when
+        CursorPageResponseEmployeeDto result = employeeService.findAll(
+            null, null, null, null,
+            "name", "desc",
+            null, null, 10
+        );
+
+        // then
+        List<String> names = result.content().stream()
+            .map(EmployeeDto::name)
+            .toList();
+
+        assertThat(names).containsExactly("다", "나", "가");
+    }
+
+}

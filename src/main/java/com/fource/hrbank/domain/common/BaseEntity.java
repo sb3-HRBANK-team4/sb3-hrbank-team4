@@ -1,6 +1,5 @@
 package com.fource.hrbank.domain.common;
 
-import com.fasterxml.jackson.annotation.JsonTypeId;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
