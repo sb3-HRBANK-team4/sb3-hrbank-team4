@@ -18,7 +18,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +58,7 @@ class EmployeeServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.name()).isEqualTo("김가");
     }
+
 
     @Test
     void findAll_검색조건없음_커서페이지네이션_정상작동() {
