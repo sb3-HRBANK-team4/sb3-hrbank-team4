@@ -1,10 +1,14 @@
-package com.fource.hrbank.controller;
+package com.fource.hrbank.service;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
+import com.fource.hrbank.domain.Employee;
+import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.dto.employee.EmployeeDto;
 import com.fource.hrbank.repository.EmployeeRepository;
 import com.fource.hrbank.service.employee.EmployeeService;
+import java.time.Instant;
+import java.util.Date;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,9 +16,10 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Transactional
 class EmployeeServiceTest {
 
 
@@ -29,6 +34,9 @@ class EmployeeServiceTest {
 
     @BeforeEach
     void setUp() {
+        // 테이블 삭제
+        employeeRepository.deleteAll();
+
         // 시퀀스 초기화
         jdbcTemplate.execute("""
             SELECT setval('tbl_employees_id_seq',
@@ -38,11 +46,14 @@ class EmployeeServiceTest {
     }
 
     @Test
-    @DisplayName("사전 삽입된 직원 ID로 조회 - 정상 동작")
-    void findById_사전데이터_정상조회() {
-        EmployeeDto result = employeeService.findById(1L);
+    void findById_정상조회() {
+        Employee emp1 = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", new Date(), EmployeeStatus.ACTIVE, Instant.now());
+        Employee savedEmp1 = employeeRepository.save(emp1);
+
+        EmployeeDto result = employeeService.findById(savedEmp1.getId());
 
         assertThat(result).isNotNull();
-        assertThat(result.name()).isEqualTo("직원1"); // 사전 데이터에 맞춰
+        assertThat(result.name()).isEqualTo("김가");
     }
+
 }
