@@ -28,13 +28,14 @@ public class LocalFileStorage implements FileStorage {
 
     /**
      * 저장 디렉토리를 생성합니다.
+     * @exception FileIOException
      */
     @PostConstruct
     public void init() {
         try {
             Files.createDirectories(root);
         } catch (IOException e) {
-            throw new FileIOException();
+            throw new FileIOException(FileIOException.FILE_CREATE_ERROR_MESSAGE, e);
         }
     }
 
@@ -44,6 +45,7 @@ public class LocalFileStorage implements FileStorage {
      * @param id 저장할 파일의 ID
      * @param bytes 저장할 파일의 데이터
      * @return 저장된 파일의 ID
+     * @exception FileIOException
      */
     @Override
     public Long put(Long id, byte[] bytes) {
