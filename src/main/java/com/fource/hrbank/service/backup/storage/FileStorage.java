@@ -4,5 +4,5 @@ import java.io.IOException;
 
 public interface FileStorage {
 
-    Long put(Long id, byte[] bytes) throws IOException;
+    Long put(Long id, byte[] bytes);
 }
