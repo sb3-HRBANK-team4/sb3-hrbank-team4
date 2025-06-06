@@ -71,4 +71,17 @@ public class DepartmentServiceTest {
         assertThat(result.nextCursor()).isNotNull(); // 다음 커서가 있어야 함
         assertThat(result.nextIdAfter()).isNotNull();     // 다음 id 커서도 존재해야 함
     }
+
+    @Test
+    void 부서등록() {
+        // given
+        Department department = new Department("지원", "부서 지원", Instant.now(), Instant.now());
+
+        // when
+        Department result = departmentRepository.save(department);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo("지원");
+    }
 }
