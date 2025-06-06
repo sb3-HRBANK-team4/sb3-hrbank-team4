@@ -3,10 +3,14 @@ package com.fource.hrbank.service;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
+import com.fource.hrbank.domain.FileMetadata;
 import com.fource.hrbank.exception.FileIOException;
-import com.fource.hrbank.service.backup.storage.LocalFileStorage;
+import com.fource.hrbank.exception.FileNotFoundException;
+import com.fource.hrbank.repository.FileMetadataRepository;
+import com.fource.hrbank.service.storage.LocalFileStorage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +18,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -23,6 +32,12 @@ public class LocalFileStorageTest {
     @Autowired
     private LocalFileStorage fileStorage;
 
+    @Autowired
+    private FileMetadataRepository fileMetadataRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @TempDir
     Path tempDir;
 
@@ -30,6 +45,16 @@ public class LocalFileStorageTest {
     void setUp() {
         fileStorage = new LocalFileStorage(tempDir.toString());
         fileStorage.init();
+
+        // 테이블 삭제
+        fileMetadataRepository.deleteAll();
+
+        // 시퀀스를 "테이블의 MAX(id) + 1"로 세팅
+        jdbcTemplate.execute("""
+            SELECT setval('tbl_file_metadata_id_seq', 
+                          COALESCE((SELECT MAX(id) FROM tbl_file_metadata), 0) + 1,
+                          false)
+        """);
     }
 
     @Test
@@ -92,5 +117,55 @@ public class LocalFileStorageTest {
         assertThatThrownBy(() -> fileStorage.put(id, content))
                 .isInstanceOf(FileIOException.class)
                 .hasMessage(FileIOException.FILE_SAVE_ERROR_MESSAGE);
+    }
+
+    @Test
+    void get_파일읽기성공_파일읽음() throws IOException {
+        // given
+        Long id = 1L;
+        byte[] content = "파일 읽기 테스트".getBytes();
+
+        Path filePath = fileStorage.resolvePath(id);
+        Files.write(filePath, content);
+
+        // when
+        InputStream inputStream = fileStorage.get(id);
+        byte[] results = inputStream.readAllBytes();
+
+        // then
+        assertThat(results).isEqualTo(content);
+    }
+
+    @Test
+    void get_파일읽기실패_예외발생() {
+        // given
+        Long id = 999L; // 존재하지 않는 파일 ID
+
+        // when
+        assertThatThrownBy(() -> fileStorage.get(id))
+                .isInstanceOf(FileNotFoundException.class)
+                .hasMessage(FileNotFoundException.FILE_NOT_FOUND_ERROR_MESSAGE);
+    }
+
+    @Test
+    void download_파일다운로드성공_다운로드됨() throws IOException {
+        // given
+        byte[] content = "파일 다운로드 테스트".getBytes();
+
+        FileMetadata fileMetadata = new FileMetadata("download.txt","text/plain",(long) content.length);
+        fileMetadataRepository.save(fileMetadata);
+
+        Path downloadPath = fileStorage.resolvePath(fileMetadata.getId());
+        Files.write(downloadPath,content);
+
+        // when
+        ResponseEntity<Resource> response = fileStorage.download(fileMetadata);
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getHeaders().getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
+        assertThat(response.getHeaders().getContentLength()).isEqualTo(content.length);
+        assertThat(response.getHeaders().getContentDisposition().getFilename()).isEqualTo("download.txt");
+        assertThat(Files.readAllBytes(downloadPath)).isEqualTo(content);
     }
 }
