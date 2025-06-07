@@ -16,7 +16,7 @@ import java.time.LocalDate;
  * 상태 : 정확히 일치(equal)
  */
 public class EmployeeSpecification {
-    public static Specification<Employee> nameOrEmailLike(String nameOrEmail){
+    public static Specification<Employee> nameOrEmailLike(String nameOrEmail) {
         return (root, query, cb) -> {
             if (nameOrEmail == null || nameOrEmail.isBlank()) return null;
             String like = "%" + nameOrEmail + "%";
@@ -27,7 +27,7 @@ public class EmployeeSpecification {
         };
     }
 
-    public static Specification<Employee> departmentContains(String department){
+    public static Specification<Employee> departmentContains(String department) {
         return (root, query, cb) -> {
             if (department == null || department.isBlank()) return null;
             return cb.like(root.join("department").get("name"), "%" + department + "%");
@@ -53,8 +53,8 @@ public class EmployeeSpecification {
      * 정렬 필드와 커서 값, 마지막 ID를 기반으로 다음 페이지의 데이터를 필터링합니다.
      *
      * @param sortField 정렬 기준 필드명 ("name", "employeeNumber", "hireDate")
-     * @param cursor 커서 값 (마지막 요소의 정렬 기준 값)
-     * @param idAfter 마지막 요소의 ID
+     * @param cursor    커서 값 (마지막 요소의 정렬 기준 값)
+     * @param idAfter   마지막 요소의 ID
      * @return 커서 기반 조건을 적용한 Specification
      */
     public static Specification<Employee> buildCursorSpec(String sortField, String cursor, Long idAfter) {

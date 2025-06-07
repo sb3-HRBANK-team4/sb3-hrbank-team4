@@ -1,7 +1,8 @@
 package com.fource.hrbank.dto.common;
 
-import java.time.LocalDateTime;
 import org.springframework.http.HttpStatus;
+
+import java.time.LocalDateTime;
 
 public record ErrorResponse(
     LocalDateTime timestamp,

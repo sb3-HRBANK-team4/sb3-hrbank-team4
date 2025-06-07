@@ -1,24 +1,19 @@
 package com.fource.hrbank.controller;
 
 import com.fource.hrbank.controller.api.EmployeeApi;
-import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
-import com.fource.hrbank.domain.FileMetadata;
 import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDto;
-import com.fource.hrbank.mapper.EmployeeMapper;
 import com.fource.hrbank.service.employee.EmployeeService;
-import java.util.Date;
-import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @RestController
@@ -29,10 +24,10 @@ public class EmployeeController implements EmployeeApi {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<EmployeeDto> create(
-        @RequestPart("EmployeeCreateRequest") EmployeeCreateRequest request,
-        @RequestPart(value = "profile", required = false) Long profileImageId
+        @RequestPart("employee") EmployeeCreateRequest request,
+        @RequestPart(value = "profile", required = false) MultipartFile profileImage
     ) {
-        EmployeeDto employeeDto = employeeService.create(request, Optional.ofNullable(profileImageId));
+        EmployeeDto employeeDto = employeeService.create(request, Optional.ofNullable(profileImage));
 
         return ResponseEntity
             .status(HttpStatus.CREATED)

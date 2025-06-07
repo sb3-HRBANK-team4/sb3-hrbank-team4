@@ -3,7 +3,6 @@ package com.fource.hrbank.dto.employee;
 import com.fource.hrbank.domain.EmployeeStatus;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 public record EmployeeUpdateRequest(
     String name,
