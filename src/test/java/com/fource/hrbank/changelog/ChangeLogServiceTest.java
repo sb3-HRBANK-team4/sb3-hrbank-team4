@@ -2,6 +2,7 @@ package com.fource.hrbank.changelog;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import com.fource.hrbank.Sb3HrbankFourceApplication;
 import com.fource.hrbank.domain.ChangeLog;
 import com.fource.hrbank.domain.ChangeType;
 import com.fource.hrbank.domain.Employee;
@@ -11,6 +12,7 @@ import com.fource.hrbank.dto.changelog.ChangeLogDto;
 import com.fource.hrbank.repository.ChangeLogRepository;
 import com.fource.hrbank.repository.EmployeeRepository;
 import com.fource.hrbank.service.changelog.ChangeLogService;
+import com.fource.hrbank.service.storage.FileStorage;
 import java.time.Instant;
 import java.util.Date;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,12 +20,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @Transactional
 public class ChangeLogServiceTest {
+
+    @MockBean
+    private FileStorage fileStorage;
 
     @Autowired
     private ChangeLogService changeLogService;
@@ -50,13 +56,25 @@ public class ChangeLogServiceTest {
         """);
     }
 
-
     @Test
     @DisplayName("정보 수정 이력 단건 조회 - 성공")
     void 정보수정이력_단건조회_성공() {
         // given
-        ChangeLog entity = new ChangeLog(
+        Employee employee = new Employee(
             null,
+            null,
+            "김단건",
+            "single@test.com",
+            "01000000000",
+            "테스트개발자",
+            new Date(),
+            EmployeeStatus.ACTIVE,
+            Instant.now()
+        );
+        employeeRepository.save(employee);
+
+        ChangeLog entity = new ChangeLog(
+            employee,
             Instant.now(),
             "127.0.0.1",
             ChangeType.CREATED,
@@ -66,10 +84,13 @@ public class ChangeLogServiceTest {
 
         ChangeLog saved = changeLogRepository.save(entity);
 
+        // when
         ChangeLogDto result = changeLogService.findById(saved.getId());
 
+        // then
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(saved.getId());
+        assertThat(result.getMemo()).isEqualTo("단건조회 테스트");
     }
 
     @Test
