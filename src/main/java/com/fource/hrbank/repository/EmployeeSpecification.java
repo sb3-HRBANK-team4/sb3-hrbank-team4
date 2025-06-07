@@ -6,6 +6,8 @@ import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.LocalDate;
+
 /**
  * 동적 where 조건을 표현하는 클래스
  * 이름 또는 이메일 : like, or 조건
@@ -76,7 +78,7 @@ public class EmployeeSpecification {
     private static Comparable<?> convertToComparable(String field, String cursor) {
         try {
             return switch (field) {
-                case "hireDate" -> java.sql.Date.valueOf(cursor); // ISO_DATE 형식 필요
+                case "hireDate" -> LocalDate.parse(cursor);
                 case "employeeNumber" -> cursor;
                 case "name" -> cursor;
                 default -> null;

@@ -1,20 +1,30 @@
 package com.fource.hrbank.service.employee;
 
+import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
+import com.fource.hrbank.domain.FileMetadata;
 import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
+import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDto;
 import com.fource.hrbank.mapper.EmployeeMapper;
+import com.fource.hrbank.repository.DepartmentRepository;
 import com.fource.hrbank.repository.EmployeeRepository;
 import com.fource.hrbank.repository.EmployeeSpecification;
-import java.util.List;
-import java.util.NoSuchElementException;
+import com.fource.hrbank.repository.FileMetadataRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Date;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 /**
  * 직원 관련 비즈니스 로직을 당담하는 클래스입니다.
@@ -25,6 +35,42 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final EmployeeMapper employeeMapper;
+    private final DepartmentRepository departmentRepository;
+    private final FileMetadataRepository fileMetadataRepository;
+
+    /**
+     *
+     * @param request
+     * @param profileImageId
+     * @return 프로필, 부서, 이름, 이메일, 사원번호, 직함, 입사일, 상태, updatedAt, createdAt
+     */
+    @Override
+    public EmployeeDto create(EmployeeCreateRequest request, Optional<Long> profileImageId) {
+        if (employeeRepository.existsByEmail(request.email())) {
+            throw new IllegalArgumentException();
+        }
+
+        FileMetadata profile = profileImageId
+            .flatMap(fileMetadataRepository::findById)
+            .orElse(null);
+
+        List<Department> departments = departmentRepository.findAll();
+        Department department = departmentRepository.findById(request.departmentId()).orElse(null);
+        String name = request.name();
+        String email = request.email();
+        LocalDate hireDate = request.hireDate();
+
+        //사원번호 : "EMP-" + [입사연도] + "-" + [해당 연도 N번째 입사], 숫자 자리는 항상 세자리로;
+        int hireYear = hireDate.getYear();
+        long count = employeeRepository.countByHireDateBetween(LocalDate.of(hireYear, 1, 1),
+            LocalDate.of(hireYear, 12, 31));
+        String employeeNumber = String.format("EMP-%d-%03d", hireYear, count + 1);
+
+        Employee employee = new Employee(profile, department, name, email, employeeNumber, request.position(), hireDate, EmployeeStatus.ACTIVE, null);
+        Employee savedEmployee = employeeRepository.save(employee);
+
+        return employeeMapper.toDto(savedEmployee);
+    }
 
     @Override
     public EmployeeDto findById(Long id) {
@@ -96,7 +142,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         return switch (sortField) {
             case "name" -> dto.name();
             case "employeeNumber" -> dto.employeeNumber();
-            case "hireDate" -> dto.hireDate().toInstant().toString();
+            case "hireDate" -> dto.hireDate().toString();
             default -> null;
         };
     }

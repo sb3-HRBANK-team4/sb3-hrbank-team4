@@ -2,9 +2,14 @@ package com.fource.hrbank.service.employee;
 
 import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
+import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDto;
 
+import java.util.Optional;
+
 public interface EmployeeService {
+
+    public EmployeeDto create(EmployeeCreateRequest request, Optional<Long> profileImageId);
 
     public EmployeeDto findById(Long id);
 
