@@ -69,6 +69,19 @@ public class BackupServiceImpl implements BackupService {
     }
 
     /**
+     * 지정된 상태의 가장 최근 백업 이력을 조회합니다.
+     *
+     * @param status 백업 상태
+     * @return 가장 최근 백업 이력 DTO
+     */
+    @Override
+    public BackupDto findLatestByStatus(BackupStatus status) {
+        BackupLog backupLog = backupLogRepository.findLatestByStatus(status);
+
+        return backupLogMapper.toDto(backupLog);
+    }
+
+    /**
      * 정렬 필드에 해당하는 커서 값을 추출합니다.
      *
      * @param backupLog 커서 기준이 될 백업 로그

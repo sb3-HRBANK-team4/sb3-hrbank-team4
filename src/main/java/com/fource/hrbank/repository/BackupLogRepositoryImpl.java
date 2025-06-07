@@ -3,6 +3,7 @@ package com.fource.hrbank.repository;
 import com.fource.hrbank.domain.BackupLog;
 import com.fource.hrbank.domain.BackupStatus;
 import com.fource.hrbank.domain.QBackupLog;
+import com.fource.hrbank.dto.backup.BackupDto;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -99,6 +100,25 @@ public class BackupLogRepositoryImpl implements BackupLogCustomRepository {
                 .fetchOne();
 
         return result != null ? result : 0L;
+    }
+
+    /**
+     * 지정된 상태의 가장 최근 백업 정보를 반환합니다.
+     *
+     * @param status 백업 상태 (기본값: COMPLETED)
+     * @return 가장 최근 백업 정보
+     */
+    @Override
+    public BackupLog findLatestByStatus(BackupStatus status) {
+        QBackupLog qBackupLog = QBackupLog.backupLog;
+
+        return queryFactory
+                .selectFrom(qBackupLog)
+                .where(
+                        qBackupLog.status.eq(status != null ? status : BackupStatus.COMPLETED)
+                )
+                .orderBy(qBackupLog.endedAt.desc())
+                .fetchFirst();
     }
 
     /**

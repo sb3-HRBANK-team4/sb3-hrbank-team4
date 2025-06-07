@@ -15,4 +15,6 @@ public interface BackupService {
             Long idAfter, String cursor, int size,
             String sortField, String sortDirection
     );
+
+    BackupDto findLatestByStatus(BackupStatus status);
 }
