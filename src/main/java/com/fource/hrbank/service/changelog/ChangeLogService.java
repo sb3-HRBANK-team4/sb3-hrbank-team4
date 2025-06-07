@@ -1,6 +1,7 @@
 package com.fource.hrbank.service.changelog;
 
 import com.fource.hrbank.dto.changelog.ChangeDetailDto;
+import com.fource.hrbank.dto.changelog.ChangeLogCreateRequestDto;
 import com.fource.hrbank.dto.changelog.ChangeLogDto;
 import com.fource.hrbank.dto.changelog.CursorPageResponseChangeLogDto;
 
@@ -23,4 +24,6 @@ public interface ChangeLogService {
     );
 
     List<ChangeDetailDto> findDiffs(Long id);
+
+    ChangeLogDto create(ChangeLogCreateRequestDto requestDto);
 }
