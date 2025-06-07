@@ -6,13 +6,17 @@ import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
+import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDto;
+import com.fource.hrbank.repository.DepartmentRepository;
 import com.fource.hrbank.repository.EmployeeRepository;
 import com.fource.hrbank.service.employee.EmployeeService;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,6 +37,9 @@ class EmployeeServiceTest {
     private EmployeeService employeeService;
 
     @Autowired
+    private DepartmentRepository departmentRepository;
+
+    @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
@@ -50,7 +57,7 @@ class EmployeeServiceTest {
 
     @Test
     void findById_정상조회() {
-        Employee emp1 = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", new Date(), EmployeeStatus.ACTIVE, Instant.now());
+        Employee emp1 = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.of(2023,1,1), EmployeeStatus.ACTIVE, Instant.now());
         Employee savedEmp1 = employeeRepository.save(emp1);
 
         EmployeeDto result = employeeService.findById(savedEmp1.getId());
@@ -63,9 +70,9 @@ class EmployeeServiceTest {
     @Test
     void findAll_검색조건없음_커서페이지네이션_정상작동() {
         // 테스트를 위해 tbl_employee의 department_id를 null처리 했습니다
-        Employee emp1 = new Employee(null, null, "가", "a@email.com", "EMP-001", "주임", new Date(), EmployeeStatus.ACTIVE, Instant.now());
-        Employee emp2 = new Employee(null, null, "나", "b@email.com", "EMP-002", "주임", new Date(), EmployeeStatus.ACTIVE, Instant.now());
-        Employee emp3 = new Employee(null, null, "다", "c@email.com", "EMP-003", "주임", new Date(), EmployeeStatus.ACTIVE, Instant.now());
+        Employee emp1 = new Employee(null, null, "가", "a@email.com", "EMP-001", "주임", LocalDate.of(2023,1,1), EmployeeStatus.ACTIVE, Instant.now());
+        Employee emp2 = new Employee(null, null, "나", "b@email.com", "EMP-002", "주임", LocalDate.of(2023,1,1), EmployeeStatus.ACTIVE, Instant.now());
+        Employee emp3 = new Employee(null, null, "다", "c@email.com", "EMP-003", "주임",  LocalDate.of(2023,1,1), EmployeeStatus.ACTIVE, Instant.now());
 
         employeeRepository.saveAll(List.of(emp1, emp2, emp3));
 
@@ -98,9 +105,9 @@ class EmployeeServiceTest {
     void findAll_이름내림차순정렬_확인() {
 
         employeeRepository.saveAll(List.of(
-            new Employee(null, null, "가", "a@email.com", "EMP-001", "주임", new Date(), EmployeeStatus.ACTIVE, Instant.now()),
-            new Employee(null, null, "나", "b@email.com", "EMP-002", "사원", new Date(), EmployeeStatus.ACTIVE, Instant.now()),
-            new Employee(null, null, "다", "c@email.com", "EMP-003", "과장", new Date(), EmployeeStatus.ACTIVE, Instant.now())
+            new Employee(null, null, "가", "a@email.com", "EMP-001", "주임", LocalDate.of(2023,1,1), EmployeeStatus.ACTIVE, Instant.now()),
+            new Employee(null, null, "나", "b@email.com", "EMP-002", "사원", LocalDate.of(2023,1,1), EmployeeStatus.ACTIVE, Instant.now()),
+            new Employee(null, null, "다", "c@email.com", "EMP-003", "과장", LocalDate.of(2023,1,1), EmployeeStatus.ACTIVE, Instant.now())
         ));
 
         // when
@@ -118,4 +125,37 @@ class EmployeeServiceTest {
         assertThat(names).containsExactly("다", "나", "가");
     }
 
+    @Test
+    void create_직원생성_확인() {
+
+        Department department = departmentRepository.save(
+            new Department("백엔드 개발팀", "서버 개발을 담당합니다.",Instant.now(), Instant.now())
+        );
+
+        EmployeeCreateRequest request = new EmployeeCreateRequest(
+            "조현아",
+            "hyun@gmail.com",
+            department.getId(),
+            "주임",
+            LocalDate.of(2025, 6, 2),
+            null // memo
+        );
+
+        // when
+        EmployeeDto employeeDto = employeeService.create(request, Optional.empty());
+
+        // then
+        assertThat(employeeDto).isNotNull();
+        assertThat(employeeDto.name()).isEqualTo("조현아");
+        assertThat(employeeDto.email()).isEqualTo("hyun@gmail.com");
+        assertThat(employeeDto.employeeNumber()).startsWith("EMP-2025-001");
+        assertThat(employeeDto.departmentId()).isEqualTo(department.getId());
+        assertThat(employeeDto.departmentName()).isEqualTo("백엔드 개발팀");
+        assertThat(employeeDto.position()).isEqualTo("주임");
+        assertThat(employeeDto.hireDate()).isEqualTo(LocalDate.of(2025, 6, 2));
+        assertThat(employeeDto.status()).isEqualTo(EmployeeStatus.ACTIVE);
+        assertThat(employeeDto.profileImageId()).isEqualTo(0L);
+        // 기본 프로필 id가 null값이여도 id = 0?
+
+    }
 }
