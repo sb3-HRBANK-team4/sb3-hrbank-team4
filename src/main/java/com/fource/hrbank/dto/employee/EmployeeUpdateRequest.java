@@ -1,6 +1,8 @@
 package com.fource.hrbank.dto.employee;
 
 import com.fource.hrbank.domain.EmployeeStatus;
+
+import java.time.LocalDate;
 import java.util.Date;
 
 public record EmployeeUpdateRequest(
@@ -8,7 +10,7 @@ public record EmployeeUpdateRequest(
     String email,
     Long departmentId,
     String position,
-    Date hireDate,
+    LocalDate hireDate,
     EmployeeStatus status,
     String memo
 ) {

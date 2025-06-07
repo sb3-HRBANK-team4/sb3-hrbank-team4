@@ -2,7 +2,8 @@ package com.fource.hrbank.dto.employee;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fource.hrbank.domain.EmployeeStatus;
-import java.util.Date;
+
+import java.time.LocalDate;
 
 public record EmployeeDto(
     long id,
@@ -13,9 +14,9 @@ public record EmployeeDto(
     String departmentName,
     String position,
 
-    // 프론트코드의 date 날짜 값 포맷 고정
+    // date 날짜 값 포맷 고정
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    Date hireDate,
+    LocalDate hireDate,
     EmployeeStatus status,
     long profileImageId
 ) {
