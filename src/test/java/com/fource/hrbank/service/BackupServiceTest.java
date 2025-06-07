@@ -1,33 +1,34 @@
 package com.fource.hrbank.service;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fource.hrbank.domain.BackupLog;
 import com.fource.hrbank.domain.BackupStatus;
-import com.fource.hrbank.domain.FileMetadata;
-import com.fource.hrbank.dto.backup.BackupDto;
 import com.fource.hrbank.repository.BackupLogRepository;
 import com.fource.hrbank.repository.FileMetadataRepository;
-import com.fource.hrbank.service.backup.BackupService;
 import java.time.Instant;
 import java.util.List;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 @Transactional
 public class BackupServiceTest {
 
     @Autowired
-    private BackupLogRepository backupLogRepository;
+    private MockMvc mockMvc;
 
     @Autowired
-    private BackupService backupService;
+    private BackupLogRepository backupLogRepository;
 
     @Autowired
     private FileMetadataRepository fileMetadataRepository;
@@ -37,53 +38,35 @@ public class BackupServiceTest {
 
     @BeforeEach
     void setUp() {
-        // 테이블 삭제
-        fileMetadataRepository.deleteAll();
-        backupLogRepository.deleteAll();
-
-        // 시퀀스를 "테이블의 MAX(id) + 1"로 세팅
-        jdbcTemplate.execute("""
-            SELECT setval('tbl_file_metadata_id_seq', 
-                          COALESCE((SELECT MAX(id) FROM tbl_file_metadata), 0) + 1,
-                          false)
-        """);
-        jdbcTemplate.execute("""
-            SELECT setval('tbl_backup_history_id_seq', 
-                          COALESCE((SELECT MAX(id) FROM tbl_backup_history), 0) + 1,
-                          false)
-        """);
+        // 테이블 ID 시퀀스 초기화
+        jdbcTemplate.execute("TRUNCATE TABLE tbl_file_metadata RESTART IDENTITY CASCADE");
+        jdbcTemplate.execute("TRUNCATE TABLE tbl_backup_history RESTART IDENTITY CASCADE");
     }
 
     @Test
-    void findAll_정상조회_fileId존재() {
+    void findAll_정상조회() throws Exception {
         // given
-        FileMetadata fileMetadata = new FileMetadata("profile_1.jpg", "image/jpeg", 39790L);
-        fileMetadataRepository.save(fileMetadata);
+        Instant startedAt = Instant.parse("2024-01-01T10:00:00Z");
+        Instant endedAt = Instant.parse("2024-01-01T10:30:00Z");
 
-        BackupLog backupLog = new BackupLog("127.0.0.1", Instant.now(),Instant.now(), BackupStatus.COMPLETED,fileMetadata);
-        backupLogRepository.save(backupLog);
+        BackupLog log1 = new BackupLog("182.216.32.93", startedAt, endedAt, BackupStatus.COMPLETED, null);
+        BackupLog log2 = new BackupLog("125.247.249.56", startedAt.plusSeconds(3600), endedAt.plusSeconds(3600), BackupStatus.COMPLETED, null);
+        BackupLog log3 = new BackupLog("14.63.67.157", startedAt.plusSeconds(7200), endedAt.plusSeconds(7200), BackupStatus.COMPLETED, null);
 
-        // when
-        List<BackupDto> result = backupService.findAll();
+        backupLogRepository.saveAll(List.of(log1, log2, log3));
 
-        // then
-        assertThat(result.size()).isEqualTo(1);
-        assertThat(result.get(0).fileId()).isNotNull();
-        assertThat(result.get(0).status()).isEqualTo(BackupStatus.COMPLETED);
-    }
-
-    @Test
-    void findAll_정상조회_fileIdNull() {
-        // given
-        BackupLog backupLog = new BackupLog("127.0.0.1", Instant.now(),Instant.now(), BackupStatus.SKIPPED,null);
-        backupLogRepository.save(backupLog);
-
-        // when
-        List<BackupDto> result = backupService.findAll();
-
-        // then
-        assertThat(result.size()).isEqualTo(1);
-        assertThat(result.get(0).fileId()).isNull();
-        assertThat(result.get(0).status()).isEqualTo(BackupStatus.SKIPPED);
+        // when & then
+        mockMvc.perform(get("/api/backups")
+                        .param("status", "COMPLETED")
+                        .param("startedAtFrom", "2024-01-01T00:00:00Z")
+                        .param("startedAtTo", "2024-01-02T00:00:00Z")
+                        .param("sortField", "startedAt")
+                        .param("sortDirection", "ASC")
+                        .param("size", "3"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(3))
+                .andExpect(jsonPath("$.hasNext").value(false))
+                .andExpect(jsonPath("$.size").value(3));
     }
 }

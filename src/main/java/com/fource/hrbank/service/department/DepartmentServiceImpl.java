@@ -2,11 +2,14 @@ package com.fource.hrbank.service.department;
 
 import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.dto.department.CursorPageResponseDepartmentDto;
+import com.fource.hrbank.dto.department.DepartmentCreateRequest;
+import com.fource.hrbank.dto.department.DepartmentDto;
 import com.fource.hrbank.mapper.DepartmentMapper;
 import com.fource.hrbank.repository.DepartmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -53,6 +56,22 @@ public class DepartmentServiceImpl implements DepartmentService {
                 totalCount,
                 hasNext
         );
+    }
+
+    /**
+     * @param request 부서 생성 정보를 담은 DTO
+     * @return 생성한 부서 정보
+     */
+    @Override
+    public DepartmentDto create(DepartmentCreateRequest request) {
+        Department department = new Department(
+                request.getName(),
+                request.getDescription(),
+                request.getEstablishedDate(),
+                Instant.now()
+        );
+
+        return departmentMapper.toDto(departmentRepository.save(department), null);
     }
 
     /**
