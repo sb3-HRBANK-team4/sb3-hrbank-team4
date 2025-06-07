@@ -46,15 +46,8 @@ public class LocalFileStorageTest {
         fileStorage = new LocalFileStorage(tempDir.toString());
         fileStorage.init();
 
-        // 테이블 삭제
-        fileMetadataRepository.deleteAll();
-
-        // 시퀀스를 "테이블의 MAX(id) + 1"로 세팅
-        jdbcTemplate.execute("""
-            SELECT setval('tbl_file_metadata_id_seq', 
-                          COALESCE((SELECT MAX(id) FROM tbl_file_metadata), 0) + 1,
-                          false)
-        """);
+        // 테이블 ID 시퀀스 초기화
+        jdbcTemplate.execute("TRUNCATE TABLE tbl_file_metadata RESTART IDENTITY CASCADE");
     }
 
     @Test
