@@ -26,11 +26,11 @@ public class DepartmentServiceImpl implements DepartmentService {
      * 부서 목록을 조회합니다.
      *
      * @param nameOrDescription 부서명 또는 부서 설명에 대한 검색어 (부분 일치)
-     * @param idAfter 마지막 요소의 ID (동일 정렬 필드일 경우 tie-breaker 역할)
-     * @param cursor 현재 커서 위치의 정렬 기준 값 (예: 부서명 또는 설립일)
-     * @param size 조회할 데이터 개수
-     * @param sortField 정렬 기준 필드 (예: "name", "establishedDate")
-     * @param sortDirection 정렬 방향 ("ASC" 또는 "DESC")
+     * @param idAfter           마지막 요소의 ID (동일 정렬 필드일 경우 tie-breaker 역할)
+     * @param cursor            현재 커서 위치의 정렬 기준 값 (예: 부서명 또는 설립일)
+     * @param size              조회할 데이터 개수
+     * @param sortField         정렬 기준 필드 (예: "name", "establishedDate")
+     * @param sortDirection     정렬 방향 ("ASC" 또는 "DESC")
      * @return 조건에 부합하는 부서 목록
      */
     @Override
@@ -49,12 +49,12 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         // 추후 employeeRepository의 직원 집계 메소드 구현 시 추가 작업 예정
         return new CursorPageResponseDepartmentDto(
-                content.stream().map(department -> departmentMapper.toDto(department, null)).toList(),
-                nextCursor,
-                nextIdAfter,
-                size,
-                totalCount,
-                hasNext
+            content.stream().map(department -> departmentMapper.toDto(department, null)).toList(),
+            nextCursor,
+            nextIdAfter,
+            size,
+            totalCount,
+            hasNext
         );
     }
 
@@ -65,10 +65,10 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public DepartmentDto create(DepartmentCreateRequest request) {
         Department department = new Department(
-                request.getName(),
-                request.getDescription(),
-                request.getEstablishedDate(),
-                Instant.now()
+            request.getName(),
+            request.getDescription(),
+            request.getEstablishedDate(),
+            Instant.now()
         );
 
         return departmentMapper.toDto(departmentRepository.save(department), null);
@@ -76,7 +76,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     /**
      * @param department 부서 엔티티
-     * @param sortField 정렬 기준 필드 (예: "name", "establishedDate")
+     * @param sortField  정렬 기준 필드 (예: "name", "establishedDate")
      * @return 정렬 필드 기준 데이터 (예: "서비스 개발", "2025-03-02")
      */
     private String extractCursorValue(Department department, String sortField) {

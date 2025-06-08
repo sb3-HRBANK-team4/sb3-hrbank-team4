@@ -1,9 +1,7 @@
 package com.fource.hrbank.service.storage;
 
 import com.fource.hrbank.domain.FileMetadata;
-import com.fource.hrbank.dto.employee.EmployeeDto;
 import java.io.InputStream;
-import java.util.List;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 

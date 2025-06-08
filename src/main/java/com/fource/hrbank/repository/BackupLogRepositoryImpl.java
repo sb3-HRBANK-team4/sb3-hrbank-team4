@@ -3,7 +3,6 @@ package com.fource.hrbank.repository;
 import com.fource.hrbank.domain.BackupLog;
 import com.fource.hrbank.domain.BackupStatus;
 import com.fource.hrbank.domain.QBackupLog;
-import com.fource.hrbank.dto.backup.BackupDto;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -11,7 +10,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import javax.swing.text.html.Option;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -29,11 +27,11 @@ public class BackupLogRepositoryImpl implements BackupLogCustomRepository {
      */
     @Override
     public List<BackupLog> findByCursorCondition(
-            String worker, Instant startedAtFrom,
-            Instant startedAtTo, BackupStatus status,
-            Long idAfter, String cursor,
-            String sortField, String sortDirection,
-            Pageable pageable
+        String worker, Instant startedAtFrom,
+        Instant startedAtTo, BackupStatus status,
+        Long idAfter, String cursor,
+        String sortField, String sortDirection,
+        Pageable pageable
     ) {
         QBackupLog qBackupLog = QBackupLog.backupLog;
 
@@ -65,11 +63,11 @@ public class BackupLogRepositoryImpl implements BackupLogCustomRepository {
         OrderSpecifier orderSpecifier = createOrderSpecifier(sortField, direction, qBackupLog);
 
         return queryFactory
-                .selectFrom(qBackupLog)
-                .where(where)
-                .orderBy(orderSpecifier, qBackupLog.id.asc())
-                .limit(pageable.getPageSize()+1)
-                .fetch();
+            .selectFrom(qBackupLog)
+            .where(where)
+            .orderBy(orderSpecifier, qBackupLog.id.asc())
+            .limit(pageable.getPageSize() + 1)
+            .fetch();
     }
 
     /**
@@ -79,7 +77,7 @@ public class BackupLogRepositoryImpl implements BackupLogCustomRepository {
      */
     @Override
     public Long countByCondition(String worker, Instant startedAtFrom, Instant startedAtTo,
-            BackupStatus status) {
+                                 BackupStatus status) {
         QBackupLog qBackupLog = QBackupLog.backupLog;
 
         BooleanBuilder where = new BooleanBuilder();
@@ -96,10 +94,10 @@ public class BackupLogRepositoryImpl implements BackupLogCustomRepository {
         }
 
         Long result = queryFactory
-                .select(qBackupLog.count())
-                .from(qBackupLog)
-                .where(where)
-                .fetchOne();
+            .select(qBackupLog.count())
+            .from(qBackupLog)
+            .where(where)
+            .fetchOne();
 
         return result != null ? result : 0L;
     }
@@ -140,9 +138,9 @@ public class BackupLogRepositoryImpl implements BackupLogCustomRepository {
      * @return 커서 조건을 포함한 BooleanBuilder (Where절)
      */
     private BooleanBuilder createCursorCondition(
-            String sortField, Order direction,
-            Instant cursorInstant, Long idAfter,
-            QBackupLog qBackupLog
+        String sortField, Order direction,
+        Instant cursorInstant, Long idAfter,
+        QBackupLog qBackupLog
     ) {
         BooleanBuilder cursorBuilder = new BooleanBuilder();
 
@@ -150,21 +148,21 @@ public class BackupLogRepositoryImpl implements BackupLogCustomRepository {
             if (direction == Order.ASC) {
                 cursorBuilder.or(qBackupLog.startedAt.gt(cursorInstant));
                 cursorBuilder.or(qBackupLog.startedAt.eq(cursorInstant)
-                        .and(qBackupLog.id.gt(idAfter)));
+                    .and(qBackupLog.id.gt(idAfter)));
             } else {
                 cursorBuilder.or(qBackupLog.startedAt.lt(cursorInstant));
                 cursorBuilder.or(qBackupLog.startedAt.eq(cursorInstant)
-                        .and(qBackupLog.id.lt(idAfter)));
+                    .and(qBackupLog.id.lt(idAfter)));
             }
         } else if (sortField.equals("endedAt")) {
             if (direction == Order.ASC) {
                 cursorBuilder.or(qBackupLog.endedAt.gt(cursorInstant));
                 cursorBuilder.or(qBackupLog.endedAt.eq(cursorInstant)
-                        .and(qBackupLog.id.gt(idAfter)));
+                    .and(qBackupLog.id.gt(idAfter)));
             } else {
                 cursorBuilder.or(qBackupLog.endedAt.lt(cursorInstant));
                 cursorBuilder.or(qBackupLog.endedAt.eq(cursorInstant)
-                        .and(qBackupLog.id.lt(idAfter)));
+                    .and(qBackupLog.id.lt(idAfter)));
             }
         }
 
@@ -174,8 +172,8 @@ public class BackupLogRepositoryImpl implements BackupLogCustomRepository {
     /**
      * 정렬 기준에 따라 OrderSpecifier를 생성합니다.
      *
-     * @param sortField 정렬 필드명
-     * @param direction 정렬 방향
+     * @param sortField  정렬 필드명
+     * @param direction  정렬 방향
      * @param qBackupLog QueryDSL용 Q도메인
      * @return 정렬 조건을 나타내는 OrderSpecifier
      */

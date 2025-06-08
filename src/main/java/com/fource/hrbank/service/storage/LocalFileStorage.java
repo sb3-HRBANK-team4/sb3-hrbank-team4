@@ -1,22 +1,15 @@
 package com.fource.hrbank.service.storage;
 
-import com.fource.hrbank.domain.BackupStatus;
 import com.fource.hrbank.domain.FileMetadata;
-import com.fource.hrbank.dto.backup.BackupDto;
-import com.fource.hrbank.dto.employee.EmployeeDto;
-import com.fource.hrbank.exception.DataExportException;
 import com.fource.hrbank.exception.FileIOException;
 import com.fource.hrbank.exception.FileNotFoundException;
 import jakarta.annotation.PostConstruct;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.InputStreamResource;
@@ -38,12 +31,13 @@ public class LocalFileStorage implements FileStorage {
     private final Path root;
 
     public LocalFileStorage(
-            @Value(".hrbank/storage") String rootPath) {
+        @Value(".hrbank/storage") String rootPath) {
         this.root = Paths.get(rootPath);
     }
 
     /**
      * 저장 디렉토리를 생성합니다.
+     *
      * @throws FileIOException
      */
     @PostConstruct
@@ -58,7 +52,7 @@ public class LocalFileStorage implements FileStorage {
     /**
      * ID, 파일 데이터를 받아 로컬에 저장합니다.
      *
-     * @param id 저장할 파일의 ID
+     * @param id    저장할 파일의 ID
      * @param bytes 저장할 파일의 데이터
      * @return 저장된 파일의 ID
      * @throws FileIOException
@@ -123,12 +117,12 @@ public class LocalFileStorage implements FileStorage {
         Resource resource = new InputStreamResource(stream);
 
         return ResponseEntity.status(HttpStatus.OK)
-                .contentLength(fileMetadata.getSize())
-                .contentType(MediaType.parseMediaType(fileMetadata.getContentType()))
-                .headers(headers -> headers.setContentDisposition(
-                        ContentDisposition.attachment()
-                                .filename(fileMetadata.getFileName())
-                                .build()))
-                .body(resource);
+            .contentLength(fileMetadata.getSize())
+            .contentType(MediaType.parseMediaType(fileMetadata.getContentType()))
+            .headers(headers -> headers.setContentDisposition(
+                ContentDisposition.attachment()
+                    .filename(fileMetadata.getFileName())
+                    .build()))
+            .body(resource);
     }
 }

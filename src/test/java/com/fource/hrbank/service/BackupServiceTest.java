@@ -26,7 +26,7 @@ import com.fource.hrbank.repository.FileMetadataRepository;
 import com.fource.hrbank.service.backup.BackupService;
 import com.fource.hrbank.service.storage.FileStorage;
 import java.time.Instant;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -102,17 +102,17 @@ public class BackupServiceTest {
 
         // when & then
         mockMvc.perform(get("/api/backups")
-                        .param("status", "COMPLETED")
-                        .param("startedAtFrom", "2024-01-01T00:00:00Z")
-                        .param("startedAtTo", "2024-01-02T00:00:00Z")
-                        .param("sortField", "startedAt")
-                        .param("sortDirection", "ASC")
-                        .param("size", "3"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content.length()").value(3))
-                .andExpect(jsonPath("$.hasNext").value(false))
-                .andExpect(jsonPath("$.size").value(3));
+                .param("status", "COMPLETED")
+                .param("startedAtFrom", "2024-01-01T00:00:00Z")
+                .param("startedAtTo", "2024-01-02T00:00:00Z")
+                .param("sortField", "startedAt")
+                .param("sortDirection", "ASC")
+                .param("size", "3"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content").isArray())
+            .andExpect(jsonPath("$.content.length()").value(3))
+            .andExpect(jsonPath("$.hasNext").value(false))
+            .andExpect(jsonPath("$.size").value(3));
     }
 
     @Test
@@ -153,7 +153,7 @@ public class BackupServiceTest {
         BackupLog backupLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(1800), Instant.now().minusSeconds(1790), BackupStatus.COMPLETED, null);
         backupLogRepository.save(backupLog);
 
-        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", new Date(), EmployeeStatus.ACTIVE, Instant.now());
+        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
         employeeRepository.save(employee);
 
         ChangeLog changeLog = new ChangeLog(employee, Instant.now(), "127.0.0.1", ChangeType.UPDATED, null, null);
@@ -174,7 +174,7 @@ public class BackupServiceTest {
         BackupLog backupLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(1800), Instant.now().minusSeconds(1790), BackupStatus.COMPLETED, null);
         backupLogRepository.save(backupLog);
 
-        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", new Date(), EmployeeStatus.ACTIVE, Instant.now());
+        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
         employeeRepository.save(employee);
 
         ChangeLog changeLog = new ChangeLog(employee, Instant.now().minusSeconds(3600), "127.0.0.1", ChangeType.UPDATED, null, null);
@@ -225,7 +225,7 @@ public class BackupServiceTest {
         backupLogRepository.save(backupLog);
         BackupDto backupDto = backupLogMapper.toDto(backupLog);
 
-        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", new Date(), EmployeeStatus.ACTIVE, Instant.now());
+        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
         employeeRepository.save(employee);
 
         // 첫번째 put() : 예외, 두번째는 성공
@@ -247,7 +247,7 @@ public class BackupServiceTest {
         backupLogRepository.save(backupLog);
         BackupDto backupDto = backupLogMapper.toDto(backupLog);
 
-        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", new Date(), EmployeeStatus.ACTIVE, Instant.now());
+        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
         employeeRepository.save(employee);
 
         // 예외발생

@@ -8,9 +8,7 @@ import com.fource.hrbank.service.backup.BackupService;
 import com.fource.hrbank.service.storage.FileStorage;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,21 +35,21 @@ public class BackupController implements BackupApi {
      */
     @GetMapping
     public ResponseEntity<CursorPageResponseBackupDto> findAll(
-            @RequestParam(required = false) String worker,
-            @RequestParam(required = false) BackupStatus status,
-            @RequestParam(required = false) Instant startedAtFrom,
-            @RequestParam(required = false) Instant startedAtTo,
-            @RequestParam(required = false) Long idAfter,
-            @RequestParam(required = false) String cursor,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam String sortField,
-            @RequestParam String sortDirection
+        @RequestParam(required = false) String worker,
+        @RequestParam(required = false) BackupStatus status,
+        @RequestParam(required = false) Instant startedAtFrom,
+        @RequestParam(required = false) Instant startedAtTo,
+        @RequestParam(required = false) Long idAfter,
+        @RequestParam(required = false) String cursor,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam String sortField,
+        @RequestParam String sortDirection
     ) {
         CursorPageResponseBackupDto cursorPageResponseBackupDto = backupService.findAll(worker, status, startedAtFrom, startedAtTo, idAfter, cursor, size, sortField, sortDirection);
 
         return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(cursorPageResponseBackupDto);
+            .status(HttpStatus.OK)
+            .body(cursorPageResponseBackupDto);
     }
 
     /**

@@ -24,7 +24,7 @@ public class FileController {
     public ResponseEntity<Resource> download(@PathVariable Long fileId) {
 
         FileMetadata fileMetadata = fileMetadataRepository.findById(fileId)
-                .orElseThrow(FileNotFoundException::new);
+            .orElseThrow(FileNotFoundException::new);
 
         return fileStorage.download(fileMetadata);
     }
