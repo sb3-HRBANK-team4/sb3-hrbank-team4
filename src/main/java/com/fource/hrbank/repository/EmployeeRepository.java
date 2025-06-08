@@ -16,7 +16,5 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSp
 
     public boolean existsByEmail(String email);
 
-    public long countByHireDateBetween(LocalDate start, LocalDate end);
-
 }
 

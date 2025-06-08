@@ -1,31 +1,30 @@
 package com.fource.hrbank.service.employee;
 
-import com.fource.hrbank.domain.Department;
-import com.fource.hrbank.domain.Employee;
-import com.fource.hrbank.domain.EmployeeStatus;
-import com.fource.hrbank.domain.FileMetadata;
+import com.fource.hrbank.domain.*;
 import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDto;
+import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.fource.hrbank.exception.DuplicateEmailException;
 import com.fource.hrbank.exception.EmployeeNotFoundException;
 import com.fource.hrbank.exception.FileIOException;
 import com.fource.hrbank.mapper.EmployeeMapper;
-import com.fource.hrbank.repository.DepartmentRepository;
-import com.fource.hrbank.repository.EmployeeRepository;
-import com.fource.hrbank.repository.EmployeeSpecification;
-import com.fource.hrbank.repository.FileMetadataRepository;
+import com.fource.hrbank.repository.*;
 import com.fource.hrbank.service.storage.FileStorage;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.time.Year;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,12 +40,14 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final DepartmentRepository departmentRepository;
     private final FileStorage fileStorage;
     private final FileMetadataRepository fileMetadataRepository;
+    private final ChangeLogRepository changeLogRepository;
 
     /**
      * @param request      직원 생성 요청 정보
      * @param profileImage 프로필 이미지 (선택)
      * @return 생성된 직원 정보 DTO
      */
+    @Transactional
     @Override
     public EmployeeDto create(EmployeeCreateRequest request, Optional<MultipartFile> profileImage) {
         if (employeeRepository.existsByEmail(request.email())) {
@@ -99,6 +100,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employeeMapper.toDto(savedEmployee);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public EmployeeDto findById(Long id) {
         Employee employee = employeeRepository.findById(id)
@@ -120,6 +122,7 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @param size           조회할 데이터 개수
      * @return 조건에 부합하는 직원 목록 페이지 응답 DTO
      */
+    @Transactional(readOnly = true)
     @Override
     public CursorPageResponseEmployeeDto findAll(String nameOrEmail, String departmentName,
                                                  String position, EmployeeStatus status, String sortField, String sortDirection,
@@ -172,5 +175,65 @@ public class EmployeeServiceImpl implements EmployeeService {
             case "hireDate" -> dto.hireDate().toString();
             default -> null;
         };
+    }
+
+    @Transactional
+    @Override
+    public EmployeeDto update(Long id, EmployeeUpdateRequest request, Optional<MultipartFile> profileImage) {
+        //1. 수정할 엔티티 조회
+        Employee employee = employeeRepository.findById(id)
+            .orElseThrow(() -> new EmployeeNotFoundException(id));
+
+        //2. email 중복 체크
+        if (employeeRepository.existsByEmail(request.email())) {
+            throw new DuplicateEmailException("이미 등록된 이메일: " + request.email());
+        }
+
+        Department department = departmentRepository.findById(request.departmentId())
+            .orElseThrow(() -> new EntityNotFoundException("부서가 존재하지 않습니다."));
+
+        FileMetadata profile = Optional.of(profileImage);
+        // 프로필 이미지 저장 처리
+        if (profileImage.isPresent() && !profileImage.get().isEmpty()) {
+            MultipartFile file = profileImage.get();
+
+            // 메타정보 생성 및 저장
+            FileMetadata metadata = new FileMetadata(
+                file.getOriginalFilename(),
+                file.getContentType(),
+                file.getSize()
+            );
+            FileMetadata savedMetadata = fileMetadataRepository.save(metadata);
+
+            // 바이트 저장
+            try {
+                fileStorage.put(savedMetadata.getId(), file.getBytes());
+                profile = savedMetadata;
+            } catch (IOException e) {
+                throw new FileIOException(FileIOException.FILE_SAVE_ERROR_MESSAGE, e);
+            }
+        }
+
+        employee.update(
+            request.name(),
+            request.email(),
+            department,
+            request.position(),
+            request.hireDate(),
+            request.status(),
+            profile
+        );
+
+
+        // 변경 로그 저장
+        changeLogService.saveChangeLog(
+            employee,
+            ChangeType.UPDATED,
+            request.memo()
+        );
+        
+        changeLogRepository.save(changeLog);
+
+        return employeeMapper.toDto(employee);
     }
 }
