@@ -2,7 +2,6 @@ package com.fource.hrbank.changelog;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import com.fource.hrbank.Sb3HrbankFourceApplication;
 import com.fource.hrbank.domain.ChangeLog;
 import com.fource.hrbank.domain.ChangeType;
 import com.fource.hrbank.domain.Employee;
@@ -18,9 +17,11 @@ import java.util.Date;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,8 +29,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ChangeLogServiceTest {
 
-    @MockBean
+    @Autowired
     private FileStorage fileStorage;
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public FileStorage fileStorage() {
+            return Mockito.mock(FileStorage.class);
+        }
+    }
 
     @Autowired
     private ChangeLogService changeLogService;
