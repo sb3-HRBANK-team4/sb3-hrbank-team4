@@ -5,7 +5,7 @@ import com.fource.hrbank.domain.EmployeeStatus;
 import java.util.Date;
 
 public record EmployeeDto(
-    long id,
+    Long id,
     String name,
     String email,
     String employeeNumber,

@@ -10,6 +10,8 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
+import javax.swing.text.html.Option;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -109,16 +111,27 @@ public class BackupLogRepositoryImpl implements BackupLogCustomRepository {
      * @return 가장 최근 백업 정보
      */
     @Override
-    public BackupLog findLatestByStatus(BackupStatus status) {
+    public Optional<BackupLog> findLatestByStatus(BackupStatus status) {
         QBackupLog qBackupLog = QBackupLog.backupLog;
 
-        return queryFactory
+        return Optional.ofNullable(
+                queryFactory
+                        .selectFrom(qBackupLog)
+                        .where(
+                                qBackupLog.status.eq(status != null ? status : BackupStatus.COMPLETED)
+                        )
+                        .orderBy(qBackupLog.endedAt.desc())
+                        .fetchFirst());
+    }
+
+    @Override
+    public Optional<BackupLog> findLatest() {
+        QBackupLog qBackupLog = QBackupLog.backupLog;
+
+        return Optional.ofNullable(queryFactory
                 .selectFrom(qBackupLog)
-                .where(
-                        qBackupLog.status.eq(status != null ? status : BackupStatus.COMPLETED)
-                )
                 .orderBy(qBackupLog.endedAt.desc())
-                .fetchFirst();
+                .fetchFirst());
     }
 
     /**

@@ -1,0 +1,2 @@
+ID, 직원번호, 이름, 이메일, 부서, 직급, 입사일, 상태
+1,EMP-001,김가,a@email.com,null,주임,Sun Jun 08 17:15:22 KST 2025,ACTIVE

@@ -17,4 +17,8 @@ public interface BackupService {
     );
 
     BackupDto findLatestByStatus(BackupStatus status);
+
+    BackupDto create(String ipAdress);
+
+    BackupDto backup(BackupDto backupDto);
 }

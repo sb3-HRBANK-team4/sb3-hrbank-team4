@@ -5,6 +5,8 @@ import com.fource.hrbank.domain.BackupStatus;
 import com.fource.hrbank.dto.backup.BackupDto;
 import com.fource.hrbank.dto.backup.CursorPageResponseBackupDto;
 import com.fource.hrbank.service.backup.BackupService;
+import com.fource.hrbank.service.storage.FileStorage;
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class BackupController implements BackupApi {
 
     private final BackupService backupService;
+    private final FileStorage fileStorage;
 
     /**
      * 백업 로그 전체를 조회합니다.
@@ -51,16 +54,32 @@ public class BackupController implements BackupApi {
                 .body(cursorPageResponseBackupDto);
     }
 
+    /**
+     * 데이터 백업을 생성합니다.
+     *
+     * @param request 클라이언트 요청 정보
+     * @return 생성된 데이터 백업 이력
+     */
     @PostMapping
-    public ResponseEntity<BackupDto> createBackup() {
-        
+    public ResponseEntity<BackupDto> backup(HttpServletRequest request) {
+        String ipAdress = request.getRemoteAddr();
+
+        BackupDto createBackupDto = backupService.create(ipAdress); // 백업 이력 등록
+        BackupDto updateBackupDto = backupService.backup(createBackupDto);  // 데이터 백업 수행
+
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .build();
+                .body(updateBackupDto);
     }
 
+    /**
+     * 지정된 상태의 가장 최근 백업 정보를 조회합니다. (기본값 :COMPLETED)
+     *
+     * @param status 백업 상태
+     * @return 가장 최근 백업 정보
+     */
     @GetMapping("/latest")
-    public ResponseEntity<BackupDto> getLatestBackup(@RequestParam BackupStatus status) {
+    public ResponseEntity<BackupDto> getLatestBackup(@RequestParam(required = false) BackupStatus status) {
 
         BackupDto backupDto = backupService.findLatestByStatus(status);
 

@@ -14,4 +14,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BackupLogRepository extends JpaRepository<BackupLog, Long>, BackupLogCustomRepository {
 
+    BackupLog findFirstByEndedAt(Instant endedAt);
 }
