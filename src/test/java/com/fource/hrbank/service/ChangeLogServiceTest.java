@@ -13,6 +13,7 @@ import com.fource.hrbank.repository.EmployeeRepository;
 import com.fource.hrbank.service.changelog.ChangeLogService;
 import com.fource.hrbank.service.storage.FileStorage;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Date;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -76,7 +77,7 @@ public class ChangeLogServiceTest {
             "single@test.com",
             "01000000000",
             "테스트개발자",
-            new Date(),
+            LocalDate.of(2024, 1, 1),
             EmployeeStatus.ACTIVE,
             Instant.now()
         );
@@ -112,7 +113,7 @@ public class ChangeLogServiceTest {
             "test@test.com",
             "0123456789",
             "개발자",
-            new Date(),
+            LocalDate.of(2024, 1, 1),
             EmployeeStatus.ACTIVE,
             Instant.now()
         );
