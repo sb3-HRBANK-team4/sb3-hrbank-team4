@@ -45,13 +45,13 @@ public class ChangeLogController implements ChangeLogApi {
     @Override
     @GetMapping("/{id}/diffs")
     public ResponseEntity<List<ChangeDetailDto>> findDiffs(@PathVariable Long id) {
-        List<ChangeDetailDto> result = changeLogService.findDiffs(id);
-        return ResponseEntity.ok(result);
+      List<ChangeDetailDto> result = changeLogService.findDiffs(id);
+      return ResponseEntity.ok(result);
     }
 
-    @PostMapping
-    public ResponseEntity<ChangeLogDto> create(@RequestBody ChangeLogCreateRequestDto requestDto) {
-        ChangeLogDto response = changeLogService.create(requestDto);
-        return ResponseEntity.ok(response);
-        }
+  @PostMapping
+  public ResponseEntity<ChangeLogDto> create(@RequestBody ChangeLogCreateRequestDto requestDto) {
+    ChangeLogDto response = changeLogService.create(requestDto);
+    return ResponseEntity.ok(response);
+  }
 }
