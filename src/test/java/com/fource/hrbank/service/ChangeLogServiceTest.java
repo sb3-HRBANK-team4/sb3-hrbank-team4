@@ -1,4 +1,4 @@
-package com.fource.hrbank.changelog;
+package com.fource.hrbank.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
