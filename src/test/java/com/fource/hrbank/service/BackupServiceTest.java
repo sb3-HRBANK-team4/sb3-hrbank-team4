@@ -1,15 +1,9 @@
 package com.fource.hrbank.service;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.fource.hrbank.domain.BackupLog;
 import com.fource.hrbank.domain.BackupStatus;
 import com.fource.hrbank.repository.BackupLogRepository;
 import com.fource.hrbank.repository.FileMetadataRepository;
-import java.time.Instant;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +12,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.util.List;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -57,16 +58,16 @@ public class BackupServiceTest {
 
         // when & then
         mockMvc.perform(get("/api/backups")
-                        .param("status", "COMPLETED")
-                        .param("startedAtFrom", "2024-01-01T00:00:00Z")
-                        .param("startedAtTo", "2024-01-02T00:00:00Z")
-                        .param("sortField", "startedAt")
-                        .param("sortDirection", "ASC")
-                        .param("size", "3"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content.length()").value(3))
-                .andExpect(jsonPath("$.hasNext").value(false))
-                .andExpect(jsonPath("$.size").value(3));
+                .param("status", "COMPLETED")
+                .param("startedAtFrom", "2024-01-01T00:00:00Z")
+                .param("startedAtTo", "2024-01-02T00:00:00Z")
+                .param("sortField", "startedAt")
+                .param("sortDirection", "ASC")
+                .param("size", "3"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content").isArray())
+            .andExpect(jsonPath("$.content.length()").value(3))
+            .andExpect(jsonPath("$.hasNext").value(false))
+            .andExpect(jsonPath("$.size").value(3));
     }
 }

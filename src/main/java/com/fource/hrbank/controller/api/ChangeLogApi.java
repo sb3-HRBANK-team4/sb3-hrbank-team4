@@ -10,19 +10,20 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 @Tag(name = "직원 이력 관리", description = "직원 정보 수정 이력 관련 API입니다.")
 @RequestMapping("/api/change-logs")
 public interface ChangeLogApi {
 
     /**
-     *  목록 조회: 필터 + 커서 기반 페이징
+     * 목록 조회: 필터 + 커서 기반 페이징
      */
     @Operation(
         summary = "정보 수정 이력 조회",
@@ -59,7 +60,7 @@ public interface ChangeLogApi {
     );
 
     /**
-     *  상세 diff 조회: 특정 이력의 변경 필드들
+     * 상세 diff 조회: 특정 이력의 변경 필드들
      */
     @Operation(
         summary = "정보 수정 이력 상세 조회",

@@ -1,9 +1,10 @@
 package com.fource.hrbank.service.storage;
 
 import com.fource.hrbank.domain.FileMetadata;
-import java.io.InputStream;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
+
+import java.io.InputStream;
 
 public interface FileStorage {
 
