@@ -5,5 +5,5 @@ import com.fource.hrbank.dto.dashboard.EmployeeCountResponseDto;
 import java.util.Date;
 
 public interface DashboardService {
-  EmployeeCountResponseDto getEmployeeCount(EmployeeStatus status, Date from, Date to);
+    EmployeeCountResponseDto getEmployeeCount(EmployeeStatus status, Date from, Date to);
 }

@@ -14,15 +14,15 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/employees")
 public class DashboardController {
 
-  private final DashboardService dashboardService;
+    private final DashboardService dashboardService;
 
-  @GetMapping("/count")
-  public ResponseEntity<EmployeeCountResponseDto> getEmployeeCount(
-      @RequestParam(required = false) EmployeeStatus status,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date fromDate,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date toDate
-  ) {
-    EmployeeCountResponseDto response = dashboardService.getEmployeeCount(status, fromDate, toDate);
-    return ResponseEntity.ok(response);
-  }
+    @GetMapping("/count")
+    public ResponseEntity<EmployeeCountResponseDto> getEmployeeCount(
+        @RequestParam(required = false) EmployeeStatus status,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date fromDate,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date toDate
+    ) {
+      EmployeeCountResponseDto response = dashboardService.getEmployeeCount(status, fromDate, toDate);
+      return ResponseEntity.ok(response);
+    }
 }

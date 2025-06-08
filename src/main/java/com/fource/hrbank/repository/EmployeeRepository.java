@@ -18,10 +18,10 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSp
 
 
     @Query("""
-      SELECT COUNT(e) FROM Employee e
-      WHERE (:status IS NULL OR e.status = :status)
-        AND (:from IS NULL OR e.hireDate >= :from)
-        AND (:to IS NULL OR e.hireDate <= :to)
+        SELECT COUNT(e) FROM Employee e
+        WHERE (:status IS NULL OR e.status = :status)
+          AND (:from IS NULL OR e.hireDate >= :from)
+          AND (:to IS NULL OR e.hireDate <= :to)
     """)
     long countByFilters(
         @Param("status") EmployeeStatus status,

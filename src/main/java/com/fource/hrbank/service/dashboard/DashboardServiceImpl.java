@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class DashboardServiceImpl implements DashboardService {
 
-  private final EmployeeRepository employeeRepository;
+    private final EmployeeRepository employeeRepository;
 
-  @Override
-  public EmployeeCountResponseDto getEmployeeCount(EmployeeStatus status, Date from, Date to) {
-    long count = employeeRepository.countByFilters(status, from, to);
-    return new EmployeeCountResponseDto(count);
+    @Override
+    public EmployeeCountResponseDto getEmployeeCount(EmployeeStatus status, Date from, Date to) {
+      long count = employeeRepository.countByFilters(status, from, to);
+      return new EmployeeCountResponseDto(count);
   }
 }
