@@ -46,8 +46,8 @@ public class DepartmentCustomRepositoryImpl implements DepartmentCustomRepositor
 
         // 정렬 조건
         sql.append(" ORDER BY d.")
-                .append(sortField).append(" ").append(sortDirection.toUpperCase())
-                .append(", d.id ").append(sortDirection.toUpperCase());
+            .append(sortField).append(" ").append(sortDirection.toUpperCase())
+            .append(", d.id ").append(sortDirection.toUpperCase());
 
         TypedQuery<Department> query = em.createQuery(sql.toString(), Department.class);
 

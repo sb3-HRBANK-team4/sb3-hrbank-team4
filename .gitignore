@@ -39,3 +39,6 @@ application.yaml
 
 # MapStruct generated code
 /src/main/generated/
+
+# 파일 추가
+.hrbank

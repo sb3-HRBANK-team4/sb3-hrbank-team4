@@ -31,12 +31,13 @@ public class LocalFileStorage implements FileStorage {
     private final Path root;
 
     public LocalFileStorage(
-            @Value(".hrbank/storage") String rootPath) {
+        @Value(".hrbank/storage") String rootPath) {
         this.root = Paths.get(rootPath);
     }
 
     /**
      * 저장 디렉토리를 생성합니다.
+     *
      * @throws FileIOException
      */
     @PostConstruct
@@ -51,7 +52,7 @@ public class LocalFileStorage implements FileStorage {
     /**
      * ID, 파일 데이터를 받아 로컬에 저장합니다.
      *
-     * @param id 저장할 파일의 ID
+     * @param id    저장할 파일의 ID
      * @param bytes 저장할 파일의 데이터
      * @return 저장된 파일의 ID
      * @throws FileIOException
@@ -116,12 +117,12 @@ public class LocalFileStorage implements FileStorage {
         Resource resource = new InputStreamResource(stream);
 
         return ResponseEntity.status(HttpStatus.OK)
-                .contentLength(fileMetadata.getSize())
-                .contentType(MediaType.parseMediaType(fileMetadata.getContentType()))
-                .headers(headers -> headers.setContentDisposition(
-                        ContentDisposition.attachment()
-                                .filename(fileMetadata.getFileName())
-                                .build()))
-                .body(resource);
+            .contentLength(fileMetadata.getSize())
+            .contentType(MediaType.parseMediaType(fileMetadata.getContentType()))
+            .headers(headers -> headers.setContentDisposition(
+                ContentDisposition.attachment()
+                    .filename(fileMetadata.getFileName())
+                    .build()))
+            .body(resource);
     }
 }

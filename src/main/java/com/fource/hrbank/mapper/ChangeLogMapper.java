@@ -8,7 +8,7 @@ import org.mapstruct.Mapper;
 public class ChangeLogMapper {
 
     public ChangeLogDto toDto(ChangeLog changeLog) {
-        return new ChangeLogDto (
+        return new ChangeLogDto(
             changeLog.getId(),
             changeLog.getEmployee().getEmployeeNumber(),
             changeLog.getChangedAt(),

@@ -6,18 +6,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
-
-
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChangeLogDto {
-    private Long id;
+public class ChangeLogCreateRequestDto {
     private String employeeNumber;
-    private Instant changedAt;
-    private String changedIp;
-    private ChangeType type;
     private String memo;
+    private String ipAddress;
+    private ChangeType type;
 }

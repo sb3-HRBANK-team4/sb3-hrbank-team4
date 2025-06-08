@@ -9,11 +9,11 @@ public class DepartmentMapper {
 
     public DepartmentDto toDto(Department department, Long employeeCount) {
         return new DepartmentDto(
-                department.getId(),
-                department.getName(),
-                department.getDescription(),
-                department.getEstablishedDate(),
-                employeeCount
+            department.getId(),
+            department.getName(),
+            department.getDescription(),
+            department.getEstablishedDate(),
+            employeeCount
         );
     }
 }

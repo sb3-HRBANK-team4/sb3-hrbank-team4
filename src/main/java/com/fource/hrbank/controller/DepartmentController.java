@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * 부서 관련 요청을 처리하는 RestController 입니다.
- *
+ * <p>
  * 추가, 수정, 삭제, 조회 등의 기능을 제공합니다.
  */
 @RestController
@@ -23,12 +23,12 @@ public class DepartmentController {
 
     @GetMapping
     public CursorPageResponseDepartmentDto findAll(
-            @RequestParam(required = false) String nameOrDescription,
-            @RequestParam(required = false) Long idAfter,
-            @RequestParam(required = false) String cursor,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam String sortField,
-            @RequestParam String sortDirection
+        @RequestParam(required = false) String nameOrDescription,
+        @RequestParam(required = false) Long idAfter,
+        @RequestParam(required = false) String cursor,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(defaultValue = "name") String sortField,
+        @RequestParam(defaultValue = "asc") String sortDirection
     ) {
         CursorPageResponseDepartmentDto departments = departmentService.findAll(nameOrDescription, idAfter, cursor, size, sortField, sortDirection);
         return departments;
@@ -39,7 +39,7 @@ public class DepartmentController {
         DepartmentDto department = departmentService.create(request);
 
         return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(department);
+            .status(HttpStatus.CREATED)
+            .body(department);
     }
 }

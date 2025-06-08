@@ -36,10 +36,10 @@ public class DepartmentServiceTest {
 
         // 시퀀스를 "테이블의 MAX(id) + 1"로 세팅
         jdbcTemplate.execute("""
-            SELECT setval('tbl_department_id_seq', 
-                          COALESCE((SELECT MAX(id) FROM tbl_department), 0) + 1,
-                          false)
-        """);
+                SELECT setval('tbl_department_id_seq', 
+                              COALESCE((SELECT MAX(id) FROM tbl_department), 0) + 1,
+                              false)
+            """);
     }
 
     @Test
@@ -60,7 +60,7 @@ public class DepartmentServiceTest {
 
         // when
         CursorPageResponseDepartmentDto result = departmentService.findAll(
-                nameOrDescription, idAfter, cursor, size, sortField, sortDirection);
+            nameOrDescription, idAfter, cursor, size, sortField, sortDirection);
 
         // then
         assertThat(result.content().size()).isEqualTo(size);
