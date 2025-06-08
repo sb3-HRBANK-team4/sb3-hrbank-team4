@@ -5,7 +5,11 @@ import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDto;
+import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.fource.hrbank.service.employee.EmployeeService;
+import com.fource.hrbank.util.IpUtils;
+import jakarta.servlet.http.HttpServletRequest;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,11 +27,11 @@ public class EmployeeController implements EmployeeApi {
     private final EmployeeService employeeService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<EmployeeDto> create(
+    public ResponseEntity<EmployeeDto> createEmployee(
         @RequestPart("employee") EmployeeCreateRequest request,
-        @RequestPart(value = "profile", required = false) MultipartFile profileImage
+        @RequestPart(value = "profile", required = false) MultipartFile profile
     ) {
-        EmployeeDto employeeDto = employeeService.create(request, Optional.ofNullable(profileImage));
+        EmployeeDto employeeDto = employeeService.create(request, Optional.ofNullable(profile));
 
         return ResponseEntity
             .status(HttpStatus.CREATED)
@@ -40,22 +44,37 @@ public class EmployeeController implements EmployeeApi {
     }
 
     @GetMapping
-    public ResponseEntity<CursorPageResponseEmployeeDto> getEmployees(
+    public ResponseEntity<CursorPageResponseEmployeeDto> getAllEmployees(
         @RequestParam(required = false) String nameOrEmail,
+        @RequestParam(required = false) String employeeNumber,
         @RequestParam(required = false) String departmentName,
         @RequestParam(required = false) String position,
+        @RequestParam(required = false) LocalDate hireDateFrom,
+        @RequestParam(required = false) LocalDate hireDateTo,
         @RequestParam(required = false) EmployeeStatus status,
-        @RequestParam(defaultValue = "name") String sortField,
-        @RequestParam(defaultValue = "asc") String sortDirection,
-        @RequestParam(required = false) String cursor,
         @RequestParam(required = false) Long idAfter,
-        @RequestParam(defaultValue = "10") int size
+        @RequestParam(required = false) String cursor,
+        @RequestParam(defaultValue = "10") Integer size,
+        @RequestParam(defaultValue = "name") String sortField,
+        @RequestParam(defaultValue = "asc") String sortDirection
     ) {
         CursorPageResponseEmployeeDto employees = employeeService.findAll(
-            nameOrEmail, departmentName, position, status, sortField, sortDirection, cursor, idAfter, size
+            nameOrEmail, employeeNumber, departmentName, position, status, sortField, sortDirection, cursor, idAfter, size
         );
 
         return ResponseEntity.status(HttpStatus.OK).body(employees);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<EmployeeDto> updateEmployee(
+        @PathVariable Long id,
+        @RequestPart("employee") EmployeeUpdateRequest employeeUpdateRequest,
+        @RequestPart(value = "profile", required = false) MultipartFile profile
+    ) {
+        EmployeeDto employee = employeeService.update(id, employeeUpdateRequest,
+            Optional.ofNullable(profile));
+
+        return ResponseEntity.status(HttpStatus.OK).body(employee);
     }
 
 }

@@ -5,6 +5,7 @@ import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
@@ -16,7 +17,7 @@ public interface EmployeeService {
     public EmployeeDto findById(Long id);
 
     public CursorPageResponseEmployeeDto findAll(
-        String nameOrEmail, String departmentName, String position, EmployeeStatus status,
+        String nameOrEmail, String employeeNumber, String departmentName, String position, EmployeeStatus status,
         String sortField, String sortDirection, String cursor, Long idAfter, int size);
 
     public EmployeeDto update(Long employeeId, EmployeeUpdateRequest request, Optional<MultipartFile> profileImage);
