@@ -6,11 +6,11 @@ import com.fource.hrbank.domain.EmployeeStatus;
 import java.time.LocalDate;
 
 public record EmployeeDto(
-    long id,
+    Long id,
     String name,
     String email,
     String employeeNumber,
-    long departmentId,
+    Long departmentId,
     String departmentName,
     String position,
 
@@ -18,7 +18,7 @@ public record EmployeeDto(
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     LocalDate hireDate,
     EmployeeStatus status,
-    long profileImageId
+    Long profileImageId
 ) {
 
 }
