@@ -7,9 +7,11 @@ import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.InputStreamResource;
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Component;
  */
 @ConditionalOnProperty(name = "hrbank.storage.type", havingValue = "local")
 @Component
+@Slf4j
 public class LocalFileStorage implements FileStorage {
 
     private final Path root;
@@ -44,6 +47,7 @@ public class LocalFileStorage implements FileStorage {
     public void init() {
         try {
             Files.createDirectories(root);
+            System.out.println("파일저장루트" + root.toAbsolutePath());
         } catch (IOException e) {
             throw new FileIOException(FileIOException.FILE_CREATE_ERROR_MESSAGE, e);
         }
@@ -121,8 +125,8 @@ public class LocalFileStorage implements FileStorage {
             .contentType(MediaType.parseMediaType(fileMetadata.getContentType()))
             .headers(headers -> headers.setContentDisposition(
                 ContentDisposition.attachment()
-                    .filename(fileMetadata.getFileName())
-                    .build()))
+                        .filename(fileMetadata.getFileName(), StandardCharsets.UTF_8)
+                        .build()))
             .body(resource);
     }
 }

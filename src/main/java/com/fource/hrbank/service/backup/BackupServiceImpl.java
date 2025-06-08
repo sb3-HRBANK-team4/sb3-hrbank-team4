@@ -2,6 +2,7 @@ package com.fource.hrbank.service.backup;
 
 import com.fource.hrbank.domain.BackupLog;
 import com.fource.hrbank.domain.BackupStatus;
+import com.fource.hrbank.domain.FileMetadata;
 import com.fource.hrbank.dto.backup.BackupDto;
 import com.fource.hrbank.dto.backup.CursorPageResponseBackupDto;
 import com.fource.hrbank.dto.employee.EmployeeDto;
@@ -12,9 +13,11 @@ import com.fource.hrbank.mapper.EmployeeMapper;
 import com.fource.hrbank.repository.BackupLogRepository;
 import com.fource.hrbank.repository.ChangeLogRepository;
 import com.fource.hrbank.repository.EmployeeRepository;
+import com.fource.hrbank.repository.FileMetadataRepository;
 import com.fource.hrbank.service.storage.FileStorage;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +38,7 @@ public class BackupServiceImpl implements BackupService {
     private final ChangeLogRepository changeLogRepository;
     private final EmployeeRepository employeeRepository;
     private final FileStorage fileStorage;
+    private final FileMetadataRepository fileMetadataRepository;
 
     private final BackupLogMapper backupLogMapper;
     private final EmployeeMapper employeeMapper;
@@ -56,8 +60,8 @@ public class BackupServiceImpl implements BackupService {
     @Override
     @Transactional(readOnly = true)
     public CursorPageResponseBackupDto findAll(String worker, BackupStatus status, Instant startedAtFrom,
-                                               Instant startedAtTo, Long idAfter, String cursor, int size, String sortField,
-                                               String sortDirection) {
+            Instant startedAtTo, Long idAfter, String cursor, int size, String sortField,
+            String sortDirection) {
 
         Pageable pageable = PageRequest.of(0, size + 1);
 
@@ -70,12 +74,12 @@ public class BackupServiceImpl implements BackupService {
         Long totalElements = backupLogRepository.countByCondition(worker, startedAtFrom, startedAtTo, status);
 
         return new CursorPageResponseBackupDto(
-            backupLogs.stream().map(backupLogMapper::toDto).collect(Collectors.toList()),
-            nextCursor,
-            nextIdAfter,
-            size,
-            totalElements,
-            hasNext
+                backupLogs.stream().map(backupLogMapper::toDto).collect(Collectors.toList()),
+                nextCursor,
+                nextIdAfter,
+                size,
+                totalElements,
+                hasNext
         );
     }
 
@@ -107,7 +111,7 @@ public class BackupServiceImpl implements BackupService {
         BackupStatus backupStatus = isRequiredBackup() ? BackupStatus.IN_PROGRESS : BackupStatus.SKIPPED;
 
         BackupLog backupLog = new BackupLog(
-            ipAdress, Instant.now(), Instant.now(), backupStatus, null
+                ipAdress, Instant.now(), Instant.now(), backupStatus, null
         );
 
         backupLogRepository.save(backupLog);
@@ -135,21 +139,38 @@ public class BackupServiceImpl implements BackupService {
                 .collect(Collectors.toList());
 
         String employeeCsv = CsvFormatter.toCsv(employeeDtos);
+        FileMetadata metadata = null;
 
         try {
             // STEP 4. 백업 성공 시 직원 정보 파일 저장 + 이력 업데이트
             fileStorage.put(backupDto.id(), employeeCsv.getBytes(StandardCharsets.UTF_8));
-            return update(backupDto.id(), BackupStatus.COMPLETED);
+
+            metadata = new FileMetadata(
+                    "employee_backup_" + backupDto.id() + "_" + LocalDate.now() + ".csv",
+                    "text/csv",
+                    (long) employeeCsv.getBytes(StandardCharsets.UTF_8).length
+            );
+            fileMetadataRepository.save(metadata);
+
+            return update(backupDto.id(), BackupStatus.COMPLETED, metadata);
         } catch (Exception e) {
             // STEP 4. 백업 실패 시 에러 로그 파일 저장 + 이력 업데이트
             String errorLog = ExceptionUtils.getStackTrace(e);
 
             try {
                 fileStorage.put(backupDto.id(), errorLog.getBytes(StandardCharsets.UTF_8));
+
+                metadata = new FileMetadata(
+                        "backup_error_" + backupDto.id() + ".log",
+                        "text/plain",
+                        (long) errorLog.getBytes(StandardCharsets.UTF_8).length
+                );
+                fileMetadataRepository.save(metadata);
             } catch (Exception ex) {
                 throw new FileIOException(FileIOException.FILE_SAVE_ERROR_MESSAGE);
             }
-            return update(backupDto.id(), BackupStatus.FAILED);
+
+            return update(backupDto.id(), BackupStatus.FAILED, metadata);
         }
     }
 
@@ -161,10 +182,10 @@ public class BackupServiceImpl implements BackupService {
      * @throws BackupLogNotFoundException
      */
     private Boolean isRequiredBackup() {
-        BackupLog backupLog = backupLogRepository.findLatest()
-                .orElseThrow(BackupLogNotFoundException::new);
 
-        return changeLogRepository.existsByChangedAtAfter(backupLog.getEndedAt());
+        return backupLogRepository.findLatest()
+                .map(backupLog -> changeLogRepository.existsByChangedAtAfter(backupLog.getEndedAt()))
+                .orElse(true); // 백업 이력이 없다면 백업 필요
     }
 
     /**
@@ -174,13 +195,15 @@ public class BackupServiceImpl implements BackupService {
      * @param status 새로운 백업 상태값
      * @return 수정된 백업 이력 DTO
      */
-    private BackupDto update(Long id, BackupStatus status) {
+    private BackupDto update(Long id, BackupStatus status, FileMetadata metadata) {
         BackupLog backupLog = backupLogRepository.findById(id)
                 .orElseThrow(BackupLogNotFoundException::new);
 
         backupLog.setEndedAt(Instant.now());
         backupLog.setStatus(status);
+        backupLog.setBackupFile(metadata);
 
+        backupLogRepository.save(backupLog);
         return backupLogMapper.toDto(backupLogRepository.save(backupLog));
     }
 
