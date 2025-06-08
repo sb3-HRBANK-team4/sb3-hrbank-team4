@@ -165,7 +165,7 @@ class EmployeeServiceTest {
         assertThat(employeeDto.position()).isEqualTo("주임");
         assertThat(employeeDto.hireDate()).isEqualTo(LocalDate.of(2025, 6, 2));
         assertThat(employeeDto.status()).isEqualTo(EmployeeStatus.ACTIVE);
-        assertThat(employeeDto.profileImageId()).isEqualTo(0L);
+        assertThat(employeeDto.profileImageId()).isNull();
     }
 
     @Test
