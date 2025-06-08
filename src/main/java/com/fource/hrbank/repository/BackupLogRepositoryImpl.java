@@ -7,12 +7,12 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-
-import java.time.Instant;
-import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
@@ -100,6 +100,36 @@ public class BackupLogRepositoryImpl implements BackupLogCustomRepository {
             .fetchOne();
 
         return result != null ? result : 0L;
+    }
+
+    /**
+     * 지정된 상태의 가장 최근 백업 정보를 반환합니다.
+     *
+     * @param status 백업 상태 (기본값: COMPLETED)
+     * @return 가장 최근 백업 정보
+     */
+    @Override
+    public Optional<BackupLog> findLatestByStatus(BackupStatus status) {
+        QBackupLog qBackupLog = QBackupLog.backupLog;
+
+        return Optional.ofNullable(
+                queryFactory
+                        .selectFrom(qBackupLog)
+                        .where(
+                                qBackupLog.status.eq(status != null ? status : BackupStatus.COMPLETED)
+                        )
+                        .orderBy(qBackupLog.endedAt.desc())
+                        .fetchFirst());
+    }
+
+    @Override
+    public Optional<BackupLog> findLatest() {
+        QBackupLog qBackupLog = QBackupLog.backupLog;
+
+        return Optional.ofNullable(queryFactory
+                .selectFrom(qBackupLog)
+                .orderBy(qBackupLog.endedAt.desc())
+                .fetchFirst());
     }
 
     /**

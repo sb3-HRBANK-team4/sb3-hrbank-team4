@@ -2,10 +2,11 @@ package com.fource.hrbank.repository;
 
 import com.fource.hrbank.domain.BackupLog;
 import com.fource.hrbank.domain.BackupStatus;
-import org.springframework.data.domain.Pageable;
-
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
+import org.springframework.data.domain.Pageable;
+
 
 public interface BackupLogCustomRepository {
 
@@ -17,6 +18,10 @@ public interface BackupLogCustomRepository {
         Pageable pageable);
 
     Long countByCondition(String worker, Instant startedAtFrom, Instant startedAtTo, BackupStatus status);
+
+    Optional<BackupLog> findLatestByStatus(BackupStatus status);
+
+    Optional<BackupLog> findLatest();
 }
 
 
