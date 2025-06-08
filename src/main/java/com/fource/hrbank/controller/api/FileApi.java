@@ -33,7 +33,7 @@ public interface FileApi {
         )
     })
     ResponseEntity<?> downloadFile(
-        @Parameter(required = true, description = "파일 ID") int id
+        @Parameter(required = true, description = "파일 ID") Long id
     );
 
 }

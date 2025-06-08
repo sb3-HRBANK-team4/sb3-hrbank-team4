@@ -101,7 +101,7 @@ public interface DepartmentApi {
         )
     })
     ResponseEntity<DepartmentDto> getDepartmentById(
-        @Parameter(required = true, description = "부서 ID") int id
+        @Parameter(required = true, description = "부서 ID") Long id
     );
 
     @Operation(
@@ -127,7 +127,7 @@ public interface DepartmentApi {
         )
     })
     ResponseEntity<Void> deleteDepartment(
-        @Parameter(required = true, description = "부서 ID") int id
+        @Parameter(required = true, description = "부서 ID") Long id
     );
 
     @Operation(
@@ -155,7 +155,7 @@ public interface DepartmentApi {
     })
     ResponseEntity<DepartmentDto> updateDepartment(
         @Parameter(required = true, description = "부서 ID")
-        @PathVariable("id") int id,
+        @PathVariable("id") Long id,
 
         @Parameter(required = true)
         @RequestPart DepartmentUpdateRequest departmentUpdateRequest

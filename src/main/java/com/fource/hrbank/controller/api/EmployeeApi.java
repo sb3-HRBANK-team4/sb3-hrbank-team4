@@ -134,7 +134,7 @@ public interface EmployeeApi {
         )
     })
     ResponseEntity<EmployeeDto> getEmployeeById(
-        @Parameter(required = true, description = "직원 ID") int id
+        @Parameter(required = true, description = "직원 ID") Long id
     );
 
     @Operation(
@@ -156,7 +156,7 @@ public interface EmployeeApi {
         )
     })
     ResponseEntity<Void> deleteEmployee(
-        @Parameter(required = true, description = "직원 ID") int id
+        @Parameter(required = true, description = "직원 ID") Long id
     );
 
     @Operation(
@@ -184,7 +184,7 @@ public interface EmployeeApi {
     })
     ResponseEntity<EmployeeDto> updateEmployee(
         @Parameter(required = true, description = "직원 ID")
-        @PathVariable("id") int id,
+        @PathVariable("id") Long id,
 
         @Parameter(required = true)
         @RequestPart("employee") EmployeeUpdateRequest employeeUpdateRequest,
