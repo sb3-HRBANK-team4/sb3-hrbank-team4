@@ -21,10 +21,10 @@ import com.fource.hrbank.dto.common.ResponseMessage;
 import com.fource.hrbank.exception.BackupLogNotFoundException;
 import com.fource.hrbank.exception.FileIOException;
 import com.fource.hrbank.mapper.BackupLogMapper;
-import com.fource.hrbank.repository.BackupLogRepository;
 import com.fource.hrbank.repository.ChangeLogRepository;
 import com.fource.hrbank.repository.EmployeeRepository;
 import com.fource.hrbank.repository.FileMetadataRepository;
+import com.fource.hrbank.repository.backup.BackupLogRepository;
 import com.fource.hrbank.service.backup.BackupService;
 import com.fource.hrbank.service.storage.FileStorage;
 import java.time.Instant;
@@ -44,7 +44,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-
 @Transactional
 public class BackupServiceTest {
 
@@ -263,5 +262,14 @@ public class BackupServiceTest {
         assertThatThrownBy(()-> backupService.backup(backupDto))
                 .isInstanceOf(FileIOException.class)
                 .hasMessage(ResponseMessage.FILE_SAVE_ERROR_MESSAGE, ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
+    }
+
+    @Test
+    void batchBackup_정상동작_로직수행됨() {
+        // when
+        BackupDto backupDto = backupService.batchBackup();
+
+        // then
+        assertThat(backupDto.status()).isIn(BackupStatus.COMPLETED, BackupStatus.SKIPPED);
     }
 }

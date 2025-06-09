@@ -1,4 +1,4 @@
-package com.fource.hrbank.repository;
+package com.fource.hrbank.repository.backup;
 
 import com.fource.hrbank.domain.BackupLog;
 import com.fource.hrbank.domain.BackupStatus;

@@ -1,7 +1,6 @@
-package com.fource.hrbank.repository;
+package com.fource.hrbank.repository.backup;
 
 import com.fource.hrbank.domain.BackupLog;
-import java.time.Instant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
