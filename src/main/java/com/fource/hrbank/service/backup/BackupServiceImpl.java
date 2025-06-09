@@ -5,6 +5,8 @@ import com.fource.hrbank.domain.BackupStatus;
 import com.fource.hrbank.domain.FileMetadata;
 import com.fource.hrbank.dto.backup.BackupDto;
 import com.fource.hrbank.dto.backup.CursorPageResponseBackupDto;
+import com.fource.hrbank.dto.common.ResponseDetails;
+import com.fource.hrbank.dto.common.ResponseMessage;
 import com.fource.hrbank.dto.employee.EmployeeDto;
 import com.fource.hrbank.exception.BackupLogNotFoundException;
 import com.fource.hrbank.exception.FileIOException;
@@ -171,7 +173,7 @@ public class BackupServiceImpl implements BackupService {
                 );
                 fileMetadataRepository.save(metadata);
             } catch (Exception ex) {
-                throw new FileIOException(FileIOException.FILE_SAVE_ERROR_MESSAGE);
+                throw new FileIOException(ResponseMessage.FILE_SAVE_ERROR_MESSAGE, ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
             }
 
             return update(backupDto.id(), BackupStatus.FAILED, metadata);
