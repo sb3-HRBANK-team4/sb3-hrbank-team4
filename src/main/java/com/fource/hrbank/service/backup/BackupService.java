@@ -20,4 +20,6 @@ public interface BackupService {
     BackupDto create(String ipAdress);
 
     BackupDto backup(BackupDto backupDto);
+
+    BackupDto batchBackup();
 }
