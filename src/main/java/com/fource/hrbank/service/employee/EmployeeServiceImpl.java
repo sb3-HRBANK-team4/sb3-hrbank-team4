@@ -73,12 +73,12 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (employeeRepository.existsByEmail(request.email())) {
             throw new DuplicateEmailException();
         }
-
         FileMetadata profile = null;
 
         // 프로필 이미지 저장 처리
         if (profileImage.isPresent() && !profileImage.get().isEmpty()) {
             MultipartFile file = profileImage.get();
+            log.info("프로필 이미지 저장 - name: {}", profileImage.get().getOriginalFilename());
 
             // 메타정보 생성 및 저장
             FileMetadata metadata = new FileMetadata(
@@ -87,12 +87,14 @@ public class EmployeeServiceImpl implements EmployeeService {
                 file.getSize()
             );
             FileMetadata savedMetadata = fileMetadataRepository.save(metadata);
+            log.info("메타데이터 저장 완료 - ID: {}", savedMetadata.getId());
 
             // 바이트 저장
             try {
                 fileStorage.put(savedMetadata.getId(), file.getBytes());
                 profile = savedMetadata;
             } catch (IOException e) {
+                log.error("파일 저장 실패: {}", e.getMessage());
                 throw new FileIOException(ResponseMessage.FILE_SAVE_ERROR_MESSAGE, ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
             }
         }
@@ -332,6 +334,19 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void deleteById(Long id) {
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(EmployeeNotFoundException::new);
+
+        FileMetadata profile = employee.getProfile();
+        if (profile != null) {
+            try {
+                // DB에서 메타데이터 삭제
+                fileMetadataRepository.delete(profile);
+
+            } catch (Exception e) {
+                log.warn("프로필 이미지 삭제 실패: {}", e.getMessage());
+            }
+        } else {
+            log.info("삭제할 프로필 이미지가 없습니다.");
+        }
 
         log.info("직원 삭제 완료 - ID: {}", id);
         employeeRepository.delete(employee);
