@@ -13,4 +13,6 @@ public interface DepartmentRepository extends JpaRepository<Department, Long>, D
 
     @Query("SELECT e.department.id, COUNT(e) FROM Employee e WHERE e.department.id IN :departmentIds GROUP BY e.department.id")
     List<Object[]> countByDepartmentIds(@Param("departmentIds") List<Long> departmentIds);
+
+    boolean existsByName(String name);
 }
