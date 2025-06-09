@@ -23,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -91,6 +90,7 @@ public class BackupServiceImpl implements BackupService {
      * @throws BackupLogNotFoundException
      */
     @Override
+    @Transactional(readOnly = true)
     public BackupDto findLatestByStatus(BackupStatus status) {
         BackupLog backupLog = backupLogRepository.findLatestByStatus(status)
                 .orElseThrow(BackupLogNotFoundException::new);
@@ -105,6 +105,7 @@ public class BackupServiceImpl implements BackupService {
      * @return 생성된 백업 이력 DTO
      */
     @Override
+    @Transactional
     public BackupDto create(String ipAdress) {
         // STEP 1. 필요여부 판단_백업이 필요없다면 건너뜀 상태로 배치 이력을 저장하고 프로세스 종료
         // STEP 2. 필요시 데이터 백업 이력 등록 (작업자_요청자 IP주소, 상태_진행중)
@@ -125,6 +126,7 @@ public class BackupServiceImpl implements BackupService {
      * @return 수행된 백업 이력 DTO
      */
     @Override
+    @Transactional
     public BackupDto backup(BackupDto backupDto) {
         // 건너뜀 상태라면 백업 진행하지 않음
         if (backupDto.status() == BackupStatus.SKIPPED) {
@@ -180,7 +182,9 @@ public class BackupServiceImpl implements BackupService {
      * @return 수행된 백업 이력 DTO
      */
     @Override
+    @Transactional
     public BackupDto batchBackup() {
+
         BackupDto result = create("system");
         result = backup(result);
 
