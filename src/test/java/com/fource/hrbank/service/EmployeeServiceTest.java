@@ -321,4 +321,31 @@ class EmployeeServiceTest {
             employeeService.update(999L, updateRequest, Optional.empty())
         ).isInstanceOf(EmployeeNotFoundException.class);
     }
+
+    @Test
+    void delete_직원삭제_정상() {
+        // given
+        Department department = departmentRepository.save(
+            new Department("개발팀", "소프트웨어 개발을 담당합니다.", Instant.now(), Instant.now())
+        );
+
+        MockHttpServletRequest mockRequest = new MockHttpServletRequest();
+        mockRequest.setRemoteAddr("127.0.0.1");
+
+        Employee employee = employeeRepository.save(new Employee(null, department, "가", "a@email.com", "EMP-001", "주임",
+            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now()));
+
+        // when
+        employeeService.deleteById(employee.getId());
+
+        // then
+        // 1. 직원이 삭제되었는지 확인
+        Optional<Employee> deletedEmployee = employeeRepository.findById(employee.getId());
+        assertThat(deletedEmployee).isEmpty();
+//
+//        // 2. 삭제 이력이 생성되었는지 확인
+//        List<ChangeLog> changeLogs = changeLogRepository.findByEmployeeIdOrderByChangedAtDesc(employeeId);
+//        assertThat(changeLogs).hasSize(1);
+//        assertThat(changeLogs.get(0).getType()).isEqualTo(ChangeType.DELETED);
+    }
 }
