@@ -3,6 +3,7 @@ package com.fource.hrbank.controller;
 import com.fource.hrbank.dto.department.CursorPageResponseDepartmentDto;
 import com.fource.hrbank.dto.department.DepartmentCreateRequest;
 import com.fource.hrbank.dto.department.DepartmentDto;
+import com.fource.hrbank.dto.department.DepartmentUpdateRequest;
 import com.fource.hrbank.service.department.DepartmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -47,5 +48,13 @@ public class DepartmentController {
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(department);
+    }
+
+    @PatchMapping("/{departmentId}")
+    public ResponseEntity<DepartmentDto> update(@PathVariable Long departmentId, @RequestBody DepartmentUpdateRequest request) {
+        DepartmentDto department = departmentService.update(departmentId, request);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(department);
     }
 }
