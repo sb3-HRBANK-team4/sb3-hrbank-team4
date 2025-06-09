@@ -11,12 +11,11 @@ import com.fource.hrbank.exception.DuplicateDepartmentException;
 import com.fource.hrbank.mapper.DepartmentMapper;
 import com.fource.hrbank.repository.DepartmentRepository;
 import com.fource.hrbank.repository.employee.EmployeeRepository;
+import java.time.Instant;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
-import java.util.List;
 
 /**
  * 부서 관련 비즈니스 로직을 당담하는 클래스입니다.
@@ -88,15 +87,17 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     /**
      * @param departmentId 수정할 부서의 ID
-     * @param request 부서 수정 정보를 담은 DTO(name, description, establishedDate)
+     * @param request      부서 수정 정보를 담은 DTO(name, description, establishedDate)
      * @return 수정한 부서 정보
      */
     @Override
     public DepartmentDto update(Long departmentId, DepartmentUpdateRequest request) {
         Department department = departmentRepository.findById(departmentId)
-                .orElseThrow(DepartmentNotFoundException::new);
+            .orElseThrow(DepartmentNotFoundException::new);
 
-        if (departmentRepository.existsByName(request.getName())) throw new DuplicateDepartmentException();
+        if (departmentRepository.existsByName(request.getName())) {
+            throw new DuplicateDepartmentException();
+        }
 
         department.update(request);
         return departmentMapper.toDto(department, null);
@@ -104,11 +105,17 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public void delete(Long departmentId) {
-        if (departmentId == null) throw new IllegalArgumentException("부서 코드는 필수입니다.");
+        if (departmentId == null) {
+            throw new IllegalArgumentException("부서 코드는 필수입니다.");
+        }
 
-        if (employeeRepository.existsByDepartmentId(departmentId)) throw new DepartmentDeleteException();
+        if (employeeRepository.existsByDepartmentId(departmentId)) {
+            throw new DepartmentDeleteException();
+        }
 
-        if (!departmentRepository.existsById(departmentId)) throw new DepartmentNotFoundException();
+        if (!departmentRepository.existsById(departmentId)) {
+            throw new DepartmentNotFoundException();
+        }
 
         departmentRepository.deleteById(departmentId);
     }

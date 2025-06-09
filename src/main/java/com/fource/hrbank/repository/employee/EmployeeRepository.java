@@ -1,7 +1,6 @@
 package com.fource.hrbank.repository.employee;
 
 import com.fource.hrbank.domain.Employee;
-
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;

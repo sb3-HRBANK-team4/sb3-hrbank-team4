@@ -1,8 +1,12 @@
 package com.fource.hrbank.repository.employee;
 
 import com.fource.hrbank.domain.EmployeeStatus;
-import java.time.LocalDate;
+import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
+import java.util.List;
 
 public interface EmployeeCustomRepository {
-    long countByFilters(EmployeeStatus status, LocalDate from, LocalDate to);
+
+    long countByStatus(EmployeeStatus status);
+
+    List<EmployeeDistributionDto> getDistributionByGroup(String groupBy, EmployeeStatus status);
 }

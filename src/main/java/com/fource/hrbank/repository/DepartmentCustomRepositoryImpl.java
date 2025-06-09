@@ -6,8 +6,6 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +19,7 @@ public class DepartmentCustomRepositoryImpl implements DepartmentCustomRepositor
 
     @Override
     public List<Department> findByCursorCondition(String keyword, Long lastId, String cursorValue,
-                                                  int size, String sortField, String sortDirection) {
+        int size, String sortField, String sortDirection) {
         QDepartment d = QDepartment.department;
 
         BooleanBuilder builder = new BooleanBuilder();
@@ -29,27 +27,27 @@ public class DepartmentCustomRepositoryImpl implements DepartmentCustomRepositor
         // 키워드 조건
         if (keyword != null && !keyword.isBlank()) {
             builder.and(d.name.containsIgnoreCase(keyword)
-                    .or(d.description.containsIgnoreCase(keyword)));
+                .or(d.description.containsIgnoreCase(keyword)));
         }
 
         // 커서 조건
         if (cursorValue != null && lastId != null) {
             if ("name".equals(sortField)) {
                 builder.and(d.name.gt(cursorValue)
-                        .or(d.name.eq(cursorValue).and(d.id.gt(lastId))));
+                    .or(d.name.eq(cursorValue).and(d.id.gt(lastId))));
                 if ("desc".equalsIgnoreCase(sortDirection)) {
                     builder = new BooleanBuilder()
-                            .and(d.name.lt(cursorValue)
-                                    .or(d.name.eq(cursorValue).and(d.id.lt(lastId))));
+                        .and(d.name.lt(cursorValue)
+                            .or(d.name.eq(cursorValue).and(d.id.lt(lastId))));
                 }
             } else if ("establishedDate".equals(sortField)) {
                 LocalDate parsed = LocalDate.parse(cursorValue);
                 builder.and(d.establishedDate.gt(parsed)
-                        .or(d.establishedDate.eq(parsed).and(d.id.gt(lastId))));
+                    .or(d.establishedDate.eq(parsed).and(d.id.gt(lastId))));
                 if ("desc".equalsIgnoreCase(sortDirection)) {
                     builder = new BooleanBuilder()
-                            .and(d.establishedDate.lt(parsed)
-                                    .or(d.establishedDate.eq(parsed).and(d.id.lt(lastId))));
+                        .and(d.establishedDate.lt(parsed)
+                            .or(d.establishedDate.eq(parsed).and(d.id.lt(lastId))));
                 }
             }
         }
@@ -66,10 +64,10 @@ public class DepartmentCustomRepositoryImpl implements DepartmentCustomRepositor
         }
 
         return queryFactory.selectFrom(d)
-                .where(builder)
-                .orderBy(orderSpecifier1, new OrderSpecifier<>(direction, d.id))
-                .limit(size + 1)
-                .fetch();
+            .where(builder)
+            .orderBy(orderSpecifier1, new OrderSpecifier<>(direction, d.id))
+            .limit(size + 1)
+            .fetch();
     }
 
     @Override
@@ -79,12 +77,12 @@ public class DepartmentCustomRepositoryImpl implements DepartmentCustomRepositor
 
         if (keyword != null && !keyword.isBlank()) {
             builder.and(d.name.containsIgnoreCase(keyword)
-                    .or(d.description.containsIgnoreCase(keyword)));
+                .or(d.description.containsIgnoreCase(keyword)));
         }
 
         return queryFactory.select(d.count())
-                .from(d)
-                .where(builder)
-                .fetchOne();
+            .from(d)
+            .where(builder)
+            .fetchOne();
     }
 }

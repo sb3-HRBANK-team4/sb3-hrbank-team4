@@ -17,7 +17,8 @@ public interface BackupLogCustomRepository {
         String sortField, String sortDirection,
         Pageable pageable);
 
-    Long countByCondition(String worker, Instant startedAtFrom, Instant startedAtTo, BackupStatus status);
+    Long countByCondition(String worker, Instant startedAtFrom, Instant startedAtTo,
+        BackupStatus status);
 
     Optional<BackupLog> findLatestByStatus(BackupStatus status);
 

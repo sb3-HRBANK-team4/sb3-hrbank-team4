@@ -114,13 +114,13 @@ public class BackupLogRepositoryImpl implements BackupLogCustomRepository {
         QBackupLog qBackupLog = QBackupLog.backupLog;
 
         return Optional.ofNullable(
-                queryFactory
-                        .selectFrom(qBackupLog)
-                        .where(
-                                qBackupLog.status.eq(status != null ? status : BackupStatus.COMPLETED)
-                        )
-                        .orderBy(qBackupLog.endedAt.desc())
-                        .fetchFirst());
+            queryFactory
+                .selectFrom(qBackupLog)
+                .where(
+                    qBackupLog.status.eq(status != null ? status : BackupStatus.COMPLETED)
+                )
+                .orderBy(qBackupLog.endedAt.desc())
+                .fetchFirst());
     }
 
     @Override
@@ -128,9 +128,9 @@ public class BackupLogRepositoryImpl implements BackupLogCustomRepository {
         QBackupLog qBackupLog = QBackupLog.backupLog;
 
         return Optional.ofNullable(queryFactory
-                .selectFrom(qBackupLog)
-                .orderBy(qBackupLog.endedAt.desc())
-                .fetchFirst());
+            .selectFrom(qBackupLog)
+            .orderBy(qBackupLog.endedAt.desc())
+            .fetchFirst());
     }
 
     /**

@@ -66,7 +66,8 @@ public class ChangeLogServiceImpl implements ChangeLogService {
     }
 
     @Override
-    public ChangeLogDto create(Employee employee, ChangeType type, String memo, List<ChangeDetailDto> changeDetailDtos) {
+    public ChangeLogDto create(Employee employee, ChangeType type, String memo,
+        List<ChangeDetailDto> changeDetailDtos) {
         String ipAddress = IpUtils.getCurrentClientIp();
 
         ChangeLog changeLog = new ChangeLog(
@@ -96,21 +97,25 @@ public class ChangeLogServiceImpl implements ChangeLogService {
     }
 
     //변경감지
-    public List<ChangeDetailDto> detectChanges(Employee currentEmployee, EmployeeUpdateRequest request, Department newDepartment) {
+    public List<ChangeDetailDto> detectChanges(Employee currentEmployee,
+        EmployeeUpdateRequest request, Department newDepartment) {
         List<ChangeDetailDto> details = new ArrayList<>();
 
         if (!Objects.equals(currentEmployee.getName(), request.name())) {
-            details.add(new ChangeDetailDto(null, null, "name", currentEmployee.getName(), request.name()));
+            details.add(
+                new ChangeDetailDto(null, null, "name", currentEmployee.getName(), request.name()));
         }
         if (!Objects.equals(currentEmployee.getEmail(), request.email())) {
-            details.add(new ChangeDetailDto(null, null, "email", currentEmployee.getEmail(), request.email()));
+            details.add(new ChangeDetailDto(null, null, "email", currentEmployee.getEmail(),
+                request.email()));
         }
         if (!Objects.equals(currentEmployee.getDepartment().getId(), request.departmentId())) {
             details.add(new ChangeDetailDto(null, null, "department",
                 currentEmployee.getDepartment().getName(), newDepartment.getName()));
         }
         if (!Objects.equals(currentEmployee.getPosition(), request.position())) {
-            details.add(new ChangeDetailDto(null, null, "position", currentEmployee.getPosition(), request.position()));
+            details.add(new ChangeDetailDto(null, null, "position", currentEmployee.getPosition(),
+                request.position()));
         }
         if (!Objects.equals(currentEmployee.getHireDate(), request.hireDate())) {
             details.add(new ChangeDetailDto(null, null, "hireDate",

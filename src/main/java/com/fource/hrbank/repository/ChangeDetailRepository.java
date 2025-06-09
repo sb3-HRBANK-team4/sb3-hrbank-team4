@@ -8,5 +8,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ChangeDetailRepository extends JpaRepository<ChangeDetail, Long> {
+
     List<ChangeDetail> findByChangeLog(ChangeLog changeLog);
 }

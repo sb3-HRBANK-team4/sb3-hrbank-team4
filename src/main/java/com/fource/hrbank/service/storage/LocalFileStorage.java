@@ -49,7 +49,8 @@ public class LocalFileStorage implements FileStorage {
         try {
             Files.createDirectories(root);
         } catch (IOException e) {
-            throw new FileIOException(ResponseMessage.FILE_CREATE_ERROR_MESSAGE, ResponseDetails.FILE_CREATE_ERROR_MESSAGE);
+            throw new FileIOException(ResponseMessage.FILE_CREATE_ERROR_MESSAGE,
+                ResponseDetails.FILE_CREATE_ERROR_MESSAGE);
         }
     }
 
@@ -68,7 +69,8 @@ public class LocalFileStorage implements FileStorage {
         try (OutputStream os = Files.newOutputStream(path)) {
             os.write(bytes);
         } catch (IOException e) {
-            throw new FileIOException(ResponseMessage.FILE_SAVE_ERROR_MESSAGE, ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
+            throw new FileIOException(ResponseMessage.FILE_SAVE_ERROR_MESSAGE,
+                ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
         }
 
         return id;
@@ -104,7 +106,8 @@ public class LocalFileStorage implements FileStorage {
         try {
             return Files.newInputStream(path);
         } catch (IOException e) {
-            throw new FileIOException(ResponseMessage.FILE_READ_ERROR_MESSAGE, ResponseDetails.FILE_READ_ERROR_MESSAGE);
+            throw new FileIOException(ResponseMessage.FILE_READ_ERROR_MESSAGE,
+                ResponseDetails.FILE_READ_ERROR_MESSAGE);
         }
     }
 
@@ -125,8 +128,8 @@ public class LocalFileStorage implements FileStorage {
             .contentType(MediaType.parseMediaType(fileMetadata.getContentType()))
             .headers(headers -> headers.setContentDisposition(
                 ContentDisposition.attachment()
-                        .filename(fileMetadata.getFileName(), StandardCharsets.UTF_8)
-                        .build()))
+                    .filename(fileMetadata.getFileName(), StandardCharsets.UTF_8)
+                    .build()))
             .body(resource);
     }
 }

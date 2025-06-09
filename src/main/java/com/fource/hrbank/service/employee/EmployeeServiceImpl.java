@@ -12,6 +12,7 @@ import com.fource.hrbank.dto.common.ResponseDetails;
 import com.fource.hrbank.dto.common.ResponseMessage;
 import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
+import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
 import com.fource.hrbank.dto.employee.EmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.fource.hrbank.exception.DuplicateEmailException;
@@ -33,6 +34,7 @@ import java.time.Year;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -97,7 +99,8 @@ public class EmployeeServiceImpl implements EmployeeService {
                 profile = savedMetadata;
             } catch (IOException e) {
                 log.error("파일 저장 실패: {}", e.getMessage());
-                throw new FileIOException(ResponseMessage.FILE_SAVE_ERROR_MESSAGE, ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
+                throw new FileIOException(ResponseMessage.FILE_SAVE_ERROR_MESSAGE,
+                    ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
             }
         }
 
@@ -267,12 +270,14 @@ public class EmployeeServiceImpl implements EmployeeService {
                 fileStorage.put(savedMetadata.getId(), file.getBytes());
                 profile = savedMetadata;
             } catch (IOException e) {
-                throw new FileIOException(ResponseMessage.FILE_SAVE_ERROR_MESSAGE, ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
+                throw new FileIOException(ResponseMessage.FILE_SAVE_ERROR_MESSAGE,
+                    ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
             }
         }
 
         //5. 변경사항 감지 후 ChangeLog, ChangeDetail 엔티티 생성
-        List<ChangeDetailDto> details = changeLogService.detectChanges(employee, request, department);
+        List<ChangeDetailDto> details = changeLogService.detectChanges(employee, request,
+            department);
 
         //6. 변경사항이 있을 때만 이력 저장
         if (!details.isEmpty()) {
@@ -329,5 +334,31 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         log.info("직원 삭제 완료 - ID: {}", id);
         employeeRepository.delete(employee);
+    }
+
+    @Override
+    public List<EmployeeDistributionDto> getEmployeeDistribution(String groupBy,
+        EmployeeStatus status) {
+        try {
+            // 전체 직원 수 조회 (퍼센티지 계산용)
+            long totalCount = employeeRepository.countByStatus(status);
+
+            // 그룹별 직원 수 조회
+            List<EmployeeDistributionDto> distributions = employeeRepository.getDistributionByGroup(
+                groupBy, status);
+
+            // 퍼센티지 계산
+            return distributions.stream()
+                .map(dist -> new EmployeeDistributionDto(
+                    dist.groupKey(),
+                    dist.count(),
+                    totalCount > 0 ? (double) dist.count() / totalCount * 100.0 : 0.0
+                ))
+                .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("직원 분포 조회 중 오류가 발생했습니다.", e);
+        }
     }
 }

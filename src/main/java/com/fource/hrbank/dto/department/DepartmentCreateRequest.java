@@ -1,10 +1,8 @@
 package com.fource.hrbank.dto.department;
 
-import java.time.Instant;
+import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDate;
 
 @Setter
 @Getter

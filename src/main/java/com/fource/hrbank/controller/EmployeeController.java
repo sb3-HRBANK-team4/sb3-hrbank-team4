@@ -4,12 +4,13 @@ import com.fource.hrbank.controller.api.EmployeeApi;
 import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
+import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
 import com.fource.hrbank.dto.employee.EmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.fource.hrbank.service.employee.EmployeeService;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
-import javax.xml.xpath.XPath;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -89,5 +90,30 @@ public class EmployeeController implements EmployeeApi {
         employeeService.deleteById(id);
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+//
+//    @GetMapping("/count")
+//    public ResponseEntity<EmployeeCountResponseDto> getEmployeeCount(
+//        @RequestParam(required = false) EmployeeStatus status,
+//        @RequestParam(required = false) LocalDate fromDate,
+//        @RequestParam(required = false) LocalDate toDate
+//    ) {
+//        EmployeeCountResponseDto response = employeeService.getEmployeeCount(status, fromDate, toDate);
+//        return ResponseEntity.status(HttpStatus.OK).body(response);
+//    }
+
+    @GetMapping("/stats/distribution")
+    public ResponseEntity<List<EmployeeDistributionDto>> getDistribution(
+        @RequestParam(required = false, defaultValue = "department") String groupBy,
+        @RequestParam(required = false, defaultValue = "ACTIVE") EmployeeStatus status
+    ) {
+        // 지원하지 않는 그룹화 기준 검증
+        if (!groupBy.equals("department") && !groupBy.equals("position")) {
+            throw new IllegalArgumentException("지원하지 않는 그룹화 기준입니다: " + groupBy);
+        }
+
+        List<EmployeeDistributionDto> distribution = employeeService.getEmployeeDistribution(
+            groupBy, status);
+        return ResponseEntity.ok(distribution);
     }
 }

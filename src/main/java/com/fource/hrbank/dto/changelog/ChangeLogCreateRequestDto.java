@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChangeLogCreateRequestDto {
+
     private String employeeNumber;
     private String memo;
     private String ipAddress;
