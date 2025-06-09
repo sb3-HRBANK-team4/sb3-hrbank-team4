@@ -151,7 +151,7 @@ public class BackupServiceImpl implements BackupService {
 
         try {
             // STEP 4. 백업 성공 시 직원 정보 파일 저장 + 이력 업데이트
-            fileStorage.put(backupDto.id(), employeeCsv.getBytes(StandardCharsets.UTF_8));
+            fileStorage.put(backupDto.fileId(), employeeCsv.getBytes(StandardCharsets.UTF_8));
 
             metadata = new FileMetadata(
                     "employee_backup_" + backupDto.id() + "_" + Instant.now() + ".csv",
@@ -166,7 +166,7 @@ public class BackupServiceImpl implements BackupService {
             String errorLog = ExceptionUtils.getStackTrace(e);
 
             try {
-                fileStorage.put(backupDto.id(), errorLog.getBytes(StandardCharsets.UTF_8));
+                fileStorage.put(backupDto.fileId(), errorLog.getBytes(StandardCharsets.UTF_8));
 
                 metadata = new FileMetadata(
                         "backup_error_" + backupDto.id() + "_" + Instant.now() + ".log",
