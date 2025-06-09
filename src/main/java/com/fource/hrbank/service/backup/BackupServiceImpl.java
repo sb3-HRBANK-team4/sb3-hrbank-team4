@@ -5,15 +5,14 @@ import com.fource.hrbank.domain.BackupStatus;
 import com.fource.hrbank.dto.backup.CursorPageResponseBackupDto;
 import com.fource.hrbank.mapper.BackupLogMapper;
 import com.fource.hrbank.repository.BackupLogRepository;
+import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 백업 관련 비지니스 로직을 처리하는 서비스입니다.
@@ -41,19 +40,24 @@ public class BackupServiceImpl implements BackupService {
      */
     @Override
     @Transactional(readOnly = true)
-    public CursorPageResponseBackupDto findAll(String worker, BackupStatus status, Instant startedAtFrom,
-                                               Instant startedAtTo, Long idAfter, String cursor, int size, String sortField,
-                                               String sortDirection) {
+    public CursorPageResponseBackupDto findAll(String worker, BackupStatus status,
+        Instant startedAtFrom,
+        Instant startedAtTo, Long idAfter, String cursor, int size, String sortField,
+        String sortDirection) {
 
         Pageable pageable = PageRequest.of(0, size + 1);
 
-        List<BackupLog> backupLogs = backupLogRepository.findByCursorCondition(worker, startedAtFrom, startedAtTo, status, idAfter, cursor, sortField, sortDirection, pageable);
+        List<BackupLog> backupLogs = backupLogRepository.findByCursorCondition(worker,
+            startedAtFrom, startedAtTo, status, idAfter, cursor, sortField, sortDirection,
+            pageable);
 
         boolean hasNext = backupLogs.size() > size;
-        String nextCursor = hasNext ? extractCursorValue(backupLogs.get(backupLogs.size() - 1), sortField) : null;
+        String nextCursor =
+            hasNext ? extractCursorValue(backupLogs.get(backupLogs.size() - 1), sortField) : null;
         Long nextIdAfter = hasNext ? backupLogs.get(backupLogs.size() - 1).getId() : null;
 
-        Long totalElements = backupLogRepository.countByCondition(worker, startedAtFrom, startedAtTo, status);
+        Long totalElements = backupLogRepository.countByCondition(worker, startedAtFrom,
+            startedAtTo, status);
 
         return new CursorPageResponseBackupDto(
             backupLogs.stream().map(backupLogMapper::toDto).collect(Collectors.toList()),

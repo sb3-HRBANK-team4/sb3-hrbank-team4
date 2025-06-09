@@ -1,15 +1,21 @@
 package com.fource.hrbank.domain;
 
 import com.fource.hrbank.domain.common.BaseEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import java.time.Instant;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.time.Instant;
-import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -50,8 +56,9 @@ public class Employee extends BaseEntity {
     private Instant updatedAt;
 
 
-    public void update(String newName, String newEmail, Department newDepartment, String newPosition, LocalDate newHireDate,
-                       EmployeeStatus newStatus, FileMetadata newProfile) {
+    public void update(String newName, String newEmail, Department newDepartment,
+        String newPosition, LocalDate newHireDate,
+        EmployeeStatus newStatus, FileMetadata newProfile) {
         if (newName != null && !newName.equals(this.name)) {
             this.name = newName;
         }

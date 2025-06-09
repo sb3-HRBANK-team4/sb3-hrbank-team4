@@ -3,7 +3,6 @@ package com.fource.hrbank.service.changelog;
 import com.fource.hrbank.dto.changelog.ChangeDetailDto;
 import com.fource.hrbank.dto.changelog.ChangeLogDto;
 import com.fource.hrbank.dto.changelog.CursorPageResponseChangeLogDto;
-
 import java.util.List;
 
 public interface ChangeLogService {

@@ -15,10 +15,9 @@ public class IpUtils {
 
     /**
      * HttpServletRequest에서 클라이언트의 실제 Ip주소를 추출
-     *
-     * 여러 프록시 환경에서 사용되는 HTTP 헤더를 순차적으로 확인
-     * 여러 Ip가 콤마로 구분되어 있는 경우 (예: "192.168.1.1, 10.0.0.1"),
-     * 첫 번째 IP 주소를 반환
+     * <p>
+     * 여러 프록시 환경에서 사용되는 HTTP 헤더를 순차적으로 확인 여러 Ip가 콤마로 구분되어 있는 경우 (예: "192.168.1.1, 10.0.0.1"), 첫 번째
+     * IP 주소를 반환
      *
      * @param request HTTP 요청 객체
      * @return 클라이언트의 IP 주소. 추출할 수 없는 경우 {@code request.getRemoteAddr()} 값 반환
@@ -52,12 +51,11 @@ public class IpUtils {
     }
 
     /**
-     * Spring의  {@link RequestContextHolder}를 사용하여 현재 요청의
-     * {@link HttpServletRequest}를 자동으로 가져와 IP 주소를 추출.
-     *
-     * 이 메서드는 다음과 같은 상황에서 안전하게 사용할 수 있습니다:
-     * 웹 요청 처리 중 (Controller, Service, Component 등)
-     * Spring Web 황경에서 실행되는 경우
+     * Spring의  {@link RequestContextHolder}를 사용하여 현재 요청의 {@link HttpServletRequest}를 자동으로 가져와 IP
+     * 주소를 추출.
+     * <p>
+     * 이 메서드는 다음과 같은 상황에서 안전하게 사용할 수 있습니다: 웹 요청 처리 중 (Controller, Service, Component 등) Spring Web
+     * 황경에서 실행되는 경우
      *
      * @return 클라이언트의 IP 주소. 추출할 수 없는 경우 "unknown" 반환
      */

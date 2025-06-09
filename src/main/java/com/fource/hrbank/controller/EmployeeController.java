@@ -7,17 +7,21 @@ import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.fource.hrbank.service.employee.EmployeeService;
-import com.fource.hrbank.util.IpUtils;
-import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @RestController
@@ -59,7 +63,8 @@ public class EmployeeController implements EmployeeApi {
         @RequestParam(defaultValue = "asc") String sortDirection
     ) {
         CursorPageResponseEmployeeDto employees = employeeService.findAll(
-            nameOrEmail, employeeNumber, departmentName, position, status, sortField, sortDirection, cursor, idAfter, size
+            nameOrEmail, employeeNumber, departmentName, position, status, sortField, sortDirection,
+            cursor, idAfter, size
         );
 
         return ResponseEntity.status(HttpStatus.OK).body(employees);

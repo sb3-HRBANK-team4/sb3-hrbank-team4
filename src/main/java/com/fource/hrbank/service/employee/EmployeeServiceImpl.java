@@ -21,7 +21,6 @@ import com.fource.hrbank.repository.DepartmentRepository;
 import com.fource.hrbank.repository.EmployeeRepository;
 import com.fource.hrbank.repository.EmployeeSpecification;
 import com.fource.hrbank.repository.FileMetadataRepository;
-import com.fource.hrbank.service.changelog.ChangeLogService;
 import com.fource.hrbank.service.storage.FileStorage;
 import com.fource.hrbank.util.IpUtils;
 import jakarta.persistence.EntityNotFoundException;
@@ -59,14 +58,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final ChangeDetailRepository changeDetailRepository;
 
     /**
-     * 직원 등록
-     * 이메일 중복 검증
-     * 프로필 이미지 파일 저장 (선택)
-     * 사원번호 자동 생성 (형식: EMP-YYYY-timestamp)
-     * 직원 상태를 ACTIVE로 초기화
-     * 변경 이력(ChangeLog) 자동 생성
+     * 직원 등록 이메일 중복 검증 프로필 이미지 파일 저장 (선택) 사원번호 자동 생성 (형식: EMP-YYYY-timestamp) 직원 상태를 ACTIVE로 초기화 변경
+     * 이력(ChangeLog) 자동 생성
      *
-     * @param request 직원 생성 요청 정보 (이름, 이메일, 부서ID, 직함, 입사일, 메모 포함)
+     * @param request      직원 생성 요청 정보 (이름, 이메일, 부서ID, 직함, 입사일, 메모 포함)
      * @param profileImage 프로필 이미지 (선택)
      * @return 생성된 직원 정보 DTO
      */
@@ -102,10 +97,12 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         // 부서 조회
         Department department = departmentRepository.findById(request.departmentId())
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 부서 ID입니다: " + request.departmentId()));
+            .orElseThrow(
+                () -> new IllegalArgumentException("존재하지 않는 부서 ID입니다: " + request.departmentId()));
 
         //사원번호 예시 : EMP-2025-158861485055084
-        String employeeNumber = String.format("EMP-" + Year.now().getValue() + "-" + System.currentTimeMillis());
+        String employeeNumber = String.format(
+            "EMP-" + Year.now().getValue() + "-" + System.currentTimeMillis());
 
         Employee employee = new Employee(
             profile,
@@ -163,15 +160,18 @@ public class EmployeeServiceImpl implements EmployeeService {
      */
     @Transactional(readOnly = true)
     @Override
-    public CursorPageResponseEmployeeDto findAll(String nameOrEmail, String employeeNumber, String departmentName,
-                                                 String position, EmployeeStatus status, String sortField, String sortDirection,
-                                                 String cursor, Long idAfter, int size) {
+    public CursorPageResponseEmployeeDto findAll(String nameOrEmail, String employeeNumber,
+        String departmentName,
+        String position, EmployeeStatus status, String sortField, String sortDirection,
+        String cursor, Long idAfter, int size) {
 
         // 1. 정렬 방향
-        Sort.Direction direction = Sort.Direction.fromOptionalString(sortDirection).orElse(Sort.Direction.ASC);
+        Sort.Direction direction = Sort.Direction.fromOptionalString(sortDirection)
+            .orElse(Sort.Direction.ASC);
 
         // 2. 페이징 정보
-        Pageable pageable = PageRequest.of(0, size + 1, Sort.by(direction, sortField).and(Sort.by("id")));
+        Pageable pageable = PageRequest.of(0, size + 1,
+            Sort.by(direction, sortField).and(Sort.by("id")));
 
         // 3. Specification 조합 (검색 조건 + 커서 조건)
         Specification<Employee> spec = Specification
@@ -193,7 +193,8 @@ public class EmployeeServiceImpl implements EmployeeService {
             .toList();
 
         // 6. 커서 계산
-        String nextCursor = hasNext ? extractCursorValue(sortField, content.get(content.size() - 1)) : null;
+        String nextCursor =
+            hasNext ? extractCursorValue(sortField, content.get(content.size() - 1)) : null;
         Long nextId = hasNext ? content.get(content.size() - 1).id() : null;
 
         return new CursorPageResponseEmployeeDto(
@@ -218,28 +219,26 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     /**
      * 직원 정보 수정
+     * <p>
+     * 직원 존재 여부 검증 이메일 중복 검증(본인 제외) 부서 존재 여부 검증 프로필 이미지 업데이트 (선택) 변경사항 감지 및 상세 이력 생성 변경
+     * 이력(ChangeLog) 자동 생성
      *
-     * 직원 존재 여부 검증
-     * 이메일 중복 검증(본인 제외)
-     * 부서 존재 여부 검증
-     * 프로필 이미지 업데이트 (선택)
-     * 변경사항 감지 및 상세 이력 생성
-     * 변경 이력(ChangeLog) 자동 생성
-     *
-     * @param id 수정할 직원의 ID
-     * @param request 직원 수정 요청 정보 (이름, 이메일, 부서ID, 직함, 입사일, 상태, 메모)
+     * @param id           수정할 직원의 ID
+     * @param request      직원 수정 요청 정보 (이름, 이메일, 부서ID, 직함, 입사일, 상태, 메모)
      * @param profileImage 새로운 프로필 이미지 파일 (비어있으면 기존 이미지 유지)
      * @return 수정된 직원의 상세 정보 담은 DTO
      */
     @Transactional
     @Override
-    public EmployeeDto update(Long id, EmployeeUpdateRequest request, Optional<MultipartFile> profileImage) {
+    public EmployeeDto update(Long id, EmployeeUpdateRequest request,
+        Optional<MultipartFile> profileImage) {
         //1. 수정할 직원 조회 및 존재 여부 검증
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> new EmployeeNotFoundException(id));
 
         //2. email 중복 체크 (본인 이메일 아닌 경우)
-        if (!employee.getEmail().equals(request.email()) && employeeRepository.existsByEmail(request.email())) {
+        if (!employee.getEmail().equals(request.email()) && employeeRepository.existsByEmail(
+            request.email())) {
             throw new DuplicateEmailException("이미 등록된 이메일: " + request.email());
         }
 
@@ -270,6 +269,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         String ipAddress = IpUtils.getCurrentClientIp();
 
         //6. 변경사항 감지 후 ChangeLog, ChangeDetail 엔티티 생성
+        //이 부분을 changeLogService.create(employee, request, request.memo()); 이런 식으로 개선?
         List<ChangeDetail> details = new ArrayList<>();
 
         if (!Objects.equals(employee.getName(), request.name())) {
@@ -283,7 +283,8 @@ public class EmployeeServiceImpl implements EmployeeService {
                 employee.getDepartment().getName(), department.getName()));
         }
         if (!Objects.equals(employee.getPosition(), request.position())) {
-            details.add(new ChangeDetail(null, "position", employee.getPosition(), request.position()));
+            details.add(
+                new ChangeDetail(null, "position", employee.getPosition(), request.position()));
         }
         if (!Objects.equals(employee.getHireDate(), request.hireDate())) {
             details.add(new ChangeDetail(null, "hireDate",

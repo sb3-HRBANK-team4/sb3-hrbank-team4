@@ -2,7 +2,6 @@ package com.fource.hrbank.dto.employee;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fource.hrbank.domain.EmployeeStatus;
-
 import java.time.LocalDate;
 
 public record EmployeeDto(

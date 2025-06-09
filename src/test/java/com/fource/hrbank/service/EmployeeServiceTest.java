@@ -1,5 +1,8 @@
 package com.fource.hrbank.service;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+
 import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
@@ -12,7 +15,10 @@ import com.fource.hrbank.exception.EmployeeNotFoundException;
 import com.fource.hrbank.repository.DepartmentRepository;
 import com.fource.hrbank.repository.EmployeeRepository;
 import com.fource.hrbank.service.employee.EmployeeService;
-import com.fource.hrbank.service.storage.FileStorage;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,14 +28,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @SpringBootTest
 @Transactional
@@ -49,8 +47,9 @@ class EmployeeServiceTest {
 
     @BeforeEach
     void setUp() {
-       //시퀀스 초기화
-        jdbcTemplate.execute("TRUNCATE TABLE tbl_change_detail, tbl_change_log, tbl_employees RESTART IDENTITY CASCADE");
+        //시퀀스 초기화
+        jdbcTemplate.execute(
+            "TRUNCATE TABLE tbl_change_detail, tbl_change_log, tbl_employees RESTART IDENTITY CASCADE");
     }
 
     @Test
@@ -59,7 +58,8 @@ class EmployeeServiceTest {
             new Department("백엔드 개발팀", "서버 개발을 담당합니다.", Instant.now(), Instant.now())
         );
 
-        Employee emp1 = new Employee(null, department, "김가", "a@email.com", "EMP-2025-", "주임", LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now());
+        Employee emp1 = new Employee(null, department, "김가", "a@email.com", "EMP-2025-", "주임",
+            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now());
         Employee savedEmp1 = employeeRepository.save(emp1);
 
         EmployeeDto result = employeeService.findById(savedEmp1.getId());
@@ -75,9 +75,12 @@ class EmployeeServiceTest {
             new Department("백엔드 개발팀", "서버 개발을 담당합니다.", Instant.now(), Instant.now())
         );
 
-        Employee emp1 = new Employee(null, department, "가", "a@email.com", "EMP-2025-", "주임", LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now());
-        Employee emp2 = new Employee(null, department, "나", "b@email.com", "EMP-2025-", "주임", LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now());
-        Employee emp3 = new Employee(null, department, "다", "c@email.com", "EMP-2025-", "주임", LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now());
+        Employee emp1 = new Employee(null, department, "가", "a@email.com", "EMP-2025-", "주임",
+            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now());
+        Employee emp2 = new Employee(null, department, "나", "b@email.com", "EMP-2025-", "주임",
+            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now());
+        Employee emp3 = new Employee(null, department, "다", "c@email.com", "EMP-2025-", "주임",
+            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now());
 
         employeeRepository.saveAll(List.of(emp1, emp2, emp3));
 
@@ -115,9 +118,12 @@ class EmployeeServiceTest {
         );
 
         employeeRepository.saveAll(List.of(
-            new Employee(null, department, "가", "a@email.com", "EMP-001", "주임", LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now()),
-            new Employee(null, department, "나", "b@email.com", "EMP-002", "사원", LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now()),
-            new Employee(null, department, "다", "c@email.com", "EMP-003", "과장", LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now())
+            new Employee(null, department, "가", "a@email.com", "EMP-001", "주임",
+                LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now()),
+            new Employee(null, department, "나", "b@email.com", "EMP-002", "사원",
+                LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now()),
+            new Employee(null, department, "다", "c@email.com", "EMP-003", "과장",
+                LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now())
         ));
 
         // when

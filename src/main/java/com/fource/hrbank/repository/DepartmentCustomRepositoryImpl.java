@@ -3,11 +3,10 @@ package com.fource.hrbank.repository;
 import com.fource.hrbank.domain.Department;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
-
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
@@ -16,7 +15,8 @@ public class DepartmentCustomRepositoryImpl implements DepartmentCustomRepositor
     private final EntityManager em;
 
     @Override
-    public List<Department> findByCursorCondition(String keyword, Long lastId, String cursorValue, int size, String sortField, String sortDirection) {
+    public List<Department> findByCursorCondition(String keyword, Long lastId, String cursorValue,
+        int size, String sortField, String sortDirection) {
         StringBuilder sql = new StringBuilder("SELECT d FROM Department d WHERE 1=1");
 
         boolean hasKeyword = keyword != null && !keyword.isBlank();
