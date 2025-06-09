@@ -10,19 +10,17 @@ import com.fource.hrbank.exception.BackupLogNotFoundException;
 import com.fource.hrbank.exception.FileIOException;
 import com.fource.hrbank.mapper.BackupLogMapper;
 import com.fource.hrbank.mapper.EmployeeMapper;
-import com.fource.hrbank.repository.backup.BackupLogRepository;
 import com.fource.hrbank.repository.ChangeLogRepository;
 import com.fource.hrbank.repository.EmployeeRepository;
 import com.fource.hrbank.repository.FileMetadataRepository;
+import com.fource.hrbank.repository.backup.BackupLogRepository;
 import com.fource.hrbank.service.storage.FileStorage;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -177,11 +175,11 @@ public class BackupServiceImpl implements BackupService {
     }
 
     /**
+     * 배치 백업 작업을 수행합니다.
      *
-     * @return
+     * @return 수행된 백업 이력 DTO
      */
     @Override
-    @Scheduled(fixedDelayString = "${hrbank.batch.time}")
     public BackupDto batchBackup() {
         BackupDto result = create("system");
         result = backup(result);

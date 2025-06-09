@@ -47,7 +47,6 @@ public class LocalFileStorage implements FileStorage {
     public void init() {
         try {
             Files.createDirectories(root);
-            System.out.println("파일저장루트" + root.toAbsolutePath());
         } catch (IOException e) {
             throw new FileIOException(FileIOException.FILE_CREATE_ERROR_MESSAGE, e);
         }
