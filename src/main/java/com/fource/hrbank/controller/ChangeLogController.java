@@ -2,6 +2,8 @@ package com.fource.hrbank.controller;
 
 import com.fource.hrbank.controller.api.ChangeLogApi;
 import com.fource.hrbank.dto.changelog.ChangeDetailDto;
+import com.fource.hrbank.dto.changelog.ChangeLogDto;
+import com.fource.hrbank.dto.changelog.ChangeLogCreateRequestDto;
 import com.fource.hrbank.dto.changelog.CursorPageResponseChangeLogDto;
 import com.fource.hrbank.service.changelog.ChangeLogService;
 import java.util.List;
@@ -9,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,16 +36,22 @@ public class ChangeLogController implements ChangeLogApi {
         @RequestParam(required = false, defaultValue = "at") String sortField,
         @RequestParam(required = false, defaultValue = "desc") String sortDirection
     ) {
-        CursorPageResponseChangeLogDto result = changeLogService.findAll(
-            employeeNumber, type, memo, ipAddress, idAfter, cursor, size, sortField, sortDirection
-        );
-        return ResponseEntity.ok(result);
+      CursorPageResponseChangeLogDto result = changeLogService.findAll(
+          employeeNumber, type, memo, ipAddress, idAfter, cursor, size, sortField, sortDirection
+      );
+      return ResponseEntity.ok(result);
     }
 
     @Override
     @GetMapping("/{id}/diffs")
     public ResponseEntity<List<ChangeDetailDto>> findDiffs(@PathVariable Long id) {
-        List<ChangeDetailDto> result = changeLogService.findDiffs(id);
-        return ResponseEntity.ok(result);
+      List<ChangeDetailDto> result = changeLogService.findDiffs(id);
+      return ResponseEntity.ok(result);
     }
+
+  @PostMapping
+  public ResponseEntity<ChangeLogDto> create(@RequestBody ChangeLogCreateRequestDto requestDto) {
+    ChangeLogDto response = changeLogService.create(requestDto);
+    return ResponseEntity.ok(response);
+  }
 }

@@ -117,3 +117,8 @@ values (1, now(), 'profile.jpg', 'jpg', 1000);
 
 insert into tbl_employees
 values (1, 1, 1, 'test', 'test@na.com', 'EMP-111-111', '사원', '2025-06-05', 'ACTIVE', now(), now());
+
+insert into tbl_change_log
+values (1, '1', now(), '111.222.333.444', 'UPDATED', '직급 변경',now());
+insert into tbl_change_detail
+values (1, 1,'개발팀', '사원', '부장', now());
