@@ -5,10 +5,12 @@ import com.fource.hrbank.dto.department.CursorPageResponseDepartmentDto;
 import com.fource.hrbank.dto.department.DepartmentCreateRequest;
 import com.fource.hrbank.dto.department.DepartmentDto;
 import com.fource.hrbank.dto.department.DepartmentUpdateRequest;
+import com.fource.hrbank.exception.DepartmentDeleteException;
 import com.fource.hrbank.exception.DepartmentNotFoundException;
 import com.fource.hrbank.exception.DuplicateDepartmentException;
 import com.fource.hrbank.mapper.DepartmentMapper;
 import com.fource.hrbank.repository.DepartmentRepository;
+import com.fource.hrbank.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,7 @@ import java.util.List;
 public class DepartmentServiceImpl implements DepartmentService {
 
     private final DepartmentRepository departmentRepository;
+    private final EmployeeRepository employeeRepository;
     private final DepartmentMapper departmentMapper;
 
     /**
@@ -97,6 +100,17 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         department.update(request);
         return departmentMapper.toDto(department, null);
+    }
+
+    @Override
+    public void delete(Long departmentId) {
+        if (departmentId == null) throw new IllegalArgumentException("부서 코드는 필수입니다.");
+
+        if (employeeRepository.existsByDepartmentId(departmentId)) throw new DepartmentDeleteException();
+
+        if (!departmentRepository.existsById(departmentId)) throw new DepartmentNotFoundException();
+
+        departmentRepository.deleteById(departmentId);
     }
 
     /**
