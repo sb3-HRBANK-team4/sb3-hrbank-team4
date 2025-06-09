@@ -12,4 +12,5 @@ public interface ResponseMessage {
     public String FILE_CREATE_ERROR_MESSAGE = "파일 생성 중 오류가 발생하였습니다.";
     public String FILE_SAVE_ERROR_MESSAGE = "파일 저장 중 오류가 발생했습니다.";
     public String FILE_READ_ERROR_MESSAGE = "파일을 읽는 중 오류가 발생하였습니다.";
+    public String DEPARTMENT_DELETE_ERROR = "부서 삭제 실패.";
 }

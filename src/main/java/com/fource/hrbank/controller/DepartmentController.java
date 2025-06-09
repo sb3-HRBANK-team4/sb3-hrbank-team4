@@ -8,12 +8,7 @@ import com.fource.hrbank.service.department.DepartmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 부서 관련 요청을 처리하는 RestController 입니다.
@@ -28,7 +23,7 @@ public class DepartmentController {
     private final DepartmentService departmentService;
 
     @GetMapping
-    public CursorPageResponseDepartmentDto findAll(
+    public ResponseEntity<CursorPageResponseDepartmentDto> findAll(
         @RequestParam(required = false) String nameOrDescription,
         @RequestParam(required = false) Long idAfter,
         @RequestParam(required = false) String cursor,
@@ -38,7 +33,9 @@ public class DepartmentController {
     ) {
         CursorPageResponseDepartmentDto departments = departmentService.findAll(nameOrDescription,
             idAfter, cursor, size, sortField, sortDirection);
-        return departments;
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(departments);
     }
 
     @PostMapping
@@ -56,5 +53,11 @@ public class DepartmentController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(department);
+    }
+
+    @DeleteMapping("/{departmentId}")
+    public ResponseEntity<Void> delete(@PathVariable Long departmentId) {
+        departmentService.delete(departmentId);
+        return ResponseEntity.noContent().build();
     }
 }
