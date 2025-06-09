@@ -151,29 +151,26 @@ public class BackupServiceImpl implements BackupService {
 
         try {
             // STEP 4. 백업 성공 시 직원 정보 파일 저장 + 이력 업데이트
-            fileStorage.put(backupDto.id(), employeeCsv.getBytes(StandardCharsets.UTF_8));
-
             metadata = new FileMetadata(
                     "employee_backup_" + backupDto.id() + "_" + Instant.now() + ".csv",
                     "text/csv",
                     (long) employeeCsv.getBytes(StandardCharsets.UTF_8).length
             );
             fileMetadataRepository.save(metadata);
-
+            fileStorage.put(metadata.getId(), employeeCsv.getBytes(StandardCharsets.UTF_8));
             return update(backupDto.id(), BackupStatus.COMPLETED, metadata);
         } catch (Exception e) {
             // STEP 4. 백업 실패 시 에러 로그 파일 저장 + 이력 업데이트
             String errorLog = ExceptionUtils.getStackTrace(e);
 
             try {
-                fileStorage.put(backupDto.id(), errorLog.getBytes(StandardCharsets.UTF_8));
-
                 metadata = new FileMetadata(
                         "backup_error_" + backupDto.id() + "_" + Instant.now() + ".log",
                         "text/plain",
                         (long) errorLog.getBytes(StandardCharsets.UTF_8).length
                 );
                 fileMetadataRepository.save(metadata);
+                fileStorage.put(metadata.getId(), errorLog.getBytes(StandardCharsets.UTF_8));
             } catch (Exception ex) {
                 throw new FileIOException(ResponseMessage.FILE_SAVE_ERROR_MESSAGE, ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
             }
