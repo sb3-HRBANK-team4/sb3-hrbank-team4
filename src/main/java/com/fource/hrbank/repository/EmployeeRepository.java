@@ -1,6 +1,8 @@
 package com.fource.hrbank.repository;
 
 import com.fource.hrbank.domain.Employee;
+import com.fource.hrbank.domain.EmployeeStatus;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -14,5 +16,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>,
 
     public boolean existsByEmail(String email);
 
+    Optional<Employee> findByEmployeeNumber(String employeeNumber);
+
+    long countByFilters(EmployeeStatus status, LocalDate from, LocalDate to);
 }
 

@@ -1,37 +1,31 @@
 package com.fource.hrbank.exception;
 
+import com.fource.hrbank.dto.common.ResponseDetails;
+import com.fource.hrbank.dto.common.ResponseMessage;
 import com.fource.hrbank.exception.common.BaseException;
 import org.springframework.http.HttpStatus;
 
 import java.time.Instant;
 
-public class FileIOException extends BaseException {
-
-    public final String message;
-    public final String details;
+public class BackupLogNotFoundException extends BaseException {
 
     @Override
     public HttpStatus getHttpStatus() {
-        return HttpStatus.INTERNAL_SERVER_ERROR;
+        return HttpStatus.NOT_FOUND;
     }
 
     @Override
     public String getMessage() {
-        return message;
+        return ResponseMessage.BACKUPLOG_NOT_FOUND_ERROR_MESSAGE;
     }
 
     @Override
     public String getDetails() {
-        return details;
+        return ResponseDetails.BACKUPLOG_NOT_FOUND_ERROR_MESSAGE;
     }
 
     @Override
     public Instant timestamp() {
         return Instant.now();
-    }
-
-    public FileIOException(String message, String details) {
-        this.message = message;
-        this.details = details;
     }
 }

@@ -1,14 +1,13 @@
 package com.fource.hrbank.exception;
 
+import com.fource.hrbank.dto.common.ResponseDetails;
+import com.fource.hrbank.dto.common.ResponseMessage;
 import com.fource.hrbank.exception.common.BaseException;
 import org.springframework.http.HttpStatus;
 
 import java.time.Instant;
 
-public class FileIOException extends BaseException {
-
-    public final String message;
-    public final String details;
+public class DataExportException extends BaseException {
 
     @Override
     public HttpStatus getHttpStatus() {
@@ -17,21 +16,16 @@ public class FileIOException extends BaseException {
 
     @Override
     public String getMessage() {
-        return message;
+        return ResponseMessage.CSV_CONVERT_ERROR_MESSAGE;
     }
 
     @Override
     public String getDetails() {
-        return details;
+        return ResponseDetails.CSV_CONVERT_ERROR_MESSAGE;
     }
 
     @Override
     public Instant timestamp() {
         return Instant.now();
-    }
-
-    public FileIOException(String message, String details) {
-        this.message = message;
-        this.details = details;
     }
 }

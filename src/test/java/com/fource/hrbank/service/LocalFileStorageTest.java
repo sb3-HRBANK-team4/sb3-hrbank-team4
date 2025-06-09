@@ -4,6 +4,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import com.fource.hrbank.domain.FileMetadata;
+import com.fource.hrbank.dto.common.ResponseDetails;
+import com.fource.hrbank.dto.common.ResponseMessage;
 import com.fource.hrbank.exception.FileIOException;
 import com.fource.hrbank.exception.FileNotFoundException;
 import com.fource.hrbank.repository.FileMetadataRepository;
@@ -109,7 +111,7 @@ public class LocalFileStorageTest {
         // when & then
         assertThatThrownBy(() -> fileStorage.put(id, content))
             .isInstanceOf(FileIOException.class)
-            .hasMessage(FileIOException.FILE_SAVE_ERROR_MESSAGE);
+            .hasMessage(ResponseMessage.FILE_SAVE_ERROR_MESSAGE, ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
     }
 
     @Test
@@ -137,7 +139,7 @@ public class LocalFileStorageTest {
         // when
         assertThatThrownBy(() -> fileStorage.get(id))
             .isInstanceOf(FileNotFoundException.class)
-            .hasMessage(FileNotFoundException.FILE_NOT_FOUND_ERROR_MESSAGE);
+            .hasMessage(ResponseDetails.FILE_NOT_FOUND_ERROR_MESSAGE);
     }
 
     @Test

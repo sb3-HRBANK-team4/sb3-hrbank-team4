@@ -1,17 +1,13 @@
 package com.fource.hrbank.exception.common;
 
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-@Getter
-public class BaseException extends RuntimeException {
+import java.time.Instant;
 
-    private final String details;
-    private final HttpStatus httpStatus;
+public abstract class BaseException extends RuntimeException {
 
-    public BaseException(String message, String details, HttpStatus httpStatus) {
-        super(message);
-        this.details = details;
-        this.httpStatus = httpStatus;
-    }
+    public abstract HttpStatus getHttpStatus();
+    public abstract String getMessage();
+    public abstract String getDetails();
+    public abstract Instant timestamp();
 }

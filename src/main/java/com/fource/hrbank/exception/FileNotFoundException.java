@@ -1,18 +1,31 @@
 package com.fource.hrbank.exception;
 
-public class FileNotFoundException extends RuntimeException {
+import com.fource.hrbank.dto.common.ResponseDetails;
+import com.fource.hrbank.dto.common.ResponseMessage;
+import com.fource.hrbank.exception.common.BaseException;
+import org.springframework.http.HttpStatus;
 
-    public static final String FILE_NOT_FOUND_ERROR_MESSAGE = "요청하신 파일을 찾을 수 없습니다.";
+import java.time.Instant;
 
-    public FileNotFoundException() {
-        super(FILE_NOT_FOUND_ERROR_MESSAGE);
+public class FileNotFoundException extends BaseException {
+
+    @Override
+    public HttpStatus getHttpStatus() {
+        return HttpStatus.NOT_FOUND;
     }
 
-    public FileNotFoundException(String message) {
-        super(message);
+    @Override
+    public String getMessage() {
+        return ResponseMessage.FILE_NOT_FOUND_ERROR_MESSAGE;
     }
 
-    public FileNotFoundException(String message, Throwable cause) {
-        super(message, cause);
+    @Override
+    public String getDetails() {
+        return ResponseDetails.FILE_NOT_FOUND_ERROR_MESSAGE;
+    }
+
+    @Override
+    public Instant timestamp() {
+        return Instant.now();
     }
 }
