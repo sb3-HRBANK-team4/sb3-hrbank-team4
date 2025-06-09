@@ -6,6 +6,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
+import com.fource.hrbank.domain.FileMetadata;
 import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDto;
@@ -14,7 +15,9 @@ import com.fource.hrbank.exception.DuplicateEmailException;
 import com.fource.hrbank.exception.EmployeeNotFoundException;
 import com.fource.hrbank.repository.DepartmentRepository;
 import com.fource.hrbank.repository.EmployeeRepository;
+import com.fource.hrbank.repository.FileMetadataRepository;
 import com.fource.hrbank.service.employee.EmployeeService;
+import com.fource.hrbank.service.storage.FileStorage;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -43,19 +46,25 @@ class EmployeeServiceTest {
     private DepartmentRepository departmentRepository;
 
     @Autowired
+    private FileMetadataRepository fileMetadataRepository;
+
+    @Autowired
+    private FileStorage fileStorage;
+
+    @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void setUp() {
         //시퀀스 초기화
         jdbcTemplate.execute(
-            "TRUNCATE TABLE tbl_change_detail, tbl_change_log, tbl_employees RESTART IDENTITY CASCADE");
+            "TRUNCATE TABLE tbl_change_detail, tbl_change_log, tbl_employees, tbl_department RESTART IDENTITY CASCADE");
     }
 
     @Test
     void findById_정상조회() {
         Department department = departmentRepository.save(
-            new Department("백엔드 개발팀", "서버 개발을 담당합니다.", Instant.now(), Instant.now())
+            new Department("백엔드 개발팀", "서버 개발을 담당합니다.", LocalDate.of(2025, 6, 2), Instant.now())
         );
 
         Employee emp1 = new Employee(null, department, "김가", "a@email.com", "EMP-2025-", "주임",
@@ -72,7 +81,7 @@ class EmployeeServiceTest {
     @Test
     void findAll_검색조건없음_커서페이지네이션_정상작동() {
         Department department = departmentRepository.save(
-            new Department("백엔드 개발팀", "서버 개발을 담당합니다.", Instant.now(), Instant.now())
+            new Department("백엔드 개발팀", "서버 개발을 담당합니다.", LocalDate.of(2025, 6, 2), Instant.now())
         );
 
         Employee emp1 = new Employee(null, department, "가", "a@email.com", "EMP-2025-", "주임",
@@ -114,7 +123,7 @@ class EmployeeServiceTest {
     void findAll_이름내림차순정렬_확인() {
 
         Department department = departmentRepository.save(
-            new Department("백엔드 개발팀", "서버 개발을 담당합니다.", Instant.now(), Instant.now())
+            new Department("백엔드 개발팀", "서버 개발을 담당합니다.", LocalDate.of(2025, 6, 2), Instant.now())
         );
 
         employeeRepository.saveAll(List.of(
@@ -145,7 +154,7 @@ class EmployeeServiceTest {
     void create_직원생성_프로필이미지없음_확인() {
 
         Department department = departmentRepository.save(
-            new Department("백엔드 개발팀", "서버 개발을 담당합니다.", Instant.now(), Instant.now())
+            new Department("백엔드 개발팀", "서버 개발을 담당합니다.", LocalDate.of(2025, 6, 2), Instant.now())
         );
 
         EmployeeCreateRequest request = new EmployeeCreateRequest(
@@ -177,7 +186,7 @@ class EmployeeServiceTest {
     void create_직원생성_프로필이미지있음_확인() {
 
         Department department = departmentRepository.save(
-            new Department("백엔드 개발팀", "서버 개발을 담당합니다.", Instant.now(), Instant.now())
+            new Department("백엔드 개발팀", "서버 개발을 담당합니다.", LocalDate.of(2025, 6, 2), Instant.now())
         );
 
         byte[] fileBytes = "dummy image data".getBytes();
@@ -217,11 +226,11 @@ class EmployeeServiceTest {
     void update_직원정보수정_이름_이메일_부서_입사일_변경_확인() {
         // given
         Department department = departmentRepository.save(
-            new Department("개발팀", "소프트웨어 개발을 담당합니다.", Instant.now(), Instant.now())
+            new Department("개발팀", "소프트웨어 개발을 담당합니다.", LocalDate.of(2025, 6, 2), Instant.now())
         );
 
         Department newDepartment = departmentRepository.save(
-            new Department("기획팀", "서비스 기획을 담당합니다.", Instant.now(), Instant.now())
+            new Department("기획팀", "서비스 기획을 담당합니다.", LocalDate.of(2025, 6, 2), Instant.now())
         );
 
         // 기존 직원 생성
@@ -270,7 +279,7 @@ class EmployeeServiceTest {
     void update_이메일중복_예외발생() {
         // given
         Department department = departmentRepository.save(
-            new Department("개발팀", "소프트웨어 개발을 담당합니다.", Instant.now(), Instant.now())
+            new Department("개발팀", "소프트웨어 개발을 담당합니다.", LocalDate.of(2025, 6, 2), Instant.now())
         );
 
         MockHttpServletRequest mockRequest = new MockHttpServletRequest();
@@ -305,7 +314,7 @@ class EmployeeServiceTest {
     void update_존재하지않는직원_예외발생() {
         // given
         Department department = departmentRepository.save(
-            new Department("개발팀", "소프트웨어 개발을 담당합니다.", Instant.now(), Instant.now())
+            new Department("개발팀", "소프트웨어 개발을 담당합니다.", LocalDate.of(2025, 6, 2), Instant.now())
         );
 
         MockHttpServletRequest mockRequest = new MockHttpServletRequest();
@@ -326,13 +335,30 @@ class EmployeeServiceTest {
     void delete_직원삭제_정상() {
         // given
         Department department = departmentRepository.save(
-            new Department("개발팀", "소프트웨어 개발을 담당합니다.", Instant.now(), Instant.now())
+            new Department("개발팀", "소프트웨어 개발을 담당합니다.", LocalDate.of(2025, 6, 2), Instant.now())
         );
 
         MockHttpServletRequest mockRequest = new MockHttpServletRequest();
         mockRequest.setRemoteAddr("127.0.0.1");
 
-        Employee employee = employeeRepository.save(new Employee(null, department, "가", "a@email.com", "EMP-001", "주임",
+        // FileMetadata 생성 및 저장
+        FileMetadata profileMetadata = new FileMetadata(
+            "profile.png",
+            MediaType.IMAGE_PNG_VALUE,
+            17L
+        );
+
+        FileMetadata savedProfile = fileMetadataRepository.save(profileMetadata);
+
+        // 실제 파일 저장
+        byte[] fileBytes = "dummy image data".getBytes();
+        try {
+            fileStorage.put(savedProfile.getId(), fileBytes);
+        } catch (Exception e) {
+            // 테스트 환경에서 파일 저장 실패는 무시
+        }
+
+        Employee employee = employeeRepository.save(new Employee(savedProfile, department, "가", "a@email.com", "EMP-001", "주임",
             LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now()));
 
         // when
@@ -342,6 +368,10 @@ class EmployeeServiceTest {
         // 1. 직원이 삭제되었는지 확인
         Optional<Employee> deletedEmployee = employeeRepository.findById(employee.getId());
         assertThat(deletedEmployee).isEmpty();
+
+        // 프로필 이미지도 삭제
+        Optional<FileMetadata> deletedProfile = fileMetadataRepository.findById(savedProfile.getId());
+        assertThat(deletedProfile).isEmpty();
 //
 //        // 2. 삭제 이력이 생성되었는지 확인
 //        List<ChangeLog> changeLogs = changeLogRepository.findByEmployeeIdOrderByChangedAtDesc(employeeId);
