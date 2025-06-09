@@ -2,6 +2,8 @@ package com.fource.hrbank.service;
 
 import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.dto.department.CursorPageResponseDepartmentDto;
+import com.fource.hrbank.dto.department.DepartmentDto;
+import com.fource.hrbank.dto.department.DepartmentUpdateRequest;
 import com.fource.hrbank.repository.DepartmentRepository;
 import com.fource.hrbank.service.department.DepartmentService;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +14,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -45,9 +48,9 @@ public class DepartmentServiceTest {
     @Test
     void findAll_검색조건_없음_커서페이지네이션() {
         // given
-        Department department1 = new Department("경리A", "자산 관리 A", Instant.now(), Instant.now());
-        Department department2 = new Department("경리B", "자산 관리 B", Instant.now(), Instant.now());
-        Department department3 = new Department("경리C", "자산 관리 C", Instant.now(), Instant.now());
+        Department department1 = new Department("경리A", "자산 관리 A", LocalDate.now(), Instant.now());
+        Department department2 = new Department("경리B", "자산 관리 B", LocalDate.now(), Instant.now());
+        Department department3 = new Department("경리C", "자산 관리 C", LocalDate.now(), Instant.now());
 
         departmentRepository.saveAll(List.of(department1, department2, department3));
 
@@ -75,7 +78,7 @@ public class DepartmentServiceTest {
     @Test
     void 부서등록() {
         // given
-        Department department = new Department("지원", "부서 지원", Instant.now(), Instant.now());
+        Department department = new Department("지원", "부서 지원", LocalDate.now(), Instant.now());
 
         // when
         Department result = departmentRepository.save(department);
@@ -83,5 +86,23 @@ public class DepartmentServiceTest {
         // then
         assertThat(result).isNotNull();
         assertThat(result.getName()).isEqualTo("지원");
+    }
+
+    @Test
+    void 부서_수정() {
+        // given
+        Department department = new Department("지원", "부서 지원", LocalDate.now(), Instant.now());
+        departmentRepository.save(department);
+
+        DepartmentUpdateRequest request = new DepartmentUpdateRequest();
+        request.setName("개발 지원");
+        request.setDescription("개발을 지원하는 부서");
+
+        // when
+        DepartmentDto update = departmentService.update(department.getId(), request);
+
+        // then
+        assertThat(update).isNotNull();
+        assertThat(update.name()).isEqualTo("개발 지원");
     }
 }
