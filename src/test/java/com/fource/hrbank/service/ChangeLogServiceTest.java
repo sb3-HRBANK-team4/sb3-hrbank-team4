@@ -1,6 +1,7 @@
 package com.fource.hrbank.service;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static jdk.dynalink.linker.support.Guards.isNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fource.hrbank.domain.ChangeDetail;
 import com.fource.hrbank.domain.ChangeLog;
@@ -9,8 +10,12 @@ import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.dto.changelog.ChangeLogDto;
+<<<<<<< HEAD
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.fource.hrbank.repository.ChangeDetailRepository;
+=======
+import com.fource.hrbank.dto.changelog.CursorPageResponseChangeLogDto;
+>>>>>>> 29d012f1a17e059df9b7a0a02a440901264262e2
 import com.fource.hrbank.repository.ChangeLogRepository;
 import com.fource.hrbank.repository.DepartmentRepository;
 import com.fource.hrbank.repository.employee.EmployeeRepository;
@@ -19,8 +24,14 @@ import com.fource.hrbank.service.employee.EmployeeService;
 import com.fource.hrbank.service.storage.FileStorage;
 import java.time.Instant;
 import java.time.LocalDate;
+<<<<<<< HEAD
 import java.util.List;
 import java.util.Optional;
+=======
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+>>>>>>> 29d012f1a17e059df9b7a0a02a440901264262e2
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+
 @SpringBootTest
 @Transactional
 public class ChangeLogServiceTest {
@@ -44,6 +56,7 @@ public class ChangeLogServiceTest {
 
     @TestConfiguration
     static class TestConfig {
+
         @Bean
         public FileStorage fileStorage() {
             return Mockito.mock(FileStorage.class);
@@ -165,5 +178,66 @@ public class ChangeLogServiceTest {
 
         ChangeDetail deptChange = details.get(0);
         assertThat(deptChange.getFieldName()).isEqualTo("name");
+    }
+
+    @Test
+    @DisplayName("정보 수정 이력 목록 조회 - changedAt 기준 내림차순 정렬만 검증")
+    void 정보수정이력_정렬기능_CHANGED_AT_DESC() {
+        // given
+        Employee employee = new Employee(
+            null,
+            null,
+            "김정렬",
+            "sort@test.com",
+            "01099990000",
+            "정렬개발자",
+            LocalDate.of(2024, 5, 1),
+            EmployeeStatus.ACTIVE,
+            Instant.now()
+        );
+        employeeRepository.save(employee);
+
+        ChangeLog changeLog1 = new ChangeLog(
+            employee,
+            Instant.now().minusSeconds(60),
+            "100.10.1.1",
+            ChangeType.UPDATED,
+            "메모1",
+            null
+        );
+        ChangeLog changeLog2 = new ChangeLog(
+            employee,
+            Instant.now().minusSeconds(30),
+            "100.10.1.2",
+            ChangeType.UPDATED,
+            "메모2",
+            null
+        );
+        ChangeLog changeLog3 = new ChangeLog(
+            employee,
+            Instant.now(),
+            "100.10.1.3",
+            ChangeType.UPDATED,
+            "메모3",
+            null
+        );
+
+        changeLogRepository.saveAll(List.of(changeLog1, changeLog2, changeLog3));
+        System.out.println("저장된 이력 수: " + changeLogRepository.count());
+
+        // when
+        CursorPageResponseChangeLogDto result = changeLogService.findAll(
+            null, null, null, null, null, null,
+            10, "changedAt", "DESC"
+        );
+
+        // then
+        List<ChangeLogDto> list = result.content();
+        System.out.println("조회된 이력 수: " + list.size());
+
+        assertThat(list).isNotNull();
+        assertThat(list).isSortedAccordingTo(
+            Comparator.comparing(ChangeLogDto::getChangedAt).reversed()
+        );
     }
 }

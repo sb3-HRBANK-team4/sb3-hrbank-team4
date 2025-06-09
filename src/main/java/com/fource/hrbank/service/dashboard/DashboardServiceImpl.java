@@ -16,8 +16,7 @@ public class DashboardServiceImpl implements DashboardService {
   @Override
   public EmployeeCountResponseDto getEmployeeCount(EmployeeStatus status, LocalDate from,
       LocalDate to) {
-//    long count = employeeRepository.countByFilters(status, from, to);
-//    return new EmployeeCountResponseDto(count);
-      return null;
+      long count = employeeRepository.count(); // countByFilters 문제
+      return new EmployeeCountResponseDto(count);
   }
 }

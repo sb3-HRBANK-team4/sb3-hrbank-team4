@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ChangeLogServiceImpl implements ChangeLogService {
 
+    private final EmployeeRepository employeeRepository;
     private final ChangeLogRepository changeLogRepository;
     private final ChangeLogMapper changeLogMapper;
     private final ChangeDetailRepository changeDetailRepository;
