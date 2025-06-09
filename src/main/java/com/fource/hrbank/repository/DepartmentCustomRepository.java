@@ -1,7 +1,6 @@
 package com.fource.hrbank.repository;
 
 import com.fource.hrbank.domain.Department;
-
 import java.util.List;
 
 public interface DepartmentCustomRepository {

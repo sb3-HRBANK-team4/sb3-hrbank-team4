@@ -1,10 +1,16 @@
 package com.fource.hrbank.domain;
 
 import com.fource.hrbank.domain.common.BaseEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 @Entity
@@ -15,6 +21,7 @@ import lombok.ToString;
 @Table(name = "tbl_change_detail")
 public class ChangeDetail extends BaseEntity {
 
+    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "change_log_id")
     private ChangeLog changeLog;

@@ -9,4 +9,5 @@ public record CursorPageResponseChangeLogDto(
     int size,
     Long totalElements,
     boolean hasNext) {
+
 }

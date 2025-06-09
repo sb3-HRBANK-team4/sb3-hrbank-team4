@@ -10,4 +10,5 @@ public record CursorPageResponseBackupDto(
     Long totalElements,
     boolean hasNext
 ) {
+
 }
