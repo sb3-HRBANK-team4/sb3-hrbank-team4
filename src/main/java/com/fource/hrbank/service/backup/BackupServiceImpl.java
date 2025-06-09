@@ -12,14 +12,13 @@ import com.fource.hrbank.exception.BackupLogNotFoundException;
 import com.fource.hrbank.exception.FileIOException;
 import com.fource.hrbank.mapper.BackupLogMapper;
 import com.fource.hrbank.mapper.EmployeeMapper;
-import com.fource.hrbank.repository.BackupLogRepository;
 import com.fource.hrbank.repository.ChangeLogRepository;
 import com.fource.hrbank.repository.EmployeeRepository;
 import com.fource.hrbank.repository.FileMetadataRepository;
+import com.fource.hrbank.repository.backup.BackupLogRepository;
 import com.fource.hrbank.service.storage.FileStorage;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -97,6 +96,7 @@ public class BackupServiceImpl implements BackupService {
      * @throws BackupLogNotFoundException
      */
     @Override
+    @Transactional(readOnly = true)
     public BackupDto findLatestByStatus(BackupStatus status) {
         BackupLog backupLog = backupLogRepository.findLatestByStatus(status)
                 .orElseThrow(BackupLogNotFoundException::new);
@@ -111,6 +111,7 @@ public class BackupServiceImpl implements BackupService {
      * @return 생성된 백업 이력 DTO
      */
     @Override
+    @Transactional
     public BackupDto create(String ipAdress) {
         // STEP 1. 필요여부 판단_백업이 필요없다면 건너뜀 상태로 배치 이력을 저장하고 프로세스 종료
         // STEP 2. 필요시 데이터 백업 이력 등록 (작업자_요청자 IP주소, 상태_진행중)
@@ -131,6 +132,7 @@ public class BackupServiceImpl implements BackupService {
      * @return 수행된 백업 이력 DTO
      */
     @Override
+    @Transactional
     public BackupDto backup(BackupDto backupDto) {
         // 건너뜀 상태라면 백업 진행하지 않음
         if (backupDto.status() == BackupStatus.SKIPPED) {
@@ -149,35 +151,47 @@ public class BackupServiceImpl implements BackupService {
 
         try {
             // STEP 4. 백업 성공 시 직원 정보 파일 저장 + 이력 업데이트
-            fileStorage.put(backupDto.id(), employeeCsv.getBytes(StandardCharsets.UTF_8));
-
             metadata = new FileMetadata(
-                    "employee_backup_" + backupDto.id() + "_" + LocalDate.now() + ".csv",
+                    "employee_backup_" + backupDto.id() + "_" + Instant.now() + ".csv",
                     "text/csv",
                     (long) employeeCsv.getBytes(StandardCharsets.UTF_8).length
             );
             fileMetadataRepository.save(metadata);
-
+            fileStorage.put(metadata.getId(), employeeCsv.getBytes(StandardCharsets.UTF_8));
             return update(backupDto.id(), BackupStatus.COMPLETED, metadata);
         } catch (Exception e) {
             // STEP 4. 백업 실패 시 에러 로그 파일 저장 + 이력 업데이트
             String errorLog = ExceptionUtils.getStackTrace(e);
 
             try {
-                fileStorage.put(backupDto.id(), errorLog.getBytes(StandardCharsets.UTF_8));
-
                 metadata = new FileMetadata(
-                        "backup_error_" + backupDto.id() + ".log",
+                        "backup_error_" + backupDto.id() + "_" + Instant.now() + ".log",
                         "text/plain",
                         (long) errorLog.getBytes(StandardCharsets.UTF_8).length
                 );
                 fileMetadataRepository.save(metadata);
+                fileStorage.put(metadata.getId(), errorLog.getBytes(StandardCharsets.UTF_8));
             } catch (Exception ex) {
                 throw new FileIOException(ResponseMessage.FILE_SAVE_ERROR_MESSAGE, ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
             }
 
             return update(backupDto.id(), BackupStatus.FAILED, metadata);
         }
+    }
+
+    /**
+     * 배치 백업 작업을 수행합니다.
+     *
+     * @return 수행된 백업 이력 DTO
+     */
+    @Override
+    @Transactional
+    public BackupDto batchBackup() {
+
+        BackupDto result = create("system");
+        result = backup(result);
+
+        return result;
     }
 
     /**
@@ -209,7 +223,6 @@ public class BackupServiceImpl implements BackupService {
         backupLog.setStatus(status);
         backupLog.setBackupFile(metadata);
 
-        backupLogRepository.save(backupLog);
         return backupLogMapper.toDto(backupLogRepository.save(backupLog));
     }
 

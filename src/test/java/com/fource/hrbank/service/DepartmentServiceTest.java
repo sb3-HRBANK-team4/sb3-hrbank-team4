@@ -1,11 +1,16 @@
 package com.fource.hrbank.service;
 
 import com.fource.hrbank.domain.Department;
+import com.fource.hrbank.domain.Employee;
+import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.dto.department.CursorPageResponseDepartmentDto;
 import com.fource.hrbank.dto.department.DepartmentDto;
 import com.fource.hrbank.dto.department.DepartmentUpdateRequest;
+import com.fource.hrbank.exception.DepartmentDeleteException;
 import com.fource.hrbank.repository.DepartmentRepository;
+import com.fource.hrbank.repository.EmployeeRepository;
 import com.fource.hrbank.service.department.DepartmentService;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +23,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
@@ -30,17 +37,29 @@ public class DepartmentServiceTest {
     private DepartmentRepository departmentRepository;
 
     @Autowired
+    private EmployeeRepository employeeRepository;
+
+    @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @BeforeEach
     void setUp() {
         // 테이블 삭제
+        employeeRepository.deleteAll();
         departmentRepository.deleteAll();
 
         // 시퀀스를 "테이블의 MAX(id) + 1"로 세팅
         jdbcTemplate.execute("""
                 SELECT setval('tbl_department_id_seq', 
                               COALESCE((SELECT MAX(id) FROM tbl_department), 0) + 1,
+                              false)
+            """);
+        jdbcTemplate.execute("""
+                SELECT setval('tbl_employees_id_seq', 
+                              COALESCE((SELECT MAX(id) FROM tbl_employees), 0) + 1,
                               false)
             """);
     }
@@ -105,4 +124,47 @@ public class DepartmentServiceTest {
         assertThat(update).isNotNull();
         assertThat(update.name()).isEqualTo("개발 지원");
     }
+
+    @Test
+    void 부서_삭제_실패() {
+        // given
+        Department department = new Department("지원", "부서 지원", LocalDate.now(), Instant.now());
+        departmentRepository.save(department);
+
+        Employee employee = new Employee(null, department, "강호", "kang@naver.com", "EMP-2025-123312", "사원", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
+        employeeRepository.save(employee);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // when & then
+        assertThrows(DepartmentDeleteException.class,
+                () -> departmentService.delete(department.getId()));
+    }
+
+
+
+    @Test
+    void 부서_삭제_성공() {
+        // given
+        Department department = new Department("지원", "부서 지원", LocalDate.now(), Instant.now());
+        departmentRepository.save(department);
+
+        // 직원 추가 후 제거
+        Employee employee = new Employee(null, department, "강호", "kang@naver.com", "EMP-2025-1233213", "사원", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
+        employeeRepository.save(employee);
+
+        // 직원 먼저 제거
+        employeeRepository.deleteAll();
+
+        entityManager.flush();
+        entityManager.clear();
+
+        // when
+        departmentService.delete(department.getId());
+
+        // then
+        assertFalse(departmentRepository.existsById(department.getId()));
+    }
+
 }
