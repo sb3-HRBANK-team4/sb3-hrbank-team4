@@ -55,7 +55,8 @@ public class BackupLogRepositoryImpl implements BackupLogCustomRepository {
         // 커서 조건
         if (cursor != null && idAfter != null) {
             Instant cursorInstant = Instant.parse(cursor);
-            BooleanBuilder cursorBuilder = createCursorCondition(sortField, direction, cursorInstant, idAfter, qBackupLog);
+            BooleanBuilder cursorBuilder = createCursorCondition(sortField, direction,
+                cursorInstant, idAfter, qBackupLog);
             where.and(cursorBuilder);
         }
 
@@ -77,7 +78,7 @@ public class BackupLogRepositoryImpl implements BackupLogCustomRepository {
      */
     @Override
     public Long countByCondition(String worker, Instant startedAtFrom, Instant startedAtTo,
-                                 BackupStatus status) {
+        BackupStatus status) {
         QBackupLog qBackupLog = QBackupLog.backupLog;
 
         BooleanBuilder where = new BooleanBuilder();
@@ -177,7 +178,8 @@ public class BackupLogRepositoryImpl implements BackupLogCustomRepository {
      * @param qBackupLog QueryDSL용 Q도메인
      * @return 정렬 조건을 나타내는 OrderSpecifier
      */
-    private OrderSpecifier createOrderSpecifier(String sortField, Order direction, QBackupLog qBackupLog) {
+    private OrderSpecifier createOrderSpecifier(String sortField, Order direction,
+        QBackupLog qBackupLog) {
 
         return switch (sortField) {
             case "startedAt" -> new OrderSpecifier<>(direction, qBackupLog.startedAt);

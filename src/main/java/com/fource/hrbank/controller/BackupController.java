@@ -46,7 +46,8 @@ public class BackupController implements BackupApi {
         @RequestParam String sortField,
         @RequestParam String sortDirection
     ) {
-        CursorPageResponseBackupDto cursorPageResponseBackupDto = backupService.findAll(worker, status, startedAtFrom, startedAtTo, idAfter, cursor, size, sortField, sortDirection);
+        CursorPageResponseBackupDto cursorPageResponseBackupDto = backupService.findAll(worker,
+            status, startedAtFrom, startedAtTo, idAfter, cursor, size, sortField, sortDirection);
 
         return ResponseEntity
             .status(HttpStatus.OK)

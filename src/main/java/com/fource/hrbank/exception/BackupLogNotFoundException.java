@@ -1,18 +1,31 @@
 package com.fource.hrbank.exception;
 
-public class BackupLogNotFoundException extends RuntimeException {
+import com.fource.hrbank.dto.common.ResponseDetails;
+import com.fource.hrbank.dto.common.ResponseMessage;
+import com.fource.hrbank.exception.common.BaseException;
+import org.springframework.http.HttpStatus;
 
-    public static final String BACKUPLOG_NOT_FOUND_ERROR_MESSAGE = "요청하신 백업 이력을 찾을 수 없습니다.";
+import java.time.Instant;
 
-    public BackupLogNotFoundException() {
-        super(BACKUPLOG_NOT_FOUND_ERROR_MESSAGE);
+public class BackupLogNotFoundException extends BaseException {
+
+    @Override
+    public HttpStatus getHttpStatus() {
+        return HttpStatus.NOT_FOUND;
     }
 
-    public BackupLogNotFoundException(String message) {
-        super(message);
+    @Override
+    public String getMessage() {
+        return ResponseMessage.BACKUPLOG_NOT_FOUND_ERROR_MESSAGE;
     }
 
-    public BackupLogNotFoundException(String message, Throwable cause) {
-        super(message, cause);
+    @Override
+    public String getDetails() {
+        return ResponseDetails.BACKUPLOG_NOT_FOUND_ERROR_MESSAGE;
+    }
+
+    @Override
+    public Instant timestamp() {
+        return Instant.now();
     }
 }

@@ -16,6 +16,8 @@ import com.fource.hrbank.domain.ChangeType;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.dto.backup.BackupDto;
+import com.fource.hrbank.dto.common.ResponseDetails;
+import com.fource.hrbank.dto.common.ResponseMessage;
 import com.fource.hrbank.exception.BackupLogNotFoundException;
 import com.fource.hrbank.exception.FileIOException;
 import com.fource.hrbank.mapper.BackupLogMapper;
@@ -93,9 +95,12 @@ public class BackupServiceTest {
         Instant startedAt = Instant.parse("2024-01-01T10:00:00Z");
         Instant endedAt = Instant.parse("2024-01-01T10:30:00Z");
 
-        BackupLog log1 = new BackupLog("182.216.32.93", startedAt, endedAt, BackupStatus.COMPLETED, null);
-        BackupLog log2 = new BackupLog("125.247.249.56", startedAt.plusSeconds(3600), endedAt.plusSeconds(3600), BackupStatus.COMPLETED, null);
-        BackupLog log3 = new BackupLog("14.63.67.157", startedAt.plusSeconds(7200), endedAt.plusSeconds(7200), BackupStatus.COMPLETED, null);
+        BackupLog log1 = new BackupLog("182.216.32.93", startedAt, endedAt, BackupStatus.COMPLETED,
+            null);
+        BackupLog log2 = new BackupLog("125.247.249.56", startedAt.plusSeconds(3600),
+            endedAt.plusSeconds(3600), BackupStatus.COMPLETED, null);
+        BackupLog log3 = new BackupLog("14.63.67.157", startedAt.plusSeconds(7200),
+            endedAt.plusSeconds(7200), BackupStatus.COMPLETED, null);
 
         backupLogRepository.saveAll(List.of(log1, log2, log3));
 
@@ -143,7 +148,7 @@ public class BackupServiceTest {
         // when & then
         assertThatThrownBy(() -> backupService.findLatestByStatus(BackupStatus.SKIPPED))
                 .isInstanceOf(BackupLogNotFoundException.class)
-                .hasMessage(BackupLogNotFoundException.BACKUPLOG_NOT_FOUND_ERROR_MESSAGE);
+                .hasMessage(ResponseDetails.BACKUPLOG_NOT_FOUND_ERROR_MESSAGE);
     }
 
     @Test
@@ -256,7 +261,7 @@ public class BackupServiceTest {
         // when & then
         assertThatThrownBy(()-> backupService.backup(backupDto))
                 .isInstanceOf(FileIOException.class)
-                .hasMessage(FileIOException.FILE_SAVE_ERROR_MESSAGE);
+                .hasMessage(ResponseMessage.FILE_SAVE_ERROR_MESSAGE, ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
     }
 
     @Test

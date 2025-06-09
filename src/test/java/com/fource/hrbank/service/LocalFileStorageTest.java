@@ -1,10 +1,20 @@
 package com.fource.hrbank.service;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+
 import com.fource.hrbank.domain.FileMetadata;
+import com.fource.hrbank.dto.common.ResponseDetails;
+import com.fource.hrbank.dto.common.ResponseMessage;
 import com.fource.hrbank.exception.FileIOException;
 import com.fource.hrbank.exception.FileNotFoundException;
 import com.fource.hrbank.repository.FileMetadataRepository;
 import com.fource.hrbank.service.storage.LocalFileStorage;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -16,15 +26,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
@@ -110,7 +111,7 @@ public class LocalFileStorageTest {
         // when & then
         assertThatThrownBy(() -> fileStorage.put(id, content))
             .isInstanceOf(FileIOException.class)
-            .hasMessage(FileIOException.FILE_SAVE_ERROR_MESSAGE);
+            .hasMessage(ResponseMessage.FILE_SAVE_ERROR_MESSAGE, ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
     }
 
     @Test
@@ -138,7 +139,7 @@ public class LocalFileStorageTest {
         // when
         assertThatThrownBy(() -> fileStorage.get(id))
             .isInstanceOf(FileNotFoundException.class)
-            .hasMessage(FileNotFoundException.FILE_NOT_FOUND_ERROR_MESSAGE);
+            .hasMessage(ResponseDetails.FILE_NOT_FOUND_ERROR_MESSAGE);
     }
 
     @Test
@@ -146,7 +147,8 @@ public class LocalFileStorageTest {
         // given
         byte[] content = "파일 다운로드 테스트".getBytes();
 
-        FileMetadata fileMetadata = new FileMetadata("download.txt", "text/plain", (long) content.length);
+        FileMetadata fileMetadata = new FileMetadata("download.txt", "text/plain",
+            (long) content.length);
         fileMetadataRepository.save(fileMetadata);
 
         Path downloadPath = fileStorage.resolvePath(fileMetadata.getId());
@@ -159,7 +161,8 @@ public class LocalFileStorageTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getHeaders().getContentType()).isEqualTo(MediaType.TEXT_PLAIN);
         assertThat(response.getHeaders().getContentLength()).isEqualTo(content.length);
-        assertThat(response.getHeaders().getContentDisposition().getFilename()).isEqualTo("download.txt");
+        assertThat(response.getHeaders().getContentDisposition().getFilename()).isEqualTo(
+            "download.txt");
         assertThat(Files.readAllBytes(downloadPath)).isEqualTo(content);
     }
 }

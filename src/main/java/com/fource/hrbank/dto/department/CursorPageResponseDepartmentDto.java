@@ -10,4 +10,5 @@ public record CursorPageResponseDepartmentDto(
     Long totalElements,
     boolean hasNext
 ) {
+
 }

@@ -3,11 +3,17 @@ package com.fource.hrbank.controller;
 import com.fource.hrbank.dto.department.CursorPageResponseDepartmentDto;
 import com.fource.hrbank.dto.department.DepartmentCreateRequest;
 import com.fource.hrbank.dto.department.DepartmentDto;
+import com.fource.hrbank.dto.department.DepartmentUpdateRequest;
 import com.fource.hrbank.service.department.DepartmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 부서 관련 요청을 처리하는 RestController 입니다.
@@ -30,7 +36,8 @@ public class DepartmentController {
         @RequestParam(defaultValue = "name") String sortField,
         @RequestParam(defaultValue = "asc") String sortDirection
     ) {
-        CursorPageResponseDepartmentDto departments = departmentService.findAll(nameOrDescription, idAfter, cursor, size, sortField, sortDirection);
+        CursorPageResponseDepartmentDto departments = departmentService.findAll(nameOrDescription,
+            idAfter, cursor, size, sortField, sortDirection);
         return departments;
     }
 
@@ -41,5 +48,13 @@ public class DepartmentController {
         return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(department);
+    }
+
+    @PatchMapping("/{departmentId}")
+    public ResponseEntity<DepartmentDto> update(@PathVariable Long departmentId, @RequestBody DepartmentUpdateRequest request) {
+        DepartmentDto department = departmentService.update(departmentId, request);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(department);
     }
 }

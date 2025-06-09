@@ -5,6 +5,8 @@ import com.fource.hrbank.domain.BackupStatus;
 import com.fource.hrbank.domain.FileMetadata;
 import com.fource.hrbank.dto.backup.BackupDto;
 import com.fource.hrbank.dto.backup.CursorPageResponseBackupDto;
+import com.fource.hrbank.dto.common.ResponseDetails;
+import com.fource.hrbank.dto.common.ResponseMessage;
 import com.fource.hrbank.dto.employee.EmployeeDto;
 import com.fource.hrbank.exception.BackupLogNotFoundException;
 import com.fource.hrbank.exception.FileIOException;
@@ -64,13 +66,17 @@ public class BackupServiceImpl implements BackupService {
 
         Pageable pageable = PageRequest.of(0, size + 1);
 
-        List<BackupLog> backupLogs = backupLogRepository.findByCursorCondition(worker, startedAtFrom, startedAtTo, status, idAfter, cursor, sortField, sortDirection, pageable);
+        List<BackupLog> backupLogs = backupLogRepository.findByCursorCondition(worker,
+            startedAtFrom, startedAtTo, status, idAfter, cursor, sortField, sortDirection,
+            pageable);
 
         boolean hasNext = backupLogs.size() > size;
-        String nextCursor = hasNext ? extractCursorValue(backupLogs.get(backupLogs.size() - 1), sortField) : null;
+        String nextCursor =
+            hasNext ? extractCursorValue(backupLogs.get(backupLogs.size() - 1), sortField) : null;
         Long nextIdAfter = hasNext ? backupLogs.get(backupLogs.size() - 1).getId() : null;
 
-        Long totalElements = backupLogRepository.countByCondition(worker, startedAtFrom, startedAtTo, status);
+        Long totalElements = backupLogRepository.countByCondition(worker, startedAtFrom,
+            startedAtTo, status);
 
         return new CursorPageResponseBackupDto(
                 backupLogs.stream().map(backupLogMapper::toDto).collect(Collectors.toList()),
@@ -169,7 +175,7 @@ public class BackupServiceImpl implements BackupService {
                 );
                 fileMetadataRepository.save(metadata);
             } catch (Exception ex) {
-                throw new FileIOException(FileIOException.FILE_SAVE_ERROR_MESSAGE);
+                throw new FileIOException(ResponseMessage.FILE_SAVE_ERROR_MESSAGE, ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
             }
 
             return update(backupDto.id(), BackupStatus.FAILED, metadata);

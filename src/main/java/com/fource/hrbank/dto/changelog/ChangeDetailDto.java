@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChangeDetailDto {
+
     private Long id;
     private Long changeLogId;
     private String fieldName;

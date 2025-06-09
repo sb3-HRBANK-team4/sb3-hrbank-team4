@@ -4,10 +4,14 @@ import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.dto.department.CursorPageResponseDepartmentDto;
 import com.fource.hrbank.dto.department.DepartmentCreateRequest;
 import com.fource.hrbank.dto.department.DepartmentDto;
+import com.fource.hrbank.dto.department.DepartmentUpdateRequest;
+import com.fource.hrbank.exception.DepartmentNotFoundException;
+import com.fource.hrbank.exception.DuplicateDepartmentException;
 import com.fource.hrbank.mapper.DepartmentMapper;
 import com.fource.hrbank.repository.DepartmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -17,6 +21,7 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class DepartmentServiceImpl implements DepartmentService {
 
     private final DepartmentRepository departmentRepository;
@@ -34,13 +39,17 @@ public class DepartmentServiceImpl implements DepartmentService {
      * @return 조건에 부합하는 부서 목록
      */
     @Override
-    public CursorPageResponseDepartmentDto findAll(String nameOrDescription, Long idAfter, String cursor, int size, String sortField, String sortDirection) {
+    public CursorPageResponseDepartmentDto findAll(String nameOrDescription, Long idAfter,
+        String cursor, int size, String sortField, String sortDirection) {
 
-        List<Department> departments = departmentRepository.findByCursorCondition(nameOrDescription, idAfter, cursor, size, sortField, sortDirection);
+        List<Department> departments = departmentRepository.findByCursorCondition(nameOrDescription,
+            idAfter, cursor, size, sortField, sortDirection);
 
-        List<Department> content = departments.size() > size ? departments.subList(0, size) : departments;
+        List<Department> content =
+            departments.size() > size ? departments.subList(0, size) : departments;
 
-        String nextCursor = content.isEmpty() ? null : extractCursorValue(content.get(content.size() - 1), sortField);
+        String nextCursor = content.isEmpty() ? null
+            : extractCursorValue(content.get(content.size() - 1), sortField);
         Long nextIdAfter = content.isEmpty() ? null : content.get(content.size() - 1).getId();
 
         boolean hasNext = departments.size() > size;
@@ -72,6 +81,22 @@ public class DepartmentServiceImpl implements DepartmentService {
         );
 
         return departmentMapper.toDto(departmentRepository.save(department), null);
+    }
+
+    /**
+     * @param departmentId 수정할 부서의 ID
+     * @param request 부서 수정 정보를 담은 DTO(name, description, establishedDate)
+     * @return 수정한 부서 정보
+     */
+    @Override
+    public DepartmentDto update(Long departmentId, DepartmentUpdateRequest request) {
+        Department department = departmentRepository.findById(departmentId)
+                .orElseThrow(DepartmentNotFoundException::new);
+
+        if (departmentRepository.existsByName(request.getName())) throw new DuplicateDepartmentException();
+
+        department.update(request);
+        return departmentMapper.toDto(department, null);
     }
 
     /**
