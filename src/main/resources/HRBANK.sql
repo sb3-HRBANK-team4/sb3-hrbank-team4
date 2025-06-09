@@ -62,8 +62,8 @@ CREATE TABLE tbl_change_detail
     id            SERIAL PRIMARY KEY,
     change_log_id INT         NOT NULL,
     field_name    VARCHAR     NOT NULL,
-    old_value     VARCHAR     NOT NULL,
-    new_value     VARCHAR     NOT NULL,
+    old_value     VARCHAR,
+    new_value     VARCHAR,
     created_at    TIMESTAMPTZ NOT NULL
 );
 
