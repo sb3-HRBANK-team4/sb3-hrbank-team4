@@ -2,19 +2,25 @@ package com.fource.hrbank.service;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import com.fource.hrbank.domain.ChangeDetail;
 import com.fource.hrbank.domain.ChangeLog;
 import com.fource.hrbank.domain.ChangeType;
+import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
-import com.fource.hrbank.dto.changelog.ChangeLogCreateRequestDto;
 import com.fource.hrbank.dto.changelog.ChangeLogDto;
+import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
+import com.fource.hrbank.repository.ChangeDetailRepository;
 import com.fource.hrbank.repository.ChangeLogRepository;
-import com.fource.hrbank.repository.EmployeeRepository;
+import com.fource.hrbank.repository.DepartmentRepository;
+import com.fource.hrbank.repository.employee.EmployeeRepository;
 import com.fource.hrbank.service.changelog.ChangeLogService;
+import com.fource.hrbank.service.employee.EmployeeService;
 import com.fource.hrbank.service.storage.FileStorage;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,7 +30,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @SpringBootTest
 @Transactional
@@ -51,19 +60,25 @@ public class ChangeLogServiceTest {
     private EmployeeRepository employeeRepository;
 
     @Autowired
+    private DepartmentRepository departmentRepository;
+
+    @Autowired
+    private ChangeDetailRepository changeDetailRepository;
+
+    @Autowired
+    private EmployeeService employeeService;
+
+    @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
     void setUp() {
-        // 테이블 삭제
-        changeLogRepository.deleteAll();
+        jdbcTemplate.execute(
+            "TRUNCATE TABLE tbl_change_detail, tbl_change_log, tbl_employees, tbl_department RESTART IDENTITY CASCADE");
 
-        // 시퀀스를 "테이블의 MAX(id) + 1"로 세팅
-        jdbcTemplate.execute("""
-            SELECT setval('tbl_change_log_id_seq', 
-                          COALESCE((SELECT MAX(id) FROM tbl_change_log), 0) + 1,
-                          false)
-        """);
+        MockHttpServletRequest mockRequest = new MockHttpServletRequest();
+        mockRequest.setRemoteAddr("127.0.0.1");
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(mockRequest));
     }
 
     @Test
@@ -106,9 +121,13 @@ public class ChangeLogServiceTest {
     @Test
     @DisplayName("정보 수정 이력 생성 - 성공")
     void 정보수정이력_생성_성공() {
+        Department newDepartment = departmentRepository.save(
+            new Department("마케팅팀", "마케팅 업무", LocalDate.of(2025, 1, 1), Instant.now())
+        );
+
         Employee employee = new Employee(
             null,
-            null,
+            newDepartment,
             "김코딩",
             "test@test.com",
             "0123456789",
@@ -119,16 +138,32 @@ public class ChangeLogServiceTest {
         );
         employeeRepository.save(employee);
 
-        ChangeLogCreateRequestDto request = ChangeLogCreateRequestDto.builder()
-            .employeeNumber(employee.getEmployeeNumber())
-            .memo("테스트 메모")
-            .ipAddress("127.0.0.1")
-            .type(ChangeType.CREATED)
-            .build();
+        EmployeeUpdateRequest request = new EmployeeUpdateRequest(
+            "변경된 이름_김코딩",
+            employee.getEmail(),
+            newDepartment.getId(),
+            employee.getPosition(),
+            employee.getHireDate(),
+            employee.getStatus(),
+            "이름 변경"
+        );
 
-        ChangeLogDto result = changeLogService.create(request);
+        // when
+        employeeService.update(employee.getId(), request, Optional.empty());
 
-        assertThat(result).isNotNull();
-        assertThat(result.getMemo()).isEqualTo("테스트 메모");
+        // then
+        List<ChangeLog> changeLogs = changeLogRepository.findAll();
+        ChangeLog updateLog = changeLogs.stream()
+            .filter(log -> log.getType() == ChangeType.UPDATED)
+            .findFirst()
+            .orElse(null);
+
+        assertThat(updateLog).isNotNull();
+
+        List<ChangeDetail> details = changeDetailRepository.findByChangeLog(updateLog);
+        assertThat(details.size()).isEqualTo(1);
+
+        ChangeDetail deptChange = details.get(0);
+        assertThat(deptChange.getFieldName()).isEqualTo("name");
     }
 }

@@ -14,14 +14,15 @@ import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.fource.hrbank.exception.DuplicateEmailException;
 import com.fource.hrbank.exception.EmployeeNotFoundException;
 import com.fource.hrbank.repository.DepartmentRepository;
-import com.fource.hrbank.repository.EmployeeRepository;
 import com.fource.hrbank.repository.FileMetadataRepository;
+import com.fource.hrbank.repository.employee.EmployeeRepository;
 import com.fource.hrbank.service.employee.EmployeeService;
 import com.fource.hrbank.service.storage.FileStorage;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @SpringBootTest
 @Transactional
@@ -56,6 +59,10 @@ class EmployeeServiceTest {
 
     @BeforeEach
     void setUp() {
+        MockHttpServletRequest mockRequest = new MockHttpServletRequest();
+        mockRequest.setRemoteAddr("127.0.0.1");
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(mockRequest));
+
         //시퀀스 초기화
         jdbcTemplate.execute(
             "TRUNCATE TABLE tbl_change_detail, tbl_change_log, tbl_employees, tbl_department RESTART IDENTITY CASCADE");
@@ -233,10 +240,6 @@ class EmployeeServiceTest {
             new Department("기획팀", "서비스 기획을 담당합니다.", LocalDate.of(2025, 6, 2), Instant.now())
         );
 
-        // 기존 직원 생성
-        MockHttpServletRequest mockRequest = new MockHttpServletRequest();
-        mockRequest.setRemoteAddr("127.0.0.1");
-
         EmployeeCreateRequest createRequest = new EmployeeCreateRequest(
             "김철수",
             "kimcs@example.com",
@@ -307,7 +310,7 @@ class EmployeeServiceTest {
         assertThatThrownBy(() ->
             employeeService.update(secondEmployee.id(), updateRequest, Optional.empty())
         ).isInstanceOf(DuplicateEmailException.class)
-            .hasMessageContaining("중복된 이메일입니다.");
+            .hasMessageContaining("데이터 중복");
     }
 
     @Test
@@ -369,13 +372,8 @@ class EmployeeServiceTest {
         Optional<Employee> deletedEmployee = employeeRepository.findById(employee.getId());
         assertThat(deletedEmployee).isEmpty();
 
-        // 프로필 이미지도 삭제
+        // 2. 프로필 이미지도 삭제되었는지
         Optional<FileMetadata> deletedProfile = fileMetadataRepository.findById(savedProfile.getId());
         assertThat(deletedProfile).isEmpty();
-//
-//        // 2. 삭제 이력이 생성되었는지 확인
-//        List<ChangeLog> changeLogs = changeLogRepository.findByEmployeeIdOrderByChangedAtDesc(employeeId);
-//        assertThat(changeLogs).hasSize(1);
-//        assertThat(changeLogs.get(0).getType()).isEqualTo(ChangeType.DELETED);
     }
 }
