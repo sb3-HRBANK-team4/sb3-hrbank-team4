@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -115,5 +116,20 @@ public class EmployeeController implements EmployeeApi {
         List<EmployeeDistributionDto> distribution = employeeService.getEmployeeDistribution(
             groupBy, status);
         return ResponseEntity.ok(distribution);
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<Long> getEmployeeCount(
+        @RequestParam(required = false) EmployeeStatus status,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
+    ) {
+        // 날짜 검증
+        if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
+            throw new IllegalArgumentException("시작일이 종료일보다 늦을 수 없습니다.");
+        }
+
+        Long count = employeeService.getEmployeeCount(status, fromDate, toDate);
+        return ResponseEntity.ok(count);
     }
 }

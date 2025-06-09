@@ -7,6 +7,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -91,5 +92,31 @@ public class EmployeeCustomRepositoryImpl implements EmployeeCustomRepository {
                 0.0 // 퍼센티지는 서비스에서 계산
             ))
             .collect(Collectors.toList());
+    }
+
+    public Long countByFilters(EmployeeStatus status, LocalDate fromDate, LocalDate toDate) {
+        BooleanBuilder where = new BooleanBuilder();
+
+        // 상태 필터링
+        if (status != null) {
+            where.and(employee.status.eq(status));
+        }
+
+        // 입사일 기간 필터링
+        if (fromDate != null) {
+            where.and(employee.hireDate.goe(fromDate));
+        }
+
+        if (toDate != null) {
+            where.and(employee.hireDate.loe(toDate));
+        }
+
+        Long result = queryFactory
+            .select(employee.count())
+            .from(employee)
+            .where(where)
+            .fetchOne();
+
+        return result != null ? result : 0L;
     }
 }

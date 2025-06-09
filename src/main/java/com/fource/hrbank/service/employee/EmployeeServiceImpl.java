@@ -30,6 +30,7 @@ import com.fource.hrbank.util.IpUtils;
 import jakarta.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.Year;
 import java.util.Collections;
 import java.util.List;
@@ -360,5 +361,23 @@ public class EmployeeServiceImpl implements EmployeeService {
             e.printStackTrace();
             throw new RuntimeException("직원 분포 조회 중 오류가 발생했습니다.", e);
         }
+    }
+
+    @Override
+    public Long getEmployeeCount(EmployeeStatus status, LocalDate fromDate, LocalDate toDate) {
+        try {
+            // toDate가 없고 fromDate만 있는 경우 현재 날짜를 toDate로 설정
+            LocalDate endDate = toDate;
+            if (fromDate != null && toDate == null) {
+                endDate = LocalDate.now();
+            }
+
+            return employeeRepository.countByFilters(status, fromDate, endDate);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("직원 수 조회 중 오류가 발생했습니다.", e);
+        }
+
     }
 }
