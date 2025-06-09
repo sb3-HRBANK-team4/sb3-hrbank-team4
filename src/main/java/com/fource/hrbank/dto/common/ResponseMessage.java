@@ -13,4 +13,6 @@ public interface ResponseMessage {
     public String FILE_SAVE_ERROR_MESSAGE = "파일 저장 중 오류가 발생했습니다.";
     public String FILE_READ_ERROR_MESSAGE = "파일을 읽는 중 오류가 발생하였습니다.";
     public String DEPARTMENT_DELETE_ERROR = "부서 삭제 실패.";
+    public String CHANGELOG_NOT_FOUND = "존재하지 않는 수정 이력입니다";
+    public String DUPLICATE_CHANGELOG = "중복된 수정 이력이 존재합니다.";
 }
