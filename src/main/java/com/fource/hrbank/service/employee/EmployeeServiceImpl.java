@@ -1,12 +1,13 @@
 package com.fource.hrbank.service.employee;
 
-import com.fource.hrbank.domain.ChangeDetail;
 import com.fource.hrbank.domain.ChangeLog;
 import com.fource.hrbank.domain.ChangeType;
 import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.domain.FileMetadata;
+import com.fource.hrbank.dto.changelog.ChangeDetailDto;
+import com.fource.hrbank.dto.changelog.ChangeLogDto;
 import com.fource.hrbank.dto.common.ResponseDetails;
 import com.fource.hrbank.dto.common.ResponseMessage;
 import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
@@ -17,21 +18,20 @@ import com.fource.hrbank.exception.DuplicateEmailException;
 import com.fource.hrbank.exception.EmployeeNotFoundException;
 import com.fource.hrbank.exception.FileIOException;
 import com.fource.hrbank.mapper.EmployeeMapper;
-import com.fource.hrbank.repository.ChangeDetailRepository;
 import com.fource.hrbank.repository.ChangeLogRepository;
 import com.fource.hrbank.repository.DepartmentRepository;
-import com.fource.hrbank.repository.EmployeeRepository;
-import com.fource.hrbank.repository.EmployeeSpecification;
 import com.fource.hrbank.repository.FileMetadataRepository;
+import com.fource.hrbank.repository.employee.EmployeeRepository;
+import com.fource.hrbank.repository.employee.EmployeeSpecification;
+import com.fource.hrbank.service.changelog.ChangeLogService;
 import com.fource.hrbank.service.storage.FileStorage;
 import com.fource.hrbank.util.IpUtils;
 import jakarta.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.Year;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +41,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -57,7 +58,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final FileStorage fileStorage;
     private final FileMetadataRepository fileMetadataRepository;
     private final ChangeLogRepository changeLogRepository;
-    private final ChangeDetailRepository changeDetailRepository;
+    private final ChangeLogService changeLogService;
+    private final TransactionTemplate transactionTemplate;
 
     /**
      * 직원 등록 이메일 중복 검증 프로필 이미지 파일 저장 (선택) 사원번호 자동 생성 (형식: EMP-YYYY-timestamp) 직원 상태를 ACTIVE로 초기화 변경
@@ -269,53 +271,22 @@ public class EmployeeServiceImpl implements EmployeeService {
             }
         }
 
-        //5. IP 주소 추출
-        String ipAddress = IpUtils.getCurrentClientIp();
+        //5. 변경사항 감지 후 ChangeLog, ChangeDetail 엔티티 생성
+        List<ChangeDetailDto> details = changeLogService.detectChanges(employee, request, department);
 
-        //6. 변경사항 감지 후 ChangeLog, ChangeDetail 엔티티 생성
-        //이 부분을 changeLogService.create(employee, request, request.memo()); 이런 식으로 개선?
-        List<ChangeDetail> details = new ArrayList<>();
-
-        if (!Objects.equals(employee.getName(), request.name())) {
-            details.add(new ChangeDetail(null, "name", employee.getName(), request.name()));
-        }
-        if (!Objects.equals(employee.getEmail(), request.email())) {
-            details.add(new ChangeDetail(null, "email", employee.getEmail(), request.email()));
-        }
-        if (!Objects.equals(employee.getDepartment().getId(), request.departmentId())) {
-            details.add(new ChangeDetail(null, "department",
-                employee.getDepartment().getName(), department.getName()));
-        }
-        if (!Objects.equals(employee.getPosition(), request.position())) {
-            details.add(
-                new ChangeDetail(null, "position", employee.getPosition(), request.position()));
-        }
-        if (!Objects.equals(employee.getHireDate(), request.hireDate())) {
-            details.add(new ChangeDetail(null, "hireDate",
-                employee.getHireDate().toString(), request.hireDate().toString()));
-        }
-        if (!Objects.equals(employee.getStatus(), request.status())) {
-            details.add(new ChangeDetail(null, "status",
-                employee.getStatus().getLabel(), request.status().getLabel()));
-        }
-
-        log.info("직원 수정 요청 - IP: {}, 직원 ID: {}, 변경 필드 수: {}",
-            ipAddress, id, details.size());
-
-        //7. 변경사항이 있을 때만 이력 저장
+        //6. 변경사항이 있을 때만 이력 저장
         if (!details.isEmpty()) {
-            ChangeLog changeLog = new ChangeLog(employee, Instant.now(), ipAddress,
-                ChangeType.UPDATED, request.memo(), null);
-            ChangeLog savedChangeLog = changeLogRepository.save(changeLog);
-
-            // ChangeDetail에 changeLog 설정
-            details.forEach(detail -> detail.setChangeLog(savedChangeLog));
-            changeDetailRepository.saveAll(details);
-
-            log.info("변경 이력 저장 완료 - ChangeLog ID: {}", savedChangeLog.getId());
+            ChangeLogDto changeLogDto = changeLogService.create(
+                employee,
+                ChangeType.UPDATED,
+                request.memo(),
+                details
+            );
+            log.info("변경 이력 저장 완료 - ChangeLog ID: {}, 직원 ID: {}, 타입: {}",
+                changeLogDto.getId(), employee.getId(), ChangeType.UPDATED);
         }
 
-        //8. 실제 업데이트
+        //7. 실제 업데이트
         employee.update(
             request.name(),
             request.email(),
@@ -329,11 +300,19 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employeeMapper.toDto(employee);
     }
 
-    @Transactional
     @Override
     public void deleteById(Long id) {
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(EmployeeNotFoundException::new);
+
+        transactionTemplate.executeWithoutResult(status -> {
+            changeLogService.create(
+                employee,
+                ChangeType.DELETED,
+                "직원 삭제",
+                Collections.emptyList()
+            );
+        });
 
         FileMetadata profile = employee.getProfile();
         if (profile != null) {

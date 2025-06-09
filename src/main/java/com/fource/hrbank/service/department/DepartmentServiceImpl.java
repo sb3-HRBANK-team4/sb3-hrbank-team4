@@ -10,7 +10,7 @@ import com.fource.hrbank.exception.DepartmentNotFoundException;
 import com.fource.hrbank.exception.DuplicateDepartmentException;
 import com.fource.hrbank.mapper.DepartmentMapper;
 import com.fource.hrbank.repository.DepartmentRepository;
-import com.fource.hrbank.repository.EmployeeRepository;
+import com.fource.hrbank.repository.employee.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
