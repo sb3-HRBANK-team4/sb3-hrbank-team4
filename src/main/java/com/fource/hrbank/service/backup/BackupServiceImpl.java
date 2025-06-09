@@ -148,7 +148,7 @@ public class BackupServiceImpl implements BackupService {
             fileStorage.put(backupDto.id(), employeeCsv.getBytes(StandardCharsets.UTF_8));
 
             metadata = new FileMetadata(
-                    "employee_backup_" + backupDto.id() + "_" + LocalDate.now() + ".csv",
+                    "employee_backup_" + backupDto.id() + "_" + Instant.now() + ".csv",
                     "text/csv",
                     (long) employeeCsv.getBytes(StandardCharsets.UTF_8).length
             );
@@ -163,7 +163,7 @@ public class BackupServiceImpl implements BackupService {
                 fileStorage.put(backupDto.id(), errorLog.getBytes(StandardCharsets.UTF_8));
 
                 metadata = new FileMetadata(
-                        "backup_error_" + backupDto.id() + ".log",
+                        "backup_error_" + backupDto.id() + "_" + Instant.now() + ".log",
                         "text/plain",
                         (long) errorLog.getBytes(StandardCharsets.UTF_8).length
                 );
@@ -218,7 +218,6 @@ public class BackupServiceImpl implements BackupService {
         backupLog.setStatus(status);
         backupLog.setBackupFile(metadata);
 
-        backupLogRepository.save(backupLog);
         return backupLogMapper.toDto(backupLogRepository.save(backupLog));
     }
 
