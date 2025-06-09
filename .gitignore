@@ -37,6 +37,9 @@ out/
 .vscode/
 application.yaml
 
+##DS_Store##
+.DS_Store
+
 # MapStruct generated code
 /src/main/generated/
 
