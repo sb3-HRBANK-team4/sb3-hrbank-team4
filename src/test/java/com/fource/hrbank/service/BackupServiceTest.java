@@ -1,5 +1,10 @@
 package com.fource.hrbank.service;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -11,6 +16,8 @@ import com.fource.hrbank.domain.ChangeType;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.dto.backup.BackupDto;
+import com.fource.hrbank.dto.common.ResponseDetails;
+import com.fource.hrbank.dto.common.ResponseMessage;
 import com.fource.hrbank.exception.BackupLogNotFoundException;
 import com.fource.hrbank.exception.FileIOException;
 import com.fource.hrbank.mapper.BackupLogMapper;
@@ -142,7 +149,7 @@ public class BackupServiceTest {
         // when & then
         assertThatThrownBy(() -> backupService.findLatestByStatus(BackupStatus.SKIPPED))
                 .isInstanceOf(BackupLogNotFoundException.class)
-                .hasMessage(BackupLogNotFoundException.BACKUPLOG_NOT_FOUND_ERROR_MESSAGE);
+                .hasMessage(ResponseDetails.BACKUPLOG_NOT_FOUND_ERROR_MESSAGE);
     }
 
     @Test
@@ -255,6 +262,6 @@ public class BackupServiceTest {
         // when & then
         assertThatThrownBy(()-> backupService.backup(backupDto))
                 .isInstanceOf(FileIOException.class)
-                .hasMessage(FileIOException.FILE_SAVE_ERROR_MESSAGE);
+                .hasMessage(ResponseMessage.FILE_SAVE_ERROR_MESSAGE, ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
     }
 }

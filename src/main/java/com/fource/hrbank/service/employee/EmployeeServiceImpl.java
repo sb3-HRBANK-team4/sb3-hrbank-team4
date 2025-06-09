@@ -7,6 +7,8 @@ import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.domain.FileMetadata;
+import com.fource.hrbank.dto.common.ResponseDetails;
+import com.fource.hrbank.dto.common.ResponseMessage;
 import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDto;
@@ -69,7 +71,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public EmployeeDto create(EmployeeCreateRequest request, Optional<MultipartFile> profileImage) {
         if (employeeRepository.existsByEmail(request.email())) {
-            throw new DuplicateEmailException("이미 등록된 이메일: " + request.email());
+            throw new DuplicateEmailException();
         }
 
         FileMetadata profile = null;
@@ -91,7 +93,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 fileStorage.put(savedMetadata.getId(), file.getBytes());
                 profile = savedMetadata;
             } catch (IOException e) {
-                throw new FileIOException(FileIOException.FILE_SAVE_ERROR_MESSAGE, e);
+                throw new FileIOException(ResponseMessage.FILE_SAVE_ERROR_MESSAGE, ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
             }
         }
 
@@ -140,7 +142,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public EmployeeDto findById(Long id) {
         Employee employee = employeeRepository.findById(id)
-            .orElseThrow(() -> new EmployeeNotFoundException(id));
+            .orElseThrow(EmployeeNotFoundException::new);
         return employeeMapper.toDto(employee);
     }
 
@@ -234,12 +236,12 @@ public class EmployeeServiceImpl implements EmployeeService {
         Optional<MultipartFile> profileImage) {
         //1. 수정할 직원 조회 및 존재 여부 검증
         Employee employee = employeeRepository.findById(id)
-            .orElseThrow(() -> new EmployeeNotFoundException(id));
+            .orElseThrow(EmployeeNotFoundException::new);
 
         //2. email 중복 체크 (본인 이메일 아닌 경우)
         if (!employee.getEmail().equals(request.email()) && employeeRepository.existsByEmail(
             request.email())) {
-            throw new DuplicateEmailException("이미 등록된 이메일: " + request.email());
+            throw new DuplicateEmailException();
         }
 
         //3. 부서 조회 및 존재 여부 검증
@@ -261,7 +263,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 fileStorage.put(savedMetadata.getId(), file.getBytes());
                 profile = savedMetadata;
             } catch (IOException e) {
-                throw new FileIOException(FileIOException.FILE_SAVE_ERROR_MESSAGE, e);
+                throw new FileIOException(ResponseMessage.FILE_SAVE_ERROR_MESSAGE, ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
             }
         }
 

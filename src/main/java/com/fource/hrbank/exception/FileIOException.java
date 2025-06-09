@@ -1,22 +1,37 @@
 package com.fource.hrbank.exception;
 
-public class FileIOException extends RuntimeException {
+import com.fource.hrbank.exception.common.BaseException;
+import org.springframework.http.HttpStatus;
 
-    public static final String FILE_DEFAULT_ERROR_MESSAGE = "파일 처리 중 오류가 발생하였습니다.";
-    public static final String FILE_CREATE_ERROR_MESSAGE = "파일 생성 중 오류가 발생하였습니다.";
-    public static final String FILE_SAVE_ERROR_MESSAGE = "파일 저장 중 오류가 발생했습니다.";
-    public static final String FILE_READ_ERROR_MESSAGE = "파일을 읽는 중 오류가 발생하였습니다.";
+import java.time.Instant;
 
+public class FileIOException extends BaseException {
 
-    public FileIOException() {
-        super(FILE_DEFAULT_ERROR_MESSAGE);
+    public final String message;
+    public final String details;
+
+    @Override
+    public HttpStatus getHttpStatus() {
+        return HttpStatus.INTERNAL_SERVER_ERROR;
     }
 
-    public FileIOException(String message) {
-        super(message);
+    @Override
+    public String getMessage() {
+        return message;
     }
 
-    public FileIOException(String message, Throwable cause) {
-        super(message, cause);
+    @Override
+    public String getDetails() {
+        return details;
+    }
+
+    @Override
+    public Instant timestamp() {
+        return Instant.now();
+    }
+
+    public FileIOException(String message, String details) {
+        this.message = message;
+        this.details = details;
     }
 }
