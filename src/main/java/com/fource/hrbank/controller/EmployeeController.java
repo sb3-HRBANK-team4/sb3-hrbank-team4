@@ -9,10 +9,12 @@ import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.fource.hrbank.service.employee.EmployeeService;
 import java.time.LocalDate;
 import java.util.Optional;
+import javax.xml.xpath.XPath;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -82,4 +84,10 @@ public class EmployeeController implements EmployeeApi {
         return ResponseEntity.status(HttpStatus.OK).body(employee);
     }
 
+    @DeleteMapping(path = "{id}")
+    public ResponseEntity<Void> deleteEmployee(@PathVariable("id") Long id) {
+        employeeService.deleteById(id);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
 }

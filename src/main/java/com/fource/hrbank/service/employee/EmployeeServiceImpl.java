@@ -7,6 +7,7 @@ import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.domain.FileMetadata;
+import com.fource.hrbank.dto.changelog.ChangeLogDto;
 import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDto;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.Year;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -38,6 +40,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -323,5 +326,15 @@ public class EmployeeServiceImpl implements EmployeeService {
         );
 
         return employeeMapper.toDto(employee);
+    }
+
+    @Transactional
+    @Override
+    public void deleteById(Long id) {
+        Employee employee = employeeRepository.findById(id)
+            .orElseThrow(() -> new EmployeeNotFoundException(id));
+
+        log.info("직원 삭제 완료 - ID: {}", id);
+        employeeRepository.delete(employee);
     }
 }

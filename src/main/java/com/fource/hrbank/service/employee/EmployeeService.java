@@ -22,4 +22,6 @@ public interface EmployeeService {
     public EmployeeDto update(Long employeeId, EmployeeUpdateRequest request,
         Optional<MultipartFile> profileImage);
 
+    public void deleteById(Long id);
+
 }
