@@ -48,10 +48,4 @@ public class ChangeLogController implements ChangeLogApi {
       List<ChangeDetailDto> result = changeLogService.findDiffs(id);
       return ResponseEntity.ok(result);
     }
-
-  @PostMapping
-  public ResponseEntity<ChangeLogDto> create(@RequestBody ChangeLogCreateRequestDto requestDto) {
-    ChangeLogDto response = changeLogService.create(requestDto);
-    return ResponseEntity.ok(response);
-  }
 }
