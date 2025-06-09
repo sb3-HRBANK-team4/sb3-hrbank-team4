@@ -65,13 +65,17 @@ public class BackupServiceImpl implements BackupService {
 
         Pageable pageable = PageRequest.of(0, size + 1);
 
-        List<BackupLog> backupLogs = backupLogRepository.findByCursorCondition(worker, startedAtFrom, startedAtTo, status, idAfter, cursor, sortField, sortDirection, pageable);
+        List<BackupLog> backupLogs = backupLogRepository.findByCursorCondition(worker,
+            startedAtFrom, startedAtTo, status, idAfter, cursor, sortField, sortDirection,
+            pageable);
 
         boolean hasNext = backupLogs.size() > size;
-        String nextCursor = hasNext ? extractCursorValue(backupLogs.get(backupLogs.size() - 1), sortField) : null;
+        String nextCursor =
+            hasNext ? extractCursorValue(backupLogs.get(backupLogs.size() - 1), sortField) : null;
         Long nextIdAfter = hasNext ? backupLogs.get(backupLogs.size() - 1).getId() : null;
 
-        Long totalElements = backupLogRepository.countByCondition(worker, startedAtFrom, startedAtTo, status);
+        Long totalElements = backupLogRepository.countByCondition(worker, startedAtFrom,
+            startedAtTo, status);
 
         return new CursorPageResponseBackupDto(
                 backupLogs.stream().map(backupLogMapper::toDto).collect(Collectors.toList()),

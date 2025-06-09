@@ -9,4 +9,5 @@ public record DepartmentDto(
     Instant establishedDate,
     Long employeeCount
 ) {
+
 }

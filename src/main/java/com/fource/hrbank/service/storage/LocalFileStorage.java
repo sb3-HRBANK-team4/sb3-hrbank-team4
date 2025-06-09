@@ -23,8 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 /**
- * 로컬 디스크에 파일을 저장하는 서비스입니다.
- * (설정 값 'hrbank.storage.type=local'일 때 활성화)
+ * 로컬 디스크에 파일을 저장하는 서비스입니다. (설정 값 'hrbank.storage.type=local'일 때 활성화)
  */
 @ConditionalOnProperty(name = "hrbank.storage.type", havingValue = "local")
 @Component

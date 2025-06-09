@@ -22,6 +22,7 @@ public interface BackupLogCustomRepository {
     Optional<BackupLog> findLatestByStatus(BackupStatus status);
 
     Optional<BackupLog> findLatest();
+
 }
 
 
