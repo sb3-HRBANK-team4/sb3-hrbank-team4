@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * 부서 관련 요청을 처리하는 RestController 입니다.
- * <p>
+ *
  * 추가, 수정, 삭제, 조회 등의 기능을 제공합니다.
  */
 @RestController

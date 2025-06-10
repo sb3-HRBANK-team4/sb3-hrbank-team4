@@ -19,7 +19,7 @@ import com.fource.hrbank.exception.FileIOException;
 import com.fource.hrbank.mapper.EmployeeMapper;
 import com.fource.hrbank.repository.ChangeDetailRepository;
 import com.fource.hrbank.repository.ChangeLogRepository;
-import com.fource.hrbank.repository.DepartmentRepository;
+import com.fource.hrbank.repository.department.DepartmentRepository;
 import com.fource.hrbank.repository.EmployeeRepository;
 import com.fource.hrbank.repository.EmployeeSpecification;
 import com.fource.hrbank.repository.FileMetadataRepository;
