@@ -6,7 +6,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
-import com.fource.hrbank.dto.dashboard.EmployeeDistributionDto;
+import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
 import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDto;
@@ -352,5 +352,44 @@ class EmployeeServiceTest {
         for (EmployeeDistributionDto dto : result) {
             assertThat(dto.percentage()).isEqualTo(25.0); // 4명 → 25%씩 분포
         }
+    }
+
+    @Test
+    void getEmployeeTrend_월별직원수추이_정상작동() {
+        // given
+        Department dept = departmentRepository.save(
+            new Department("개발팀", "개발부서", LocalDate.now(), Instant.now())
+        );
+
+        // 월별 고르게 입사자를 배치 (2025-01 ~ 2025-04)
+        employeeRepository.save(new Employee(null, dept, "A", "a@email.com", "EMP-001", "주임",
+            LocalDate.of(2025, 1, 10), EmployeeStatus.ACTIVE, Instant.now()));
+        employeeRepository.save(new Employee(null, dept, "B", "b@email.com", "EMP-002", "사원",
+            LocalDate.of(2025, 2, 5), EmployeeStatus.ACTIVE, Instant.now()));
+        employeeRepository.save(new Employee(null, dept, "C", "c@email.com", "EMP-003", "과장",
+            LocalDate.of(2025, 3, 1), EmployeeStatus.ACTIVE, Instant.now()));
+        employeeRepository.save(new Employee(null, dept, "D", "d@email.com", "EMP-004", "대리",
+            LocalDate.of(2025, 4, 25), EmployeeStatus.ACTIVE, Instant.now()));
+
+        LocalDate from = LocalDate.of(2025, 1, 1);
+        LocalDate to = LocalDate.of(2025, 4, 30);
+
+        // when
+        var trendList = dashboardService.getEmployeeTrend(from, to, "month");
+
+        // then
+        assertThat(trendList).hasSize(4);
+
+        assertThat(trendList.get(0).date()).isEqualTo(LocalDate.of(2025, 1, 1));
+        assertThat(trendList.get(0).count()).isEqualTo(1);
+        assertThat(trendList.get(0).change()).isEqualTo(0); // 첫 달이므로 비교 대상 없음
+        assertThat(trendList.get(0).percentage()).isEqualTo(0.0);
+
+        assertThat(trendList.get(1).count()).isEqualTo(2); // 1→2
+        assertThat(trendList.get(1).change()).isEqualTo(1);
+        assertThat(trendList.get(1).percentage()).isEqualTo(100.0);
+
+        assertThat(trendList.get(2).count()).isEqualTo(3);
+        assertThat(trendList.get(3).count()).isEqualTo(4);
     }
 }
