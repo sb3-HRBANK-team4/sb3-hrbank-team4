@@ -16,8 +16,8 @@ public class ChangeLogDto {
 
     private Long id;
     private String employeeNumber;
-    private Instant changedAt;
-    private String changedIp;
+    private Instant at;
+    private String ipAddress;
     private ChangeType type;
     private String memo;
 }

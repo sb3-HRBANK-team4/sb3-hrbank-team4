@@ -13,7 +13,7 @@ import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.fource.hrbank.exception.DuplicateEmailException;
 import com.fource.hrbank.exception.EmployeeNotFoundException;
 import com.fource.hrbank.repository.department.DepartmentRepository;
-import com.fource.hrbank.repository.EmployeeRepository;
+import com.fource.hrbank.repository.employee.EmployeeRepository;
 import com.fource.hrbank.service.employee.EmployeeService;
 import java.time.Instant;
 import java.time.LocalDate;

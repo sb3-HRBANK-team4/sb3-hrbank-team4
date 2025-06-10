@@ -21,14 +21,14 @@ public class CsvFormatter {
 
         for (EmployeeDto e : employees) {
             builder.append(String.join(",",
-                    e.id().toString(),
-                    e.employeeNumber(),
-                    e.name(),
-                    e.email(),
-                    e.departmentName(),
-                    e.position(),
-                    e.hireDate().toString(),
-                    e.status().name()
+                e.id().toString(),
+                e.employeeNumber(),
+                e.name(),
+                e.email(),
+                e.departmentName(),
+                e.position(),
+                e.hireDate().toString(),
+                e.status().name()
             ));
             builder.append(System.lineSeparator());
         }

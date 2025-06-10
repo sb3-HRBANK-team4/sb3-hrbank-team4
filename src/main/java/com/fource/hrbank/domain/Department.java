@@ -5,7 +5,6 @@ import com.fource.hrbank.dto.department.DepartmentUpdateRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;

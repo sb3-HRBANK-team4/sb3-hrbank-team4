@@ -24,7 +24,7 @@ public class BackupScheduler {
     @PostConstruct
     public void init() {
         log.info("생성됨 - 해시코드: {}, 클래스: {}, 스레드: {}",
-                System.identityHashCode(this), this.getClass(), Thread.currentThread().getName());
+            System.identityHashCode(this), this.getClass(), Thread.currentThread().getName());
     }
 
     @Scheduled(fixedDelayString = "${hrbank.batch.time}")

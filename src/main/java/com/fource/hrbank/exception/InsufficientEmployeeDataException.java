@@ -6,21 +6,21 @@ import com.fource.hrbank.exception.common.BaseException;
 import java.time.Instant;
 import org.springframework.http.HttpStatus;
 
-public class DepartmentDeleteException extends BaseException {
+public class InsufficientEmployeeDataException extends BaseException {
 
     @Override
     public HttpStatus getHttpStatus() {
-        return HttpStatus.BAD_REQUEST;
+        return HttpStatus.NOT_FOUND;
     }
 
     @Override
     public String getMessage() {
-        return ResponseMessage.DEPARTMENT_DELETE_ERROR;
+        return ResponseMessage.BACKUPLOG_NOT_FOUND_ERROR_MESSAGE;
     }
 
     @Override
     public String getDetails() {
-        return ResponseDetails.DEPARTMENT_DELETE_ERROR;
+        return ResponseDetails.BACKUPLOG_NOT_FOUND_ERROR_MESSAGE;
     }
 
     @Override

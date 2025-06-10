@@ -8,7 +8,7 @@ import com.fource.hrbank.dto.department.DepartmentDto;
 import com.fource.hrbank.dto.department.DepartmentUpdateRequest;
 import com.fource.hrbank.exception.DepartmentDeleteException;
 import com.fource.hrbank.repository.department.DepartmentRepository;
-import com.fource.hrbank.repository.EmployeeRepository;
+import com.fource.hrbank.repository.employee.EmployeeRepository;
 import com.fource.hrbank.service.department.DepartmentService;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
