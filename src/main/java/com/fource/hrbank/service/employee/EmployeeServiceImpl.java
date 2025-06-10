@@ -1,5 +1,6 @@
 package com.fource.hrbank.service.employee;
 
+import com.fource.hrbank.annotation.Logging;
 import com.fource.hrbank.domain.ChangeLog;
 import com.fource.hrbank.domain.ChangeType;
 import com.fource.hrbank.domain.Department;
@@ -20,16 +21,15 @@ import com.fource.hrbank.exception.FileIOException;
 import com.fource.hrbank.mapper.EmployeeMapper;
 import com.fource.hrbank.repository.change.ChangeDetailRepository;
 import com.fource.hrbank.repository.change.ChangeLogRepository;
-import com.fource.hrbank.repository.DepartmentRepository;
-import com.fource.hrbank.repository.FileMetadataRepository;
+import com.fource.hrbank.repository.department.DepartmentRepository;
 import com.fource.hrbank.repository.employee.EmployeeRepository;
 import com.fource.hrbank.repository.employee.EmployeeSpecification;
+import com.fource.hrbank.repository.FileMetadataRepository;
 import com.fource.hrbank.service.changelog.ChangeLogService;
 import com.fource.hrbank.service.storage.FileStorage;
 import com.fource.hrbank.util.IpUtils;
 import jakarta.persistence.EntityNotFoundException;
 import java.io.IOException;
-import java.time.Instant;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,6 +53,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @RequiredArgsConstructor
 @Service
+@Logging
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
@@ -79,6 +80,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (employeeRepository.existsByEmail(request.email())) {
             throw new DuplicateEmailException();
         }
+
         FileMetadata profile = null;
 
         // 프로필 이미지 저장 처리

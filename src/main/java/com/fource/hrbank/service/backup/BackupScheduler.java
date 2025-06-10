@@ -28,9 +28,13 @@ public class BackupScheduler {
     }
 
     @Scheduled(fixedDelayString = "${hrbank.batch.time}")
-    public BackupDto run() {
-        log.info("배치 백업 실행됨 - 현재 시각: {}, 배치 주기: {}ms", LocalDateTime.now(), batchTime);
-        log.info("실행되고 있는 스레드 : " + Thread.currentThread().getName());
-        return backupService.batchBackup();
+    public void run() {
+        try {
+            log.info("배치 백업 실행됨 - 현재 시각: {}, 배치 주기: {}ms", LocalDateTime.now(), batchTime);
+            log.info("실행되고 있는 스레드 : " + Thread.currentThread().getName());
+            backupService.batchBackup();
+        } catch(Exception e) {
+            log.error("스케줄러 작업 중 오류 발생", e);
+        }
     }
 }

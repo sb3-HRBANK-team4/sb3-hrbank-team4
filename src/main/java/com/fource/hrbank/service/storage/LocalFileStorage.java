@@ -1,5 +1,6 @@
 package com.fource.hrbank.service.storage;
 
+import com.fource.hrbank.annotation.Logging;
 import com.fource.hrbank.domain.FileMetadata;
 import com.fource.hrbank.dto.common.ResponseDetails;
 import com.fource.hrbank.dto.common.ResponseMessage;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty(name = "hrbank.storage.type", havingValue = "local")
 @Component
 @Slf4j
+@Logging
 public class LocalFileStorage implements FileStorage {
 
     private final Path root;

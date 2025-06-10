@@ -1,5 +1,6 @@
 package com.fource.hrbank.service.backup;
 
+import com.fource.hrbank.annotation.Logging;
 import com.fource.hrbank.domain.BackupLog;
 import com.fource.hrbank.domain.BackupStatus;
 import com.fource.hrbank.domain.FileMetadata;
@@ -33,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @RequiredArgsConstructor
+@Logging
 public class BackupServiceImpl implements BackupService {
 
     private final BackupLogRepository backupLogRepository;

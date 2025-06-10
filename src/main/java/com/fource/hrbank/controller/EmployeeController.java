@@ -2,16 +2,19 @@ package com.fource.hrbank.controller;
 
 import com.fource.hrbank.controller.api.EmployeeApi;
 import com.fource.hrbank.domain.EmployeeStatus;
+import com.fource.hrbank.dto.dashboard.EmployeeTrendDto;
 import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
 import com.fource.hrbank.dto.employee.EmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
+import com.fource.hrbank.service.dashboard.DashboardService;
 import com.fource.hrbank.service.employee.EmployeeService;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class EmployeeController implements EmployeeApi {
 
     private final EmployeeService employeeService;
+    private final DashboardService dashboardService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<EmployeeDto> createEmployee(
@@ -91,16 +95,6 @@ public class EmployeeController implements EmployeeApi {
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
-//
-//    @GetMapping("/count")
-//    public ResponseEntity<EmployeeCountResponseDto> getEmployeeCount(
-//        @RequestParam(required = false) EmployeeStatus status,
-//        @RequestParam(required = false) LocalDate fromDate,
-//        @RequestParam(required = false) LocalDate toDate
-//    ) {
-//        EmployeeCountResponseDto response = employeeService.getEmployeeCount(status, fromDate, toDate);
-//        return ResponseEntity.status(HttpStatus.OK).body(response);
-//    }
 
     @GetMapping("/stats/distribution")
     public ResponseEntity<List<EmployeeDistributionDto>> getDistribution(
@@ -115,5 +109,15 @@ public class EmployeeController implements EmployeeApi {
         List<EmployeeDistributionDto> distribution = employeeService.getEmployeeDistribution(
             groupBy, status);
         return ResponseEntity.ok(distribution);
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<EmployeeTrendDto> getEmployeeCount(
+        @RequestParam(required = false) EmployeeStatus status,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
+    ) {
+        EmployeeTrendDto response = dashboardService.getEmployeeCount(status, fromDate, toDate);
+        return ResponseEntity.ok(response);
     }
 }

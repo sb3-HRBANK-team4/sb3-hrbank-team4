@@ -1,5 +1,6 @@
 package com.fource.hrbank.service.changelog;
 
+import com.fource.hrbank.annotation.Logging;
 import com.fource.hrbank.domain.ChangeDetail;
 import com.fource.hrbank.domain.ChangeLog;
 import com.fource.hrbank.domain.ChangeType;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Logging
 public class ChangeLogServiceImpl implements ChangeLogService {
 
     private final ChangeLogRepository changeLogRepository;
