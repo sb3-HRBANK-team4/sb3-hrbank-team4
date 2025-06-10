@@ -4,7 +4,7 @@ public interface ResponseMessage {
     public String DEPARTMENT_NOT_FOUND = "부서 데이터 없음";
     public String DUPLICATE_DEPARTMENT = "부서 수정 실패.";
     public String EMPLOYEE_NOT_FOUND = "직원 데이터 없음";
-    public String DUPLICATE_EMAIL = "데이터 중복.";
+    public String DUPLICATE_EMAIL = "중복된 이메일입니다.";
     public String BACKUPLOG_NOT_FOUND_ERROR_MESSAGE = "백업 이력 데이터 없음.";
     public String FILE_NOT_FOUND_ERROR_MESSAGE = "파일 데이터 없음.";
     public String CSV_CONVERT_ERROR_MESSAGE = "CSV 파일 변환 에러.";
