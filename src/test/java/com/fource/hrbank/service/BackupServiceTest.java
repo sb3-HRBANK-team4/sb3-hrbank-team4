@@ -41,7 +41,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest(properties = "hrbank.storage.type=test")
+@SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
 public class BackupServiceTest {
