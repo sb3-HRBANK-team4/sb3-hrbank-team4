@@ -1,7 +1,7 @@
 package com.fource.hrbank.service;
 
 import com.fource.hrbank.domain.EmployeeStatus;
-import com.fource.hrbank.dto.dashboard.EmployeeTrendDto;
+import com.fource.hrbank.dto.employee.EmployeeTrendDto;
 import com.fource.hrbank.service.dashboard.DashboardService;
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ class DashboardServiceTest {
         EmployeeTrendDto result = dashboardService.getEmployeeCount(null, from, to);
 
         // then
-        assertThat(result.getCount()).isGreaterThanOrEqualTo(0);
+        assertThat(result.count()).isGreaterThanOrEqualTo(0);
     }
 
     @Test
@@ -37,6 +37,6 @@ class DashboardServiceTest {
         LocalDate to = LocalDate.of(2024,12,31);
         EmployeeTrendDto result = dashboardService.getEmployeeCount(EmployeeStatus.ACTIVE, from, to);
 
-        assertThat(result.getCount()).isGreaterThanOrEqualTo(0);
+        assertThat(result.count()).isGreaterThanOrEqualTo(0);
     }
 }
