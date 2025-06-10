@@ -15,24 +15,24 @@ import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
 import com.fource.hrbank.dto.employee.EmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
+import com.fource.hrbank.exception.DepartmentNotFoundException;
+import com.fource.hrbank.exception.DuplicateDepartmentException;
 import com.fource.hrbank.exception.DuplicateEmailException;
 import com.fource.hrbank.exception.EmployeeNotFoundException;
 import com.fource.hrbank.exception.FileIOException;
+import com.fource.hrbank.exception.InsufficientEmployeeDataException;
+import com.fource.hrbank.exception.InvalidStatFieldException;
 import com.fource.hrbank.mapper.EmployeeMapper;
-import com.fource.hrbank.repository.change.ChangeDetailRepository;
-import com.fource.hrbank.repository.change.ChangeLogRepository;
+import com.fource.hrbank.repository.FileMetadataRepository;
 import com.fource.hrbank.repository.department.DepartmentRepository;
 import com.fource.hrbank.repository.employee.EmployeeRepository;
 import com.fource.hrbank.repository.employee.EmployeeSpecification;
-import com.fource.hrbank.repository.FileMetadataRepository;
 import com.fource.hrbank.service.changelog.ChangeLogService;
 import com.fource.hrbank.service.storage.FileStorage;
 import com.fource.hrbank.util.IpUtils;
-import jakarta.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.time.Year;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -44,11 +44,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * 직원 관련 비즈니스 로직을 당담하는 클래스입니다.
+ * 직원 관련 비즈니스 로직을 담당하는 클래스입니다.
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -61,10 +60,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final DepartmentRepository departmentRepository;
     private final FileStorage fileStorage;
     private final FileMetadataRepository fileMetadataRepository;
-    private final ChangeLogRepository changeLogRepository;
     private final ChangeLogService changeLogService;
-    private final TransactionTemplate transactionTemplate;
-    private final ChangeDetailRepository changeDetailRepository;
 
     /**
      * 직원 등록 이메일 중복 검증 프로필 이미지 파일 저장 (선택) 사원번호 자동 생성 (형식: EMP-YYYY-timestamp) 직원 상태를 ACTIVE로 초기화 변경
@@ -110,8 +106,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         // 부서 조회
         Department department = departmentRepository.findById(request.departmentId())
-            .orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 부서 ID입니다: " + request.departmentId()));
+            .orElseThrow(() -> new DuplicateDepartmentException());
 
         //사원번호 예시 : EMP-2025-158861485055084
         String employeeNumber = String.format(
@@ -257,7 +252,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         //3. 부서 조회 및 존재 여부 검증
         Department department = departmentRepository.findById(request.departmentId())
-            .orElseThrow(() -> new EntityNotFoundException("부서가 존재하지 않습니다."));
+            .orElseThrow(() -> new DepartmentNotFoundException());
 
         //4. 프로필 이미지 처리
         FileMetadata profile = employee.getProfile(); // 기존 프로필 유지
@@ -297,19 +292,16 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employeeMapper.toDto(employee);
     }
 
+    /**
+     * id로 직원 삭제, 삭제 이력과 상세변경 내용도 함께 저장됨
+     *
+     * @param id
+     */
+    @Transactional
     @Override
     public void deleteById(Long id) {
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(EmployeeNotFoundException::new);
-
-        transactionTemplate.executeWithoutResult(status -> {
-            changeLogService.create(
-                employee,
-                ChangeType.DELETED,
-                "직원 삭제",
-                Collections.emptyList()
-            );
-        });
 
         FileMetadata profile = employee.getProfile();
         if (profile != null) {
@@ -339,6 +331,14 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeRepository.delete(employee);
     }
 
+    /**
+     * 지정된 그룹 기준을으로 직원 분포 통계
+     *
+     * @param groupBy 그룹 기준 필드 (예: 부서명, 직함 등)
+     * @param status 직원 상태 필터 (enum값, 예: ACTIVE)
+     * @return 그룹별 분포 결과 리스트 (비율 포함)
+     */
+    @Transactional(readOnly = true)
     @Override
     public List<EmployeeDistributionDto> getEmployeeDistribution(String groupBy,
         EmployeeStatus status) {
@@ -346,9 +346,20 @@ public class EmployeeServiceImpl implements EmployeeService {
             // 전체 직원 수 조회 (퍼센티지 계산용)
             long totalCount = employeeRepository.countByStatus(status);
 
+            // 직원 수 없을 때
+            if (totalCount == 0) {
+                throw new InsufficientEmployeeDataException();
+            }
+
             // 그룹별 직원 수 조회
             List<EmployeeDistributionDto> distributions = employeeRepository.getDistributionByGroup(
                 groupBy, status);
+
+            if (distributions.isEmpty()) {
+                log.warn("분포 데이터 없음 groupBy: {}, status: {}, totalCount: {}",
+                    groupBy, status, totalCount);
+                throw new InsufficientEmployeeDataException();
+            }
 
             // 퍼센티지 계산
             return distributions.stream()
@@ -359,9 +370,11 @@ public class EmployeeServiceImpl implements EmployeeService {
                 ))
                 .collect(Collectors.toList());
 
+        } catch (InsufficientEmployeeDataException e) {
+            throw e;
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("직원 분포 조회 중 오류가 발생했습니다.", e);
+            log.error("직원 분포 조회 중 오류 발생. groupBy: {}, status: {}", groupBy, status, e);
+            throw new InvalidStatFieldException();
         }
     }
 }

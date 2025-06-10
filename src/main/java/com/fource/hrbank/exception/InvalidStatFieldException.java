@@ -6,7 +6,7 @@ import com.fource.hrbank.exception.common.BaseException;
 import java.time.Instant;
 import org.springframework.http.HttpStatus;
 
-public class EmployeeNotFoundException extends BaseException {
+public class InvalidStatFieldException extends BaseException {
 
     @Override
     public HttpStatus getHttpStatus() {
@@ -15,12 +15,12 @@ public class EmployeeNotFoundException extends BaseException {
 
     @Override
     public String getMessage() {
-        return ResponseMessage.EMPLOYEE_NOT_FOUND;
+        return ResponseMessage.BACKUPLOG_NOT_FOUND_ERROR_MESSAGE;
     }
 
     @Override
     public String getDetails() {
-        return ResponseDetails.EMPLOYEE_NOT_FOUND;
+        return ResponseDetails.BACKUPLOG_NOT_FOUND_ERROR_MESSAGE;
     }
 
     @Override

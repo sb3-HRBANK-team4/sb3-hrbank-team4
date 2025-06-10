@@ -111,13 +111,13 @@ public class EmployeeController implements EmployeeApi {
         return ResponseEntity.ok(distribution);
     }
 
-    @GetMapping("/count")
-    public ResponseEntity<EmployeeTrendDto> getEmployeeCount(
-        @RequestParam(required = false) EmployeeStatus status,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
-    ) {
-        EmployeeTrendDto response = dashboardService.getEmployeeCount(status, fromDate, toDate);
-        return ResponseEntity.ok(response);
-    }
+//    @GetMapping("/count")
+//    public ResponseEntity<EmployeeTrendDto> getEmployeeCount(
+//        @RequestParam(required = false) EmployeeStatus status,
+//        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+//        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
+//    ) {
+//        EmployeeTrendDto response = dashboardService.getEmployeeCount(status, fromDate, toDate);
+//        return ResponseEntity.ok(response);
+//    }
 }

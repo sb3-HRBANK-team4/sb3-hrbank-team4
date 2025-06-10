@@ -6,9 +6,6 @@ import com.fource.hrbank.exception.common.BaseException;
 import java.time.Instant;
 import org.springframework.http.HttpStatus;
 
-/**
- * 존재하는 이메일을 조회하거나 수정/삭제하려 할 때 발생하는 예외입니다.
- */
 public class DuplicateEmailException extends BaseException {
 
     @Override
