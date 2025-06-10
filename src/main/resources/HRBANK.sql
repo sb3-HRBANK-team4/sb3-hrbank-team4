@@ -94,8 +94,7 @@ ALTER TABLE tbl_employees
 
 ALTER TABLE tbl_change_log
     ADD CONSTRAINT fk_change_log_employee
-        FOREIGN KEY (employee_id)
-            REFERENCES tbl_employees (id);
+        FOREIGN KEY (employee_id) REFERENCES tbl_employees (id) ON DELETE SET NULL;
 
 ALTER TABLE tbl_backup_history
     ADD CONSTRAINT fk_backup_history_file
@@ -108,46 +107,6 @@ ALTER TABLE tbl_change_detail
             REFERENCES tbl_change_log (id)
             ON DELETE CASCADE;
 
-insert into tbl_department
-values (1, '개발팀', '백엔드', '2025-01-01', now(), now());
-insert into tbl_department
-values (2, '개발팀1', '백엔드1', '2025-12-2', now(), now());
-
-insert into tbl_file_metadata
-values (1, now(), 'profile.jpg', 'jpg', 1000);
-
-insert into tbl_employees
-values (1, 1, 1, 'test', 'test@na.com', 'EMP-111-111', '사원', '2025-06-05', 'ACTIVE', now(), now());
-
-insert into tbl_change_log
-values (1, '1', now(), '111.222.333.444', 'UPDATED', '직급 변경', now());
-insert into tbl_change_detail
-values (1, 1, '개발팀', '사원', '부장', now());
 
 -- 모든 테이블 데이터 삭제 + 시퀀스 초기화
-TRUNCATE TABLE tbl_change_detail, tbl_change_log, tbl_backup_history, tbl_employees, tbl_file_metadata, tbl_department RESTART IDENTITY CASCADE;
-
--- 1. 기존 외래키 제약조건 삭제
-ALTER TABLE tbl_change_log
-    DROP CONSTRAINT fk_change_log_employee;
-
--- 2. employee_id를 nullable로 변경
-ALTER TABLE tbl_change_log
-    ALTER COLUMN employee_id DROP NOT NULL;
-
--- 3. SET NULL 옵션으로 외래키 재생성
-ALTER TABLE tbl_change_log
-    ADD CONSTRAINT fk_change_log_employee
-        FOREIGN KEY (employee_id) REFERENCES tbl_employees (id) ON DELETE SET NULL;
-
-
-SELECT id, memo, changed_ip, type, employee_number, changed_at
-FROM tbl_change_log
-ORDER BY changed_at DESC
-LIMIT 10;
-
-select * from tbl_change_log where id = 7;
-
-select *
-from tbl_change_detail
-where change_log_id = 1
+-- TRUNCATE TABLE tbl_change_detail, tbl_change_log, tbl_backup_history, tbl_employees, tbl_file_metadata, tbl_department RESTART IDENTITY CASCADE;
