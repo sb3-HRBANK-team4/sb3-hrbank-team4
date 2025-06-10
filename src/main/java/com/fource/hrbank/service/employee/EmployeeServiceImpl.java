@@ -328,7 +328,6 @@ public class EmployeeServiceImpl implements EmployeeService {
      *
      * @param id
      */
-    @Transactional
     @Override
     public void deleteById(Long id) {
         Employee employee = employeeRepository.findById(id)
