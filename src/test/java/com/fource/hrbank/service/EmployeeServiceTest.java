@@ -55,7 +55,7 @@ class EmployeeServiceTest {
     @Test
     void findById_정상조회() {
         Department department = departmentRepository.save(
-            new Department("백엔드 개발팀", "서버 개발을 담당합니다.", Instant.now(), Instant.now())
+            new Department("백엔드 개발팀", "서버 개발을 담당합니다.", LocalDate.now(), Instant.now())
         );
 
         Employee emp1 = new Employee(null, department, "김가", "a@email.com", "EMP-2025-", "주임",
@@ -72,7 +72,7 @@ class EmployeeServiceTest {
     @Test
     void findAll_검색조건없음_커서페이지네이션_정상작동() {
         Department department = departmentRepository.save(
-            new Department("백엔드 개발팀", "서버 개발을 담당합니다.", Instant.now(), Instant.now())
+            new Department("백엔드 개발팀", "서버 개발을 담당합니다.", LocalDate.now(), Instant.now())
         );
 
         Employee emp1 = new Employee(null, department, "가", "a@email.com", "EMP-2025-", "주임",
@@ -114,7 +114,7 @@ class EmployeeServiceTest {
     void findAll_이름내림차순정렬_확인() {
 
         Department department = departmentRepository.save(
-            new Department("백엔드 개발팀", "서버 개발을 담당합니다.", Instant.now(), Instant.now())
+            new Department("백엔드 개발팀", "서버 개발을 담당합니다.", LocalDate.now(), Instant.now())
         );
 
         employeeRepository.saveAll(List.of(
@@ -145,7 +145,7 @@ class EmployeeServiceTest {
     void create_직원생성_프로필이미지없음_확인() {
 
         Department department = departmentRepository.save(
-            new Department("백엔드 개발팀", "서버 개발을 담당합니다.", Instant.now(), Instant.now())
+            new Department("백엔드 개발팀", "서버 개발을 담당합니다.", LocalDate.now(), Instant.now())
         );
 
         EmployeeCreateRequest request = new EmployeeCreateRequest(
@@ -177,7 +177,7 @@ class EmployeeServiceTest {
     void create_직원생성_프로필이미지있음_확인() {
 
         Department department = departmentRepository.save(
-            new Department("백엔드 개발팀", "서버 개발을 담당합니다.", Instant.now(), Instant.now())
+            new Department("백엔드 개발팀", "서버 개발을 담당합니다.", LocalDate.now(), Instant.now())
         );
 
         byte[] fileBytes = "dummy image data".getBytes();
@@ -217,11 +217,11 @@ class EmployeeServiceTest {
     void update_직원정보수정_이름_이메일_부서_입사일_변경_확인() {
         // given
         Department department = departmentRepository.save(
-            new Department("개발팀", "소프트웨어 개발을 담당합니다.", Instant.now(), Instant.now())
+            new Department("개발팀", "소프트웨어 개발을 담당합니다.", LocalDate.now(), Instant.now())
         );
 
         Department newDepartment = departmentRepository.save(
-            new Department("기획팀", "서비스 기획을 담당합니다.", Instant.now(), Instant.now())
+            new Department("기획팀", "서비스 기획을 담당합니다.", LocalDate.now(), Instant.now())
         );
 
         // 기존 직원 생성
@@ -270,7 +270,7 @@ class EmployeeServiceTest {
     void update_이메일중복_예외발생() {
         // given
         Department department = departmentRepository.save(
-            new Department("개발팀", "소프트웨어 개발을 담당합니다.", Instant.now(), Instant.now())
+            new Department("개발팀", "소프트웨어 개발을 담당합니다.", LocalDate.now(), Instant.now())
         );
 
         MockHttpServletRequest mockRequest = new MockHttpServletRequest();
@@ -305,7 +305,7 @@ class EmployeeServiceTest {
     void update_존재하지않는직원_예외발생() {
         // given
         Department department = departmentRepository.save(
-            new Department("개발팀", "소프트웨어 개발을 담당합니다.", Instant.now(), Instant.now())
+            new Department("개발팀", "소프트웨어 개발을 담당합니다.", LocalDate.now(), Instant.now())
         );
 
         MockHttpServletRequest mockRequest = new MockHttpServletRequest();
