@@ -2,11 +2,11 @@ package com.fource.hrbank.controller;
 
 import com.fource.hrbank.controller.api.EmployeeApi;
 import com.fource.hrbank.domain.EmployeeStatus;
-import com.fource.hrbank.dto.dashboard.EmployeeTrendDto;
 import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
 import com.fource.hrbank.dto.employee.EmployeeDto;
+import com.fource.hrbank.dto.employee.EmployeeTrendDto;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.fource.hrbank.service.dashboard.DashboardService;
 import com.fource.hrbank.service.employee.EmployeeService;
@@ -114,13 +114,23 @@ public class EmployeeController implements EmployeeApi {
         return ResponseEntity.ok(distribution);
     }
 
-//    @GetMapping("/count")
-//    public ResponseEntity<EmployeeTrendDto> getEmployeeCount(
-//        @RequestParam(required = false) EmployeeStatus status,
-//        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-//        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
-//    ) {
-//        EmployeeTrendDto response = dashboardService.getEmployeeCount(status, fromDate, toDate);
-//        return ResponseEntity.ok(response);
-//    }
+    @GetMapping("/count")
+    public ResponseEntity<EmployeeTrendDto> getEmployeeCount(
+        @RequestParam(required = false) EmployeeStatus status,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
+    ) {
+        EmployeeTrendDto response = dashboardService.getEmployeeCount(status, fromDate, toDate);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/stats/trend")
+    public ResponseEntity<List<EmployeeTrendDto>> getEmployeeTrend(
+        @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+        @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+        @RequestParam("unit") String unit // 예: "month", "week"
+    ) {
+        List<EmployeeTrendDto> trend = dashboardService.getEmployeeTrend(from, to, unit);
+        return ResponseEntity.ok(trend);
+    }
 }
