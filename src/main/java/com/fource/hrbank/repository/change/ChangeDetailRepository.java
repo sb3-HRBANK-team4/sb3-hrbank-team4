@@ -1,4 +1,4 @@
-package com.fource.hrbank.repository;
+package com.fource.hrbank.repository.change;
 
 import com.fource.hrbank.domain.ChangeDetail;
 import com.fource.hrbank.domain.ChangeLog;
@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface ChangeDetailRepository extends JpaRepository<ChangeDetail, Long> {
 
     List<ChangeDetail> findByChangeLog(ChangeLog changeLog);
+
+    List<ChangeDetail> findByChangeLogId(Long changeLogId);
 }

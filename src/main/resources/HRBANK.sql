@@ -48,7 +48,8 @@ CREATE TABLE tbl_employees
 CREATE TABLE tbl_change_log
 (
     id          SERIAL PRIMARY KEY,
-    employee_id INT         NOT NULL,
+    employee_id INT,
+    employee_number varchar         NOT NULL,
     changed_at  TIMESTAMPTZ NOT NULL,
     changed_ip  VARCHAR(50) NOT NULL,
     type        VARCHAR     NOT NULL,
@@ -138,3 +139,15 @@ ALTER TABLE tbl_change_log
 ALTER TABLE tbl_change_log
     ADD CONSTRAINT fk_change_log_employee
         FOREIGN KEY (employee_id) REFERENCES tbl_employees (id) ON DELETE SET NULL;
+
+
+SELECT id, memo, changed_ip, type, employee_number, changed_at
+FROM tbl_change_log
+ORDER BY changed_at DESC
+LIMIT 10;
+
+select * from tbl_change_log where id = 7;
+
+select *
+from tbl_change_detail
+where change_log_id = 7

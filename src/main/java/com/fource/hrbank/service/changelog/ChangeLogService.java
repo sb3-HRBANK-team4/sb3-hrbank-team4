@@ -11,11 +11,9 @@ import java.util.List;
 
 public interface ChangeLogService {
 
-    ChangeLogDto findById(Long id);
-
-    CursorPageResponseChangeLogDto findAll(
+    CursorPageResponseChangeLogDto getAllChangeLogs(
         String employeeNumber,
-        String type,
+        ChangeType type,
         String memo,
         String ipAddress,
         Long idAfter,
@@ -25,11 +23,13 @@ public interface ChangeLogService {
         String sortDirection
     );
 
-    List<ChangeDetailDto> findDiffs(Long id);
+    List<ChangeDetailDto> findDiffs(Long changeLogId);
 
     ChangeLogDto create(Employee employee, ChangeType type, String memo,
         List<ChangeDetailDto> changeDetailDtos);
 
     List<ChangeDetailDto> detectChanges(Employee employee, EmployeeUpdateRequest request,
         Department department);
+
+    List<ChangeDetailDto> setChangeLogId(List<ChangeDetailDto> details, Long changeLogId);
 }

@@ -11,9 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ChangeDetailDto {
 
-    private Long id;
-    private Long changeLogId;
-    private String fieldName;
-    private String oldValue;
-    private String newValue;
+    private String propertyName;
+    private String before;
+    private String after;
 }

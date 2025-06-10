@@ -12,7 +12,7 @@ import com.fource.hrbank.exception.BackupLogNotFoundException;
 import com.fource.hrbank.exception.FileIOException;
 import com.fource.hrbank.mapper.BackupLogMapper;
 import com.fource.hrbank.mapper.EmployeeMapper;
-import com.fource.hrbank.repository.ChangeLogRepository;
+import com.fource.hrbank.repository.change.ChangeLogRepository;
 import com.fource.hrbank.repository.FileMetadataRepository;
 import com.fource.hrbank.repository.backup.BackupLogRepository;
 import com.fource.hrbank.repository.employee.EmployeeRepository;

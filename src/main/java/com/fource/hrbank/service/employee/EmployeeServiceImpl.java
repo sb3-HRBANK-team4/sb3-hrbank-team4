@@ -19,7 +19,7 @@ import com.fource.hrbank.exception.DuplicateEmailException;
 import com.fource.hrbank.exception.EmployeeNotFoundException;
 import com.fource.hrbank.exception.FileIOException;
 import com.fource.hrbank.mapper.EmployeeMapper;
-import com.fource.hrbank.repository.ChangeLogRepository;
+import com.fource.hrbank.repository.change.ChangeLogRepository;
 import com.fource.hrbank.repository.DepartmentRepository;
 import com.fource.hrbank.repository.FileMetadataRepository;
 import com.fource.hrbank.repository.employee.EmployeeRepository;
@@ -132,6 +132,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         ChangeLog changeLog = new ChangeLog(
             savedEmployee,
+            savedEmployee.getEmployeeNumber(),
             Instant.now(),
             ipAddress,
             ChangeType.CREATED,
@@ -280,28 +281,42 @@ public class EmployeeServiceImpl implements EmployeeService {
             department);
 
         //6. 변경사항이 있을 때만 이력 저장
-        if (!details.isEmpty()) {
-            ChangeLogDto changeLogDto = changeLogService.create(
+        if (!details.isEmpty() || (request.memo() != null && !request.memo().trim().isEmpty())) {
+            String ipAddress = IpUtils.getCurrentClientIp();
+            ChangeLog changeLog = new ChangeLog(
                 employee,
+                employee.getEmployeeNumber(),
+                Instant.now(),
+                ipAddress,
                 ChangeType.UPDATED,
                 request.memo(),
-                details
+                null
             );
-            log.info("변경 이력 저장 완료 - ChangeLog ID: {}, 직원 ID: {}, 타입: {}",
-                changeLogDto.getId(), employee.getId(), ChangeType.UPDATED);
+            ChangeLog savedChangeLog = changeLogRepository.save(changeLog);
+
+            if (!details.isEmpty()) {
+                List<ChangeDetailDto> detailsWithChangeLogId =
+                    changeLogService.setChangeLogId(details, savedChangeLog.getId());
+
+                // ChangeDetail 엔티티들을 저장하는 로직 추가 필요
+                // (예: changeDetailRepository.saveAll(...))
+            }
+
+            log.info("변경 이력 저장 완료 - ChangeLog ID: {}, 직원 ID: {}, 타입: {}, 변경사항 수: {}",
+                changeLog.getId(), employee.getId(), ChangeType.UPDATED, details.size());
         }
-
         //7. 실제 업데이트
-        employee.update(
-            request.name(),
-            request.email(),
-            department,
-            request.position(),
-            request.hireDate(),
-            request.status(),
-            profile
-        );
-
+        if (!details.isEmpty()) {
+            employee.update(
+                request.name(),
+                request.email(),
+                department,
+                request.position(),
+                request.hireDate(),
+                request.status(),
+                profile
+            );
+        }
         return employeeMapper.toDto(employee);
     }
 
