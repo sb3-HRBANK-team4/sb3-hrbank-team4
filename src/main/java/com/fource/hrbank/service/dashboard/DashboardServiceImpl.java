@@ -1,5 +1,6 @@
 package com.fource.hrbank.service.dashboard;
 
+import com.fource.hrbank.annotation.Logging;
 import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.dto.dashboard.EmployeeTrendDto;
 import com.fource.hrbank.repository.EmployeeRepository;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Logging
 public class DashboardServiceImpl implements DashboardService {
 
   private final EmployeeRepository employeeRepository;

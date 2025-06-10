@@ -14,7 +14,7 @@ public class LoggingAspect {
 
     private static final Logger log = LoggerFactory.getLogger(LoggingAspect.class);
 
-    @Around("@target(com.fource.hrbank.annotation.Logging)")
+    @Around("@within(com.fource.hrbank.annotation.Logging)")
     public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
         long start = System.currentTimeMillis();
 

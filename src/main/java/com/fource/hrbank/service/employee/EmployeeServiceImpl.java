@@ -1,5 +1,6 @@
 package com.fource.hrbank.service.employee;
 
+import com.fource.hrbank.annotation.Logging;
 import com.fource.hrbank.domain.ChangeDetail;
 import com.fource.hrbank.domain.ChangeLog;
 import com.fource.hrbank.domain.ChangeType;
@@ -49,6 +50,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @RequiredArgsConstructor
 @Service
+@Logging
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
