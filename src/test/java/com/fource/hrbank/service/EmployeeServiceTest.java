@@ -6,6 +6,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
+import com.fource.hrbank.dto.dashboard.EmployeeDistributionDto;
 import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDto;
@@ -14,6 +15,7 @@ import com.fource.hrbank.exception.DuplicateEmailException;
 import com.fource.hrbank.exception.EmployeeNotFoundException;
 import com.fource.hrbank.repository.department.DepartmentRepository;
 import com.fource.hrbank.repository.employee.EmployeeRepository;
+import com.fource.hrbank.service.dashboard.DashboardService;
 import com.fource.hrbank.service.employee.EmployeeService;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -41,6 +43,9 @@ class EmployeeServiceTest {
 
     @Autowired
     private DepartmentRepository departmentRepository;
+
+    @Autowired
+    private DashboardService dashboardService;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -320,5 +325,32 @@ class EmployeeServiceTest {
         assertThatThrownBy(() ->
             employeeService.update(999L, updateRequest, Optional.empty())
         ).isInstanceOf(EmployeeNotFoundException.class);
+    }
+
+    @Test
+    void getEmployeeDistribution_부서기준_비율확인() {
+        // given
+        Department dept1 = departmentRepository.save(new Department("백엔드", "백엔드팀", LocalDate.now(), Instant.now()));
+        Department dept2 = departmentRepository.save(new Department("프론트엔드", "프론트엔드팀", LocalDate.now(), Instant.now()));
+        Department dept3 = departmentRepository.save(new Department("기획", "기획팀", LocalDate.now(), Instant.now()));
+        Department dept4 = departmentRepository.save(new Department("디자인", "디자인팀", LocalDate.now(), Instant.now()));
+
+        employeeRepository.save(new Employee(null, dept1, "A", "a1@email.com", "EMP-001", "주임",
+            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now()));
+        employeeRepository.save(new Employee(null, dept2, "B", "b1@email.com", "EMP-002", "주임",
+            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now()));
+        employeeRepository.save(new Employee(null, dept3, "C", "c1@email.com", "EMP-003", "주임",
+            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now()));
+        employeeRepository.save(new Employee(null, dept4, "D", "d1@email.com", "EMP-004", "주임",
+            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now()));
+
+        // when
+        List<EmployeeDistributionDto> result = dashboardService.getEmployeeDistribution("department", EmployeeStatus.ACTIVE);
+
+        // then
+        assertThat(result).hasSize(4);
+        for (EmployeeDistributionDto dto : result) {
+            assertThat(dto.percentage()).isEqualTo(25.0); // 4명 → 25%씩 분포
+        }
     }
 }

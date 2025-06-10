@@ -10,9 +10,9 @@ import com.fource.hrbank.domain.FileMetadata;
 import com.fource.hrbank.dto.changelog.DiffsDto;
 import com.fource.hrbank.dto.common.ResponseDetails;
 import com.fource.hrbank.dto.common.ResponseMessage;
+import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
 import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
-import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
 import com.fource.hrbank.dto.employee.EmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.fource.hrbank.exception.DepartmentNotFoundException;
@@ -31,6 +31,8 @@ import com.fource.hrbank.service.changelog.ChangeLogService;
 import com.fource.hrbank.service.storage.FileStorage;
 import com.fource.hrbank.util.IpUtils;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
@@ -292,6 +294,35 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employeeMapper.toDto(employee);
     }
 
+//    @Override
+//    public long getEmployeeCount(EmployeeStatus status, LocalDate from, LocalDate to) {
+//        return employeeRepository.countByFilters(status, from, to);
+//    }
+
+//    @Transactional(readOnly = true)
+//    @Override
+//    public List<EmployeeDistributionDto> getEmployeeDistribution(String groupBy, EmployeeStatus status) {
+//        long totalCount = employeeRepository.countAllByStatus(status);
+//        if (totalCount == 0) return List.of();
+//
+//        List<Object[]> groupedCounts;
+//
+//        if (groupBy.equals("department")) {
+//            groupedCounts = employeeRepository.countByDepartmentGroup(status);
+//        } else if (groupBy.equals("position")) {
+//            groupedCounts = employeeRepository.countByPositionGroup(status);
+//        } else {
+//            throw new IllegalArgumentException("지원하지 않는 그룹화 기준입니다: " + groupBy);
+//        }
+//
+//        return groupedCounts.stream()
+//            .map(row -> {
+//                String groupKey = (String) row[0];
+//                long count = (long) row[1];
+//                double percentage = (count * 100.0) / totalCount;
+//                return new EmployeeDistributionDto(groupKey, (int) count, Math.round(percentage * 100.0) / 100.0);
+//            })
+//            .toList();
     /**
      * id로 직원 삭제, 삭제 이력과 상세변경 내용도 함께 저장됨
      *
