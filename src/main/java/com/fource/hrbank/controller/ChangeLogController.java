@@ -1,10 +1,10 @@
 package com.fource.hrbank.controller;
 
 import com.fource.hrbank.domain.ChangeType;
-import com.fource.hrbank.dto.changelog.ChangeDetailDto;
-import com.fource.hrbank.dto.changelog.ChangeLogDto;
+import com.fource.hrbank.dto.changelog.DiffsDto;
 import com.fource.hrbank.dto.changelog.CursorPageResponseChangeLogDto;
 import com.fource.hrbank.service.changelog.ChangeLogService;
+import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -31,17 +31,19 @@ public class ChangeLogController{
         @RequestParam(required = false) String cursor,
         @RequestParam(required = false, defaultValue = "10") Integer size,
         @RequestParam(required = false, defaultValue = "at") String sortField,
-        @RequestParam(required = false, defaultValue = "desc") String sortDirection
+        @RequestParam(required = false, defaultValue = "desc") String sortDirection,
+        @RequestParam(required = false) Instant atFrom,
+        @RequestParam(required = false) Instant atTo
     ) {
         CursorPageResponseChangeLogDto response  = changeLogService.getAllChangeLogs(
-            employeeNumber, type, memo, ipAddress, idAfter, cursor, size, sortField, sortDirection
+            employeeNumber, type, memo, ipAddress, idAfter, cursor, size, sortField, sortDirection, atFrom, atTo
         );
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}/diffs")
-    public ResponseEntity<List<ChangeDetailDto>> findDiffs(@PathVariable Long id) {
-        List<ChangeDetailDto> result = changeLogService.findDiffs(id);
+    public ResponseEntity<List<DiffsDto>> findDiffs(@PathVariable Long id) {
+        List<DiffsDto> result = changeLogService.findDiffs(id);
         return ResponseEntity.ok(result);
     }
 }

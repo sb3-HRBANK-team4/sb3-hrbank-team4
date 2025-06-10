@@ -15,13 +15,13 @@ import lombok.ToString;
 
 @Entity
 @Getter
+@Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "tbl_change_detail")
 public class ChangeDetail extends BaseEntity {
 
-    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "change_log_id")
     private ChangeLog changeLog;

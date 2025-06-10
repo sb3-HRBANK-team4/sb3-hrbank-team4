@@ -1,6 +1,6 @@
 //package com.fource.hrbank.controller.api;
 //
-//import com.fource.hrbank.dto.changelog.ChangeDetailDto;
+//import com.fource.hrbank.dto.changelog.DiffsDto;
 //import com.fource.hrbank.dto.changelog.CursorPageResponseChangeLogDto;
 //import com.fource.hrbank.dto.common.ErrorResponse;
 //import io.swagger.v3.oas.annotations.Operation;
@@ -69,7 +69,7 @@
 //        @ApiResponse(
 //            responseCode = "200",
 //            description = "조회 성공",
-//            content = @Content(schema = @Schema(implementation = ChangeDetailDto.class))
+//            content = @Content(schema = @Schema(implementation = DiffsDto.class))
 //        ),
 //        @ApiResponse(
 //            responseCode = "404",
@@ -83,7 +83,7 @@
 //        )
 //    })
 //    @GetMapping("/{id}/diffs")
-//    ResponseEntity<List<ChangeDetailDto>> findDiffs(
+//    ResponseEntity<List<DiffsDto>> findDiffs(
 //        @Parameter(description = "이력 ID") @PathVariable Long id
 //    );
 //}

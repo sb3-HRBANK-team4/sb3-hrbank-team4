@@ -5,8 +5,7 @@ import com.fource.hrbank.domain.ChangeLog;
 import com.fource.hrbank.domain.ChangeType;
 import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
-import com.fource.hrbank.dto.changelog.ChangeDetailDto;
-import com.fource.hrbank.dto.changelog.ChangeLogDto;
+import com.fource.hrbank.dto.changelog.DiffsDto;
 import com.fource.hrbank.dto.changelog.CursorPageResponseChangeLogDto;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.fource.hrbank.exception.ChangeLogNotFoundException;
@@ -35,7 +34,7 @@ public class ChangeLogServiceImpl implements ChangeLogService {
     @Override
     public CursorPageResponseChangeLogDto getAllChangeLogs(String employeeNumber, ChangeType type,
         String memo, String ipAddress, Long idAfter, String cursor, int size, String sortField,
-        String sortDirection) {
+        String sortDirection, Instant atFrom, Instant atTo) {
 
         // 기본값 설정
         if (size <= 0) {
@@ -56,26 +55,21 @@ public class ChangeLogServiceImpl implements ChangeLogService {
         // Repository의 커스텀 메서드 호출
         return changeLogRepository.searchChangeLogsWithSorting(
             employeeNumber, type, memo, ipAddress,
-            idAfter, cursor, size, sortField, sortDirection
+            idAfter, cursor, size, sortField, sortDirection, atFrom, atTo
         );
     }
 
     private boolean isValidSortField(String sortField) {
-        return "ipAddress".equals(sortField) || "ip".equals(sortField) ||
+        return "ipAddress".equals(sortField) ||
             "at".equals(sortField) || "changedAt".equals(sortField) ||
             "memo".equals(sortField) || "type".equals(sortField);
     }
 
-    public List<ChangeDetailDto> findDiffs(Long changeLogId) {
+    public List<DiffsDto> findDiffs(Long changeLogId) {
         ChangeLog changeLog = changeLogRepository.findById(changeLogId)
             .orElseThrow(ChangeLogNotFoundException::new);
 
         List<ChangeDetail> changeDetails = changeDetailRepository.findByChangeLogId(changeLogId);
-//
-//        // 변경사항이 없으면 현재 상태 정보 반환
-//        if (changeDetails.isEmpty() && changeLog.getType() == ChangeType.DELETED) {
-//            return createSimpleSnapshot(changeLog);
-//        }
 
         return changeDetails.stream()
             .map(changeDetailMapper::toDto)
@@ -83,8 +77,8 @@ public class ChangeLogServiceImpl implements ChangeLogService {
     }
 
     @Override
-    public ChangeLogDto create(Employee employee, ChangeType type, String memo,
-        List<ChangeDetailDto> changeDetailDtos) {
+    public ChangeLog create(Employee employee, ChangeType type, String memo,
+        List<DiffsDto> diffsDtos) {
         String ipAddress = IpUtils.getCurrentClientIp();
 
         ChangeLog changeLog = new ChangeLog(
@@ -98,70 +92,55 @@ public class ChangeLogServiceImpl implements ChangeLogService {
         );
 
         ChangeLog savedChangeLog = changeLogRepository.save(changeLog);
-        setChangeLogId(changeDetailDtos, savedChangeLog.getId());
 
-        return changeLogMapper.toDto(savedChangeLog);
+        return savedChangeLog;
     }
 
     //변경감지
-    public List<ChangeDetailDto> detectChanges(Employee currentEmployee,
+    public List<DiffsDto> detectChanges(Employee currentEmployee,
         EmployeeUpdateRequest request, Department newDepartment) {
-        List<ChangeDetailDto> details = new ArrayList<>();
+        List<DiffsDto> details = new ArrayList<>();
 
         if (!Objects.equals(currentEmployee.getHireDate(), request.hireDate())) {
-            details.add(new ChangeDetailDto("입사일",
+            details.add(new DiffsDto("입사일",
                 currentEmployee.getHireDate().toString(), request.hireDate().toString()));
         }
         if (!Objects.equals(currentEmployee.getName(), request.name())) {
             details.add(
-                new ChangeDetailDto("이름", currentEmployee.getName(), request.name()));
+                new DiffsDto("이름", currentEmployee.getName(), request.name()));
         }
         if (!Objects.equals(currentEmployee.getPosition(), request.position())) {
-            details.add(new ChangeDetailDto("직함", currentEmployee.getPosition(),
+            details.add(new DiffsDto("직함", currentEmployee.getPosition(),
                 request.position()));
         }
         if (!Objects.equals(currentEmployee.getDepartment().getId(), request.departmentId())) {
-            details.add(new ChangeDetailDto("부서명",
+            details.add(new DiffsDto("부서명",
                 currentEmployee.getDepartment().getName(), newDepartment.getName()));
         }
         if (!Objects.equals(currentEmployee.getEmail(), request.email())) {
-            details.add(new ChangeDetailDto("이메일", currentEmployee.getEmail(),
+            details.add(new DiffsDto("이메일", currentEmployee.getEmail(),
                 request.email()));
         }
         if (!Objects.equals(currentEmployee.getStatus(), request.status())) {
-            details.add(new ChangeDetailDto("상태",
+            details.add(new DiffsDto("상태",
                 currentEmployee.getStatus().getLabel(), request.status().getLabel()));
         }
 
         return details;
     }
 
-    public List<ChangeDetailDto> setChangeLogId(List<ChangeDetailDto> details, Long changeLogId) {
-        return details.stream()
-            .map(detail -> new ChangeDetailDto(
-                detail.getPropertyName(),
-                detail.getBefore(),
-                detail.getAfter()
-            ))
+    public void saveChangeLogWithDetails(ChangeLog changeLog, List<DiffsDto> dtos) {
+        List<ChangeDetail> entities = dtos.stream()
+            .map(dto -> {
+                ChangeDetail detail = new ChangeDetail();
+                detail.setChangeLog(changeLog);
+                detail.setPropertyName(dto.getPropertyName());
+                detail.setBefore(dto.getBefore());
+                detail.setAfter(dto.getAfter());
+                return detail;
+            })
             .collect(Collectors.toList());
-    }
 
-//    private List<ChangeDetailDto> createSimpleSnapshot(ChangeLog changeLog) {
-//        List<ChangeDetailDto> snapshot = new ArrayList<>();
-//        Long changeLogId = changeLog.getId();
-//
-//        if (changeLog.getEmployee() != null) {
-//            Employee employee = changeLog.getEmployee();
-//
-//            // 현재 값만 "변경 후" 필드에 설정, "변경 전"은 "-"
-//            snapshot.add(new ChangeDetailDto("입사일", "-", employee.getHireDate().toString()));
-//            snapshot.add(new ChangeDetailDto("이름", "-", employee.getName()));
-//            snapshot.add(new ChangeDetailDto("직함", "-", employee.getPosition()));
-//            snapshot.add(new ChangeDetailDto("부서명", "-", employee.getDepartment().getName()));
-//            snapshot.add(new ChangeDetailDto("이메일", "-", employee.getEmail()));
-//            snapshot.add(new ChangeDetailDto("상태", "-", employee.getStatus().getLabel()));
-//        }
-//
-//        return snapshot;
-//    }
+        changeDetailRepository.saveAll(entities);
+    }
 }

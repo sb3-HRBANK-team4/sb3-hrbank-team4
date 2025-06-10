@@ -9,6 +9,7 @@ import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -30,7 +31,10 @@ public class ChangeLogCustomRepositoryImpl implements ChangeLogCustomRepository 
         String cursor,
         int size,
         String sortField,
-        String sortDirection) {
+        String sortDirection,
+        Instant atFrom,
+        Instant atTo
+    ) {
 
         // 커서 처리
         if (cursor != null && !cursor.isEmpty()) {
@@ -43,7 +47,7 @@ public class ChangeLogCustomRepositoryImpl implements ChangeLogCustomRepository 
 
         // 동적 조건 생성
         BooleanBuilder whereCondition = createWhereCondition(
-            employeeNumber, type, memo, ipAddress, idAfter);
+            employeeNumber, type, memo, ipAddress, idAfter, atFrom, atTo);
 
         // 정렬 조건 생성
         OrderSpecifier<?> orderSpecifier = createOrderSpecifier(sortField, sortDirection);
@@ -97,7 +101,7 @@ public class ChangeLogCustomRepositoryImpl implements ChangeLogCustomRepository 
     }
 
     private BooleanBuilder createWhereCondition(String employeeNumber, ChangeType type,
-        String memo, String ipAddress, Long idAfter) {
+        String memo, String ipAddress, Long idAfter, Instant atFrom, Instant atTo){
         BooleanBuilder builder = new BooleanBuilder();
 
         // 부분 일치 조건
@@ -120,6 +124,13 @@ public class ChangeLogCustomRepositoryImpl implements ChangeLogCustomRepository 
         // 커서 조건
         if (idAfter != null) {
             builder.and(changeLog.id.gt(idAfter));
+        }
+
+        if (atFrom != null) {
+            builder.and(changeLog.changedAt.goe(atFrom));
+        }
+        if (atTo != null) {
+            builder.and(changeLog.changedAt.loe(atTo));
         }
 
         return builder;

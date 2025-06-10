@@ -6,8 +6,7 @@ import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.domain.FileMetadata;
-import com.fource.hrbank.dto.changelog.ChangeDetailDto;
-import com.fource.hrbank.dto.changelog.ChangeLogDto;
+import com.fource.hrbank.dto.changelog.DiffsDto;
 import com.fource.hrbank.dto.common.ResponseDetails;
 import com.fource.hrbank.dto.common.ResponseMessage;
 import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
@@ -19,6 +18,7 @@ import com.fource.hrbank.exception.DuplicateEmailException;
 import com.fource.hrbank.exception.EmployeeNotFoundException;
 import com.fource.hrbank.exception.FileIOException;
 import com.fource.hrbank.mapper.EmployeeMapper;
+import com.fource.hrbank.repository.change.ChangeDetailRepository;
 import com.fource.hrbank.repository.change.ChangeLogRepository;
 import com.fource.hrbank.repository.DepartmentRepository;
 import com.fource.hrbank.repository.FileMetadataRepository;
@@ -31,6 +31,7 @@ import jakarta.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.Year;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -62,6 +63,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final ChangeLogRepository changeLogRepository;
     private final ChangeLogService changeLogService;
     private final TransactionTemplate transactionTemplate;
+    private final ChangeDetailRepository changeDetailRepository;
 
     /**
      * 직원 등록 이메일 중복 검증 프로필 이미지 파일 저장 (선택) 사원번호 자동 생성 (형식: EMP-YYYY-timestamp) 직원 상태를 ACTIVE로 초기화 변경
@@ -130,18 +132,17 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         Employee savedEmployee = employeeRepository.save(employee);
 
-        ChangeLog changeLog = new ChangeLog(
-            savedEmployee,
-            savedEmployee.getEmployeeNumber(),
-            Instant.now(),
-            ipAddress,
-            ChangeType.CREATED,
-            request.memo(),
-            null);
-        ChangeLog savedChangeLog = changeLogRepository.save(changeLog);
+        // 정보 수정 이력 상세 조회_ 생성시 수정 전 값으로
+        List<DiffsDto> diffs = new ArrayList<>();
+        diffs.add(new DiffsDto("이름", null, request.name()));
+        diffs.add(new DiffsDto("이메일", null, request.email()));
+        diffs.add(new DiffsDto("부서명", null, department.getName()));
+        diffs.add(new DiffsDto("직함", null, request.position()));
+        diffs.add(new DiffsDto("입사일", null, request.hireDate().toString()));
+        diffs.add(new DiffsDto("상태", null, EmployeeStatus.ACTIVE.getLabel()));
 
-        log.info("변경 이력 저장 완료 - ChangeLog ID: {}, 직원 ID: {}, 타입: {}",
-            savedChangeLog.getId(), savedEmployee.getId(), ChangeType.CREATED);
+        ChangeLog changeLog = changeLogService.create(savedEmployee, ChangeType.CREATED, request.memo(), diffs);
+        changeLogService.saveChangeLogWithDetails(changeLog, diffs);
 
         return employeeMapper.toDto(savedEmployee);
     }
@@ -276,47 +277,21 @@ public class EmployeeServiceImpl implements EmployeeService {
             }
         }
 
-        //5. 변경사항 감지 후 ChangeLog, ChangeDetail 엔티티 생성
-        List<ChangeDetailDto> details = changeLogService.detectChanges(employee, request,
-            department);
+        List<DiffsDto> diffs = changeLogService.detectChanges(employee, request, department);
+        ChangeLog changeLog = changeLogService.create(employee, ChangeType.UPDATED, request.memo(), diffs);
+        changeLogService.saveChangeLogWithDetails(changeLog, diffs);
 
-        //6. 변경사항이 있을 때만 이력 저장
-        if (!details.isEmpty() || (request.memo() != null && !request.memo().trim().isEmpty())) {
-            String ipAddress = IpUtils.getCurrentClientIp();
-            ChangeLog changeLog = new ChangeLog(
-                employee,
-                employee.getEmployeeNumber(),
-                Instant.now(),
-                ipAddress,
-                ChangeType.UPDATED,
-                request.memo(),
-                null
-            );
-            ChangeLog savedChangeLog = changeLogRepository.save(changeLog);
-
-            if (!details.isEmpty()) {
-                List<ChangeDetailDto> detailsWithChangeLogId =
-                    changeLogService.setChangeLogId(details, savedChangeLog.getId());
-
-                // ChangeDetail 엔티티들을 저장하는 로직 추가 필요
-                // (예: changeDetailRepository.saveAll(...))
-            }
-
-            log.info("변경 이력 저장 완료 - ChangeLog ID: {}, 직원 ID: {}, 타입: {}, 변경사항 수: {}",
-                changeLog.getId(), employee.getId(), ChangeType.UPDATED, details.size());
-        }
         //7. 실제 업데이트
-        if (!details.isEmpty()) {
-            employee.update(
-                request.name(),
-                request.email(),
-                department,
-                request.position(),
-                request.hireDate(),
-                request.status(),
-                profile
-            );
-        }
+        employee.update(
+            request.name(),
+            request.email(),
+            department,
+            request.position(),
+            request.hireDate(),
+            request.status(),
+            profile
+        );
+
         return employeeMapper.toDto(employee);
     }
 
@@ -346,6 +321,17 @@ public class EmployeeServiceImpl implements EmployeeService {
         } else {
             log.info("삭제할 프로필 이미지가 없습니다.");
         }
+
+        List<DiffsDto> diffs = new ArrayList<>();
+        diffs.add(new DiffsDto("이름", employee.getName(), null));
+        diffs.add(new DiffsDto("이메일", employee.getEmail(), null));
+        diffs.add(new DiffsDto("부서명", employee.getDepartment().getName(), null));
+        diffs.add(new DiffsDto("직함", employee.getPosition(), null));
+        diffs.add(new DiffsDto("입사일", employee.getHireDate().toString(), null));
+        diffs.add(new DiffsDto("상태", employee.getStatus().getLabel(), null));
+
+        ChangeLog changeLog = changeLogService.create(employee, ChangeType.DELETED, "직원 삭제", diffs);
+        changeLogService.saveChangeLogWithDetails(changeLog, diffs);
 
         log.info("직원 삭제 완료 - ID: {}", id);
         employeeRepository.delete(employee);

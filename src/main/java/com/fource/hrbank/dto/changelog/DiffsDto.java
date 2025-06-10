@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChangeDetailDto {
+public class DiffsDto {
 
     private String propertyName;
     private String before;

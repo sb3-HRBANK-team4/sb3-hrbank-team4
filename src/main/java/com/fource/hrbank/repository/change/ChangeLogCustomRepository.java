@@ -2,6 +2,7 @@ package com.fource.hrbank.repository.change;
 
 import com.fource.hrbank.domain.ChangeType;
 import com.fource.hrbank.dto.changelog.CursorPageResponseChangeLogDto;
+import java.time.Instant;
 
 public interface ChangeLogCustomRepository {
 
@@ -14,6 +15,8 @@ public interface ChangeLogCustomRepository {
         String cursor,
         int size,
         String sortField,
-        String sortDirection
+        String sortDirection,
+        Instant atFrom,
+        Instant atTo
     );
 }

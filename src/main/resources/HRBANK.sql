@@ -150,4 +150,4 @@ select * from tbl_change_log where id = 7;
 
 select *
 from tbl_change_detail
-where change_log_id = 7
+where change_log_id = 1
