@@ -16,7 +16,6 @@ import com.fource.hrbank.domain.ChangeType;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.dto.backup.BackupDto;
-import com.fource.hrbank.dto.common.ResponseDetails;
 import com.fource.hrbank.dto.common.ResponseMessage;
 import com.fource.hrbank.exception.BackupLogNotFoundException;
 import com.fource.hrbank.exception.FileIOException;
@@ -42,7 +41,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest
+@SpringBootTest(properties = "hrbank.storage.type=test")
 @AutoConfigureMockMvc
 @Transactional
 public class BackupServiceTest {
@@ -148,7 +147,7 @@ public class BackupServiceTest {
         // when & then
         assertThatThrownBy(() -> backupService.findLatestByStatus(BackupStatus.SKIPPED))
                 .isInstanceOf(BackupLogNotFoundException.class)
-                .hasMessage(ResponseDetails.BACKUPLOG_NOT_FOUND_ERROR_MESSAGE);
+                .hasMessage(ResponseMessage.BACKUPLOG_NOT_FOUND_ERROR_MESSAGE);
     }
 
     @Test
@@ -254,14 +253,15 @@ public class BackupServiceTest {
         Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
         employeeRepository.save(employee);
 
-        // 예외발생
-        when(fileStorage.put(eq(backupDto.id()),any()))
-                .thenThrow(new RuntimeException("파일 저장 실패"));
+        // 예외 발생
+        when(fileStorage.put(any(),any()))
+                .thenThrow(new RuntimeException("파일 저장 실패"))
+                .thenThrow(new RuntimeException("에러 로그 저장 실패"));
 
         // when & then
         assertThatThrownBy(()-> backupService.backup(backupDto))
                 .isInstanceOf(FileIOException.class)
-                .hasMessage(ResponseMessage.FILE_SAVE_ERROR_MESSAGE, ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
+                .hasMessage(ResponseMessage.FILE_SAVE_ERROR_MESSAGE);
     }
 
     @Test
