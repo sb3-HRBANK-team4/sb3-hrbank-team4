@@ -1,5 +1,6 @@
 package com.fource.hrbank.service.department;
 
+import com.fource.hrbank.annotation.Logging;
 import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.dto.department.CursorPageResponseDepartmentDto;
 import com.fource.hrbank.dto.department.DepartmentCreateRequest;
@@ -25,6 +26,7 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Logging
 public class DepartmentServiceImpl implements DepartmentService {
 
     private final DepartmentRepository departmentRepository;
