@@ -96,9 +96,14 @@ public class DepartmentServiceImpl implements DepartmentService {
         Department department = departmentRepository.findById(departmentId)
                 .orElseThrow(DepartmentNotFoundException::new);
 
-        if (departmentRepository.existsByName(request.getName())) throw new DuplicateDepartmentException();
+        if (request.getName() != null && !request.getName().equals(department.getName())) {
+            if (departmentRepository.existsByName(request.getName())) {
+                throw new DuplicateDepartmentException();
+            }
+        }
 
         department.update(request);
+
         return departmentMapper.toDto(department, null);
     }
 

@@ -14,13 +14,11 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long>,
-    JpaSpecificationExecutor<Employee> {
+    JpaSpecificationExecutor<Employee>, EmployeeCustomRepository {
 
     public boolean existsByEmail(String email);
 
     Optional<Employee> findByEmployeeNumber(String employeeNumber);
-
-//    long countByFilters(EmployeeStatus status, LocalDate from, LocalDate to);
 
     boolean existsByDepartmentId(Long departmentId);
 }

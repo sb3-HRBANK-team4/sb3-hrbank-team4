@@ -1,6 +1,7 @@
 package com.fource.hrbank.service.changelog;
 
 import com.fource.hrbank.domain.ChangeLog;
+import com.fource.hrbank.domain.ChangeType;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.dto.changelog.ChangeDetailDto;
 import com.fource.hrbank.dto.changelog.ChangeLogCreateRequestDto;
@@ -43,6 +44,27 @@ public class ChangeLogServiceImpl implements ChangeLogService {
             0L,
             false
         );
+    }
+
+    @Override
+    public ChangeLogDto create(
+        Employee employee,
+        String employeeNumber,
+        ChangeType changeType,
+        String memo,
+        String ipAddress,
+        List<ChangeDetailDto> changeDetails
+    ) {
+        ChangeLog changeLog = new ChangeLog(
+            employee,
+            Instant.now(),
+            ipAddress,
+            changeType,
+            memo,
+            null
+        );
+        ChangeLog saved = changeLogRepository.save(changeLog);
+        return changeLogMapper.toDto(saved);
     }
 
     @Override
