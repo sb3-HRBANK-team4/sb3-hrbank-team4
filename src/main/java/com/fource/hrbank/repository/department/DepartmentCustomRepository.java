@@ -1,7 +1,9 @@
-package com.fource.hrbank.repository;
+package com.fource.hrbank.repository.department;
 
 import com.fource.hrbank.domain.Department;
+
 import java.util.List;
+import java.util.Map;
 
 public interface DepartmentCustomRepository {
 
@@ -15,4 +17,6 @@ public interface DepartmentCustomRepository {
     );
 
     long countByKeyword(String keyword);
+
+    Map<Long, Long> countByDepartmentIds(List<Long> departmentIds);
 }
