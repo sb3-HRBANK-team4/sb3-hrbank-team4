@@ -9,12 +9,9 @@
 //import com.fource.hrbank.domain.Employee;
 //import com.fource.hrbank.domain.EmployeeStatus;
 //import com.fource.hrbank.dto.changelog.ChangeLogDto;
-//<<<<<<< HEAD
 //import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
 //import com.fource.hrbank.repository.change.ChangeDetailRepository;
-//=======
 //import com.fource.hrbank.dto.changelog.CursorPageResponseChangeLogDto;
-//>>>>>>> 29d012f1a17e059df9b7a0a02a440901264262e2
 //import com.fource.hrbank.repository.change.ChangeLogRepository;
 //import com.fource.hrbank.repository.DepartmentRepository;
 //import com.fource.hrbank.repository.employee.EmployeeRepository;
@@ -23,12 +20,9 @@
 //import com.fource.hrbank.service.storage.FileStorage;
 //import java.time.Instant;
 //import java.time.LocalDate;
-//<<<<<<< HEAD
 //import java.util.List;
 //import java.util.Optional;
-//=======
 //import java.util.Comparator;
-//>>>>>>> 29d012f1a17e059df9b7a0a02a440901264262e2
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.DisplayName;
 //import org.junit.jupiter.api.Test;
@@ -196,6 +190,7 @@
 //
 //        ChangeLog changeLog1 = new ChangeLog(
 //            employee,
+//            employee.getEmployeeNumber(),
 //            Instant.now().minusSeconds(60),
 //            "100.10.1.1",
 //            ChangeType.UPDATED,
@@ -204,6 +199,7 @@
 //        );
 //        ChangeLog changeLog2 = new ChangeLog(
 //            employee,
+//            employee.getEmployeeNumber(),
 //            Instant.now().minusSeconds(30),
 //            "100.10.1.2",
 //            ChangeType.UPDATED,
@@ -212,6 +208,7 @@
 //        );
 //        ChangeLog changeLog3 = new ChangeLog(
 //            employee,
+//            employee.getEmployeeNumber(),
 //            Instant.now(),
 //            "100.10.1.3",
 //            ChangeType.UPDATED,
