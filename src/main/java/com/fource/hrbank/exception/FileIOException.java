@@ -1,9 +1,8 @@
 package com.fource.hrbank.exception;
 
 import com.fource.hrbank.exception.common.BaseException;
-import org.springframework.http.HttpStatus;
-
 import java.time.Instant;
+import org.springframework.http.HttpStatus;
 
 public class FileIOException extends BaseException {
 

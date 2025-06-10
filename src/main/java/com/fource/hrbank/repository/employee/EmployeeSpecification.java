@@ -1,4 +1,4 @@
-package com.fource.hrbank.repository;
+package com.fource.hrbank.repository.employee;
 
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;

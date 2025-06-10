@@ -12,16 +12,16 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @ResponseBody
 public class GlobalExceptionHandler {
 
-  @ExceptionHandler(BaseException.class)
-  public ResponseEntity<ErrorResponse> handleBaseException(BaseException ex) {
-    return ResponseEntity.status(ex.getHttpStatus())
+    @ExceptionHandler(BaseException.class)
+    public ResponseEntity<ErrorResponse> handleBaseException(BaseException ex) {
+        return ResponseEntity.status(ex.getHttpStatus())
             .body(ErrorResponse.of(ex.getHttpStatus(), ex.getMessage(), ex.getDetails()));
-  }
+    }
 
-  @ExceptionHandler(Exception.class)
-  public ResponseEntity<String> handleException(Exception e) {
-    return ResponseEntity
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .body(e.getMessage());
-  }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleException(Exception e) {
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(e.getMessage());
+    }
 }

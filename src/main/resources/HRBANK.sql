@@ -48,7 +48,8 @@ CREATE TABLE tbl_employees
 CREATE TABLE tbl_change_log
 (
     id          SERIAL PRIMARY KEY,
-    employee_id INT         NOT NULL,
+    employee_id INT,
+    employee_number varchar         NOT NULL,
     changed_at  TIMESTAMPTZ NOT NULL,
     changed_ip  VARCHAR(50) NOT NULL,
     type        VARCHAR     NOT NULL,
@@ -62,8 +63,8 @@ CREATE TABLE tbl_change_detail
     id            SERIAL PRIMARY KEY,
     change_log_id INT         NOT NULL,
     field_name    VARCHAR     NOT NULL,
-    old_value     VARCHAR     NOT NULL,
-    new_value     VARCHAR     NOT NULL,
+    old_value     VARCHAR,
+    new_value     VARCHAR,
     created_at    TIMESTAMPTZ NOT NULL
 );
 
@@ -119,6 +120,34 @@ insert into tbl_employees
 values (1, 1, 1, 'test', 'test@na.com', 'EMP-111-111', '사원', '2025-06-05', 'ACTIVE', now(), now());
 
 insert into tbl_change_log
-values (1, '1', now(), '111.222.333.444', 'UPDATED', '직급 변경',now());
+values (1, '1', now(), '111.222.333.444', 'UPDATED', '직급 변경', now());
 insert into tbl_change_detail
-values (1, 1,'개발팀', '사원', '부장', now());
+values (1, 1, '개발팀', '사원', '부장', now());
+
+-- 모든 테이블 데이터 삭제 + 시퀀스 초기화
+TRUNCATE TABLE tbl_change_detail, tbl_change_log, tbl_backup_history, tbl_employees, tbl_file_metadata, tbl_department RESTART IDENTITY CASCADE;
+
+-- 1. 기존 외래키 제약조건 삭제
+ALTER TABLE tbl_change_log
+    DROP CONSTRAINT fk_change_log_employee;
+
+-- 2. employee_id를 nullable로 변경
+ALTER TABLE tbl_change_log
+    ALTER COLUMN employee_id DROP NOT NULL;
+
+-- 3. SET NULL 옵션으로 외래키 재생성
+ALTER TABLE tbl_change_log
+    ADD CONSTRAINT fk_change_log_employee
+        FOREIGN KEY (employee_id) REFERENCES tbl_employees (id) ON DELETE SET NULL;
+
+
+SELECT id, memo, changed_ip, type, employee_number, changed_at
+FROM tbl_change_log
+ORDER BY changed_at DESC
+LIMIT 10;
+
+select * from tbl_change_log where id = 7;
+
+select *
+from tbl_change_detail
+where change_log_id = 1

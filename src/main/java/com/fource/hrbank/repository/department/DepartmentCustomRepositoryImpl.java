@@ -1,15 +1,19 @@
-package com.fource.hrbank.repository;
+package com.fource.hrbank.repository.department;
 
 import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.QDepartment;
+import com.fource.hrbank.domain.QEmployee;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
+
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -86,5 +90,23 @@ public class DepartmentCustomRepositoryImpl implements DepartmentCustomRepositor
                 .from(d)
                 .where(builder)
                 .fetchOne();
+    }
+
+    @Override
+    public Map<Long, Long> countByDepartmentIds(List<Long> departmentIds) {
+        QEmployee e = QEmployee.employee;
+
+        List<Tuple> result = queryFactory
+                .select(e.department.id, e.count())
+                .from(e)
+                .where(e.department.id.in(departmentIds))
+                .groupBy(e.department.id)
+                .fetch();
+
+        return result.stream()
+                .collect(Collectors.toMap(
+                        t -> t.get(e.department.id),
+                        t -> t.get(e.count())
+                ));
     }
 }

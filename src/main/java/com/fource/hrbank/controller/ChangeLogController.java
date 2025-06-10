@@ -1,18 +1,15 @@
 package com.fource.hrbank.controller;
 
-import com.fource.hrbank.controller.api.ChangeLogApi;
-import com.fource.hrbank.dto.changelog.ChangeDetailDto;
-import com.fource.hrbank.dto.changelog.ChangeLogDto;
-import com.fource.hrbank.dto.changelog.ChangeLogCreateRequestDto;
+import com.fource.hrbank.domain.ChangeType;
+import com.fource.hrbank.dto.changelog.DiffsDto;
 import com.fource.hrbank.dto.changelog.CursorPageResponseChangeLogDto;
 import com.fource.hrbank.service.changelog.ChangeLogService;
+import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,38 +17,33 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/change-logs")
-public class ChangeLogController implements ChangeLogApi {
+public class ChangeLogController{
 
     private final ChangeLogService changeLogService;
 
     @GetMapping
-    public ResponseEntity<CursorPageResponseChangeLogDto> findAll(
+    public ResponseEntity<CursorPageResponseChangeLogDto> getAllChangeLogs(
         @RequestParam(required = false) String employeeNumber,
-        @RequestParam(required = false) String type,
+        @RequestParam(required = false) ChangeType type,
         @RequestParam(required = false) String memo,
         @RequestParam(required = false) String ipAddress,
         @RequestParam(required = false) Long idAfter,
         @RequestParam(required = false) String cursor,
-        @RequestParam(required = false, defaultValue = "10") int size,
+        @RequestParam(required = false, defaultValue = "10") Integer size,
         @RequestParam(required = false, defaultValue = "at") String sortField,
-        @RequestParam(required = false, defaultValue = "desc") String sortDirection
+        @RequestParam(required = false, defaultValue = "desc") String sortDirection,
+        @RequestParam(required = false) Instant atFrom,
+        @RequestParam(required = false) Instant atTo
     ) {
-      CursorPageResponseChangeLogDto result = changeLogService.findAll(
-          employeeNumber, type, memo, ipAddress, idAfter, cursor, size, sortField, sortDirection
-      );
-      return ResponseEntity.ok(result);
+        CursorPageResponseChangeLogDto response  = changeLogService.getAllChangeLogs(
+            employeeNumber, type, memo, ipAddress, idAfter, cursor, size, sortField, sortDirection, atFrom, atTo
+        );
+        return ResponseEntity.ok(response);
     }
 
-    @Override
     @GetMapping("/{id}/diffs")
-    public ResponseEntity<List<ChangeDetailDto>> findDiffs(@PathVariable Long id) {
-      List<ChangeDetailDto> result = changeLogService.findDiffs(id);
-      return ResponseEntity.ok(result);
+    public ResponseEntity<List<DiffsDto>> findDiffs(@PathVariable Long id) {
+        List<DiffsDto> result = changeLogService.findDiffs(id);
+        return ResponseEntity.ok(result);
     }
-
-  @PostMapping
-  public ResponseEntity<ChangeLogDto> create(@RequestBody ChangeLogCreateRequestDto requestDto) {
-    ChangeLogDto response = changeLogService.create(requestDto);
-    return ResponseEntity.ok(response);
-  }
 }

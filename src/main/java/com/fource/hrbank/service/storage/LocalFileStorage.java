@@ -1,5 +1,6 @@
 package com.fource.hrbank.service.storage;
 
+import com.fource.hrbank.annotation.Logging;
 import com.fource.hrbank.domain.FileMetadata;
 import com.fource.hrbank.dto.common.ResponseDetails;
 import com.fource.hrbank.dto.common.ResponseMessage;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty(name = "hrbank.storage.type", havingValue = "local")
 @Component
 @Slf4j
+@Logging
 public class LocalFileStorage implements FileStorage {
 
     private final Path root;
@@ -49,7 +51,8 @@ public class LocalFileStorage implements FileStorage {
         try {
             Files.createDirectories(root);
         } catch (IOException e) {
-            throw new FileIOException(ResponseMessage.FILE_CREATE_ERROR_MESSAGE, ResponseDetails.FILE_CREATE_ERROR_MESSAGE);
+            throw new FileIOException(ResponseMessage.FILE_CREATE_ERROR_MESSAGE,
+                ResponseDetails.FILE_CREATE_ERROR_MESSAGE);
         }
     }
 
@@ -68,7 +71,8 @@ public class LocalFileStorage implements FileStorage {
         try (OutputStream os = Files.newOutputStream(path)) {
             os.write(bytes);
         } catch (IOException e) {
-            throw new FileIOException(ResponseMessage.FILE_SAVE_ERROR_MESSAGE, ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
+            throw new FileIOException(ResponseMessage.FILE_SAVE_ERROR_MESSAGE,
+                ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
         }
 
         return id;
@@ -104,7 +108,8 @@ public class LocalFileStorage implements FileStorage {
         try {
             return Files.newInputStream(path);
         } catch (IOException e) {
-            throw new FileIOException(ResponseMessage.FILE_READ_ERROR_MESSAGE, ResponseDetails.FILE_READ_ERROR_MESSAGE);
+            throw new FileIOException(ResponseMessage.FILE_READ_ERROR_MESSAGE,
+                ResponseDetails.FILE_READ_ERROR_MESSAGE);
         }
     }
 
@@ -125,8 +130,8 @@ public class LocalFileStorage implements FileStorage {
             .contentType(MediaType.parseMediaType(fileMetadata.getContentType()))
             .headers(headers -> headers.setContentDisposition(
                 ContentDisposition.attachment()
-                        .filename(fileMetadata.getFileName(), StandardCharsets.UTF_8)
-                        .build()))
+                    .filename(fileMetadata.getFileName(), StandardCharsets.UTF_8)
+                    .build()))
             .body(resource);
     }
 }

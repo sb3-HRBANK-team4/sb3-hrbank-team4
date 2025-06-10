@@ -1,32 +1,38 @@
 package com.fource.hrbank.service.changelog;
 
+import com.fource.hrbank.domain.ChangeLog;
 import com.fource.hrbank.domain.ChangeType;
+import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
-import com.fource.hrbank.dto.changelog.ChangeDetailDto;
-import com.fource.hrbank.dto.changelog.ChangeLogCreateRequestDto;
-import com.fource.hrbank.dto.changelog.ChangeLogDto;
+import com.fource.hrbank.dto.changelog.DiffsDto;
 import com.fource.hrbank.dto.changelog.CursorPageResponseChangeLogDto;
+import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
+import java.time.Instant;
 import java.util.List;
 
 public interface ChangeLogService {
 
-    ChangeLogDto findById(Long id);
-
-    CursorPageResponseChangeLogDto findAll(
+    CursorPageResponseChangeLogDto getAllChangeLogs(
         String employeeNumber,
-        String type,
+        ChangeType type,
         String memo,
         String ipAddress,
         Long idAfter,
         String cursor,
         int size,
         String sortField,
-        String sortDirection
+        String sortDirection,
+        Instant atFrom,
+        Instant atTo
     );
 
-    List<ChangeDetailDto> findDiffs(Long id);
+    List<DiffsDto> findDiffs(Long changeLogId);
 
-    ChangeLogDto create(ChangeLogCreateRequestDto requestDto);
+    ChangeLog create(Employee employee, ChangeType type, String memo,
+        List<DiffsDto> diffsDtos);
 
-    public ChangeLogDto create(Employee employee, String employeeNumber, ChangeType changeType, String memo, String ipAddress, List<ChangeDetailDto> changeDetails);
+    List<DiffsDto> detectChanges(Employee employee, EmployeeUpdateRequest request,
+        Department department);
+
+    void saveChangeLogWithDetails(ChangeLog changeLog, List<DiffsDto> dtos);
 }

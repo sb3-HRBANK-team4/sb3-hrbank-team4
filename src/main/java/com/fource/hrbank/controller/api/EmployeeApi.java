@@ -168,4 +168,27 @@ public interface EmployeeApi {
         @Parameter(description = "프로필 이미지")
         @RequestPart(value = "profile", required = false) MultipartFile profile
     );
+
+    @Operation(
+        summary = "직원 삭제",
+        description = "직원을 삭제합니다.",
+        operationId = "deleteEmployee"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "204", description = "삭제 성공"
+        ),
+        @ApiResponse(
+            responseCode = "404", description = "직원을 찾을 수 없음",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "500", description = "서버 오류",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+        )
+    })
+    ResponseEntity<Void> deleteEmployee(
+        @Parameter(required = true, description = "직원 ID") Long id
+    );
+
 }

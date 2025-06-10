@@ -11,7 +11,6 @@ import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -68,8 +67,8 @@ public class BackupController implements BackupApi {
         BackupDto updateBackupDto = backupService.backup(createBackupDto);  // 데이터 백업 수행
 
         return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(updateBackupDto);
+            .status(HttpStatus.CREATED)
+            .body(updateBackupDto);
     }
 
     /**
@@ -79,12 +78,13 @@ public class BackupController implements BackupApi {
      * @return 가장 최근 백업 정보
      */
     @GetMapping("/latest")
-    public ResponseEntity<BackupDto> getLatestBackup(@RequestParam(required = false) BackupStatus status) {
+    public ResponseEntity<BackupDto> getLatestBackup(
+        @RequestParam(required = false) BackupStatus status) {
 
         BackupDto backupDto = backupService.findLatestByStatus(status);
 
         return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(backupDto);
+            .status(HttpStatus.OK)
+            .body(backupDto);
     }
 }

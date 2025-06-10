@@ -1,41 +1,43 @@
 package com.fource.hrbank.service.employee;
 
-import com.fource.hrbank.domain.ChangeDetail;
+import com.fource.hrbank.annotation.Logging;
 import com.fource.hrbank.domain.ChangeLog;
 import com.fource.hrbank.domain.ChangeType;
 import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.domain.FileMetadata;
+import com.fource.hrbank.dto.changelog.DiffsDto;
 import com.fource.hrbank.dto.common.ResponseDetails;
 import com.fource.hrbank.dto.common.ResponseMessage;
-import com.fource.hrbank.dto.dashboard.EmployeeDistributionDto;
-import com.fource.hrbank.dto.dashboard.EmployeeTrendDto;
+import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
 import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
+import com.fource.hrbank.exception.DepartmentNotFoundException;
+import com.fource.hrbank.exception.DuplicateDepartmentException;
 import com.fource.hrbank.exception.DuplicateEmailException;
 import com.fource.hrbank.exception.EmployeeNotFoundException;
 import com.fource.hrbank.exception.FileIOException;
+import com.fource.hrbank.exception.InsufficientEmployeeDataException;
+import com.fource.hrbank.exception.InvalidStatFieldException;
 import com.fource.hrbank.mapper.EmployeeMapper;
-import com.fource.hrbank.repository.ChangeDetailRepository;
-import com.fource.hrbank.repository.ChangeLogRepository;
-import com.fource.hrbank.repository.DepartmentRepository;
-import com.fource.hrbank.repository.EmployeeRepository;
-import com.fource.hrbank.repository.EmployeeSpecification;
 import com.fource.hrbank.repository.FileMetadataRepository;
+import com.fource.hrbank.repository.department.DepartmentRepository;
+import com.fource.hrbank.repository.employee.EmployeeRepository;
+import com.fource.hrbank.repository.employee.EmployeeSpecification;
+import com.fource.hrbank.service.changelog.ChangeLogService;
 import com.fource.hrbank.service.storage.FileStorage;
 import com.fource.hrbank.util.IpUtils;
-import jakarta.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -47,11 +49,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * 직원 관련 비즈니스 로직을 당담하는 클래스입니다.
+ * 직원 관련 비즈니스 로직을 담당하는 클래스입니다.
  */
 @Slf4j
 @RequiredArgsConstructor
 @Service
+@Logging
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
@@ -59,8 +62,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final DepartmentRepository departmentRepository;
     private final FileStorage fileStorage;
     private final FileMetadataRepository fileMetadataRepository;
-    private final ChangeLogRepository changeLogRepository;
-    private final ChangeDetailRepository changeDetailRepository;
+    private final ChangeLogService changeLogService;
 
     /**
      * 직원 등록 이메일 중복 검증 프로필 이미지 파일 저장 (선택) 사원번호 자동 생성 (형식: EMP-YYYY-timestamp) 직원 상태를 ACTIVE로 초기화 변경
@@ -82,6 +84,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         // 프로필 이미지 저장 처리
         if (profileImage.isPresent() && !profileImage.get().isEmpty()) {
             MultipartFile file = profileImage.get();
+            log.info("프로필 이미지 저장 - name: {}", profileImage.get().getOriginalFilename());
 
             // 메타정보 생성 및 저장
             FileMetadata metadata = new FileMetadata(
@@ -90,20 +93,22 @@ public class EmployeeServiceImpl implements EmployeeService {
                 file.getSize()
             );
             FileMetadata savedMetadata = fileMetadataRepository.save(metadata);
+            log.info("메타데이터 저장 완료 - ID: {}", savedMetadata.getId());
 
             // 바이트 저장
             try {
                 fileStorage.put(savedMetadata.getId(), file.getBytes());
                 profile = savedMetadata;
             } catch (IOException e) {
-                throw new FileIOException(ResponseMessage.FILE_SAVE_ERROR_MESSAGE, ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
+                log.error("파일 저장 실패: {}", e.getMessage());
+                throw new FileIOException(ResponseMessage.FILE_SAVE_ERROR_MESSAGE,
+                    ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
             }
         }
 
         // 부서 조회
         Department department = departmentRepository.findById(request.departmentId())
-            .orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 부서 ID입니다: " + request.departmentId()));
+            .orElseThrow(() -> new DuplicateDepartmentException());
 
         //사원번호 예시 : EMP-2025-158861485055084
         String employeeNumber = String.format(
@@ -126,17 +131,17 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         Employee savedEmployee = employeeRepository.save(employee);
 
-        ChangeLog changeLog = new ChangeLog(
-            savedEmployee,
-            Instant.now(),
-            ipAddress,
-            ChangeType.CREATED,
-            request.memo(),
-            null);
-        ChangeLog savedChangeLog = changeLogRepository.save(changeLog);
+        // 정보 수정 이력 상세 조회_ 생성시 수정 전 값으로
+        List<DiffsDto> diffs = new ArrayList<>();
+        diffs.add(new DiffsDto("이름", null, request.name()));
+        diffs.add(new DiffsDto("이메일", null, request.email()));
+        diffs.add(new DiffsDto("부서명", null, department.getName()));
+        diffs.add(new DiffsDto("직함", null, request.position()));
+        diffs.add(new DiffsDto("입사일", null, request.hireDate().toString()));
+        diffs.add(new DiffsDto("상태", null, EmployeeStatus.ACTIVE.getLabel()));
 
-        log.info("변경 이력 저장 완료 - ChangeLog ID: {}, 직원 ID: {}, 타입: {}",
-            savedChangeLog.getId(), savedEmployee.getId(), ChangeType.CREATED);
+        ChangeLog changeLog = changeLogService.create(savedEmployee, ChangeType.CREATED, request.memo(), diffs);
+        changeLogService.saveChangeLogWithDetails(changeLog, diffs);
 
         return employeeMapper.toDto(savedEmployee);
     }
@@ -249,7 +254,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         //3. 부서 조회 및 존재 여부 검증
         Department department = departmentRepository.findById(request.departmentId())
-            .orElseThrow(() -> new EntityNotFoundException("부서가 존재하지 않습니다."));
+            .orElseThrow(() -> new DepartmentNotFoundException());
 
         //4. 프로필 이미지 처리
         FileMetadata profile = employee.getProfile(); // 기존 프로필 유지
@@ -266,57 +271,16 @@ public class EmployeeServiceImpl implements EmployeeService {
                 fileStorage.put(savedMetadata.getId(), file.getBytes());
                 profile = savedMetadata;
             } catch (IOException e) {
-                throw new FileIOException(ResponseMessage.FILE_SAVE_ERROR_MESSAGE, ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
+                throw new FileIOException(ResponseMessage.FILE_SAVE_ERROR_MESSAGE,
+                    ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
             }
         }
 
-        //5. IP 주소 추출
-        String ipAddress = IpUtils.getCurrentClientIp();
+        List<DiffsDto> diffs = changeLogService.detectChanges(employee, request, department);
+        ChangeLog changeLog = changeLogService.create(employee, ChangeType.UPDATED, request.memo(), diffs);
+        changeLogService.saveChangeLogWithDetails(changeLog, diffs);
 
-        //6. 변경사항 감지 후 ChangeLog, ChangeDetail 엔티티 생성
-        //이 부분을 changeLogService.create(employee, request, request.memo()); 이런 식으로 개선?
-        List<ChangeDetail> details = new ArrayList<>();
-
-        if (!Objects.equals(employee.getName(), request.name())) {
-            details.add(new ChangeDetail(null, "name", employee.getName(), request.name()));
-        }
-        if (!Objects.equals(employee.getEmail(), request.email())) {
-            details.add(new ChangeDetail(null, "email", employee.getEmail(), request.email()));
-        }
-        if (!Objects.equals(employee.getDepartment().getId(), request.departmentId())) {
-            details.add(new ChangeDetail(null, "department",
-                employee.getDepartment().getName(), department.getName()));
-        }
-        if (!Objects.equals(employee.getPosition(), request.position())) {
-            details.add(
-                new ChangeDetail(null, "position", employee.getPosition(), request.position()));
-        }
-        if (!Objects.equals(employee.getHireDate(), request.hireDate())) {
-            details.add(new ChangeDetail(null, "hireDate",
-                employee.getHireDate().toString(), request.hireDate().toString()));
-        }
-        if (!Objects.equals(employee.getStatus(), request.status())) {
-            details.add(new ChangeDetail(null, "status",
-                employee.getStatus().getLabel(), request.status().getLabel()));
-        }
-
-        log.info("직원 수정 요청 - IP: {}, 직원 ID: {}, 변경 필드 수: {}",
-            ipAddress, id, details.size());
-
-        //7. 변경사항이 있을 때만 이력 저장
-        if (!details.isEmpty()) {
-            ChangeLog changeLog = new ChangeLog(employee, Instant.now(), ipAddress,
-                ChangeType.UPDATED, request.memo(), null);
-            ChangeLog savedChangeLog = changeLogRepository.save(changeLog);
-
-            // ChangeDetail에 changeLog 설정
-            details.forEach(detail -> detail.setChangeLog(savedChangeLog));
-            changeDetailRepository.saveAll(details);
-
-            log.info("변경 이력 저장 완료 - ChangeLog ID: {}", savedChangeLog.getId());
-        }
-
-        //8. 실제 업데이트
+        //7. 실제 업데이트
         employee.update(
             request.name(),
             request.email(),
@@ -330,34 +294,118 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employeeMapper.toDto(employee);
     }
 
+//    @Override
+//    public long getEmployeeCount(EmployeeStatus status, LocalDate from, LocalDate to) {
+//        return employeeRepository.countByFilters(status, from, to);
+//    }
+
+//    @Transactional(readOnly = true)
+//    @Override
+//    public List<EmployeeDistributionDto> getEmployeeDistribution(String groupBy, EmployeeStatus status) {
+//        long totalCount = employeeRepository.countAllByStatus(status);
+//        if (totalCount == 0) return List.of();
+//
+//        List<Object[]> groupedCounts;
+//
+//        if (groupBy.equals("department")) {
+//            groupedCounts = employeeRepository.countByDepartmentGroup(status);
+//        } else if (groupBy.equals("position")) {
+//            groupedCounts = employeeRepository.countByPositionGroup(status);
+//        } else {
+//            throw new IllegalArgumentException("지원하지 않는 그룹화 기준입니다: " + groupBy);
+//        }
+//
+//        return groupedCounts.stream()
+//            .map(row -> {
+//                String groupKey = (String) row[0];
+//                long count = (long) row[1];
+//                double percentage = (count * 100.0) / totalCount;
+//                return new EmployeeDistributionDto(groupKey, (int) count, Math.round(percentage * 100.0) / 100.0);
+//            })
+//            .toList();
+    /**
+     * id로 직원 삭제, 삭제 이력과 상세변경 내용도 함께 저장됨
+     *
+     * @param id
+     */
+    @Transactional
     @Override
-    public long getEmployeeCount(EmployeeStatus status, LocalDate from, LocalDate to) {
-        return employeeRepository.countByFilters(status, from, to);
-    }
+    public void deleteById(Long id) {
+        Employee employee = employeeRepository.findById(id)
+            .orElseThrow(EmployeeNotFoundException::new);
 
-    @Transactional(readOnly = true)
-    @Override
-    public List<EmployeeDistributionDto> getEmployeeDistribution(String groupBy, EmployeeStatus status) {
-        long totalCount = employeeRepository.countAllByStatus(status);
-        if (totalCount == 0) return List.of();
+        FileMetadata profile = employee.getProfile();
+        if (profile != null) {
+            try {
+                // DB에서 메타데이터 삭제
+                fileMetadataRepository.delete(profile);
 
-        List<Object[]> groupedCounts;
-
-        if (groupBy.equals("department")) {
-            groupedCounts = employeeRepository.countByDepartmentGroup(status);
-        } else if (groupBy.equals("position")) {
-            groupedCounts = employeeRepository.countByPositionGroup(status);
+            } catch (Exception e) {
+                log.warn("프로필 이미지 삭제 실패: {}", e.getMessage());
+            }
         } else {
-            throw new IllegalArgumentException("지원하지 않는 그룹화 기준입니다: " + groupBy);
+            log.info("삭제할 프로필 이미지가 없습니다.");
         }
 
-        return groupedCounts.stream()
-            .map(row -> {
-                String groupKey = (String) row[0];
-                long count = (long) row[1];
-                double percentage = (count * 100.0) / totalCount;
-                return new EmployeeDistributionDto(groupKey, (int) count, Math.round(percentage * 100.0) / 100.0);
-            })
-            .toList();
+        List<DiffsDto> diffs = new ArrayList<>();
+        diffs.add(new DiffsDto("이름", employee.getName(), null));
+        diffs.add(new DiffsDto("이메일", employee.getEmail(), null));
+        diffs.add(new DiffsDto("부서명", employee.getDepartment().getName(), null));
+        diffs.add(new DiffsDto("직함", employee.getPosition(), null));
+        diffs.add(new DiffsDto("입사일", employee.getHireDate().toString(), null));
+        diffs.add(new DiffsDto("상태", employee.getStatus().getLabel(), null));
+
+        ChangeLog changeLog = changeLogService.create(employee, ChangeType.DELETED, "직원 삭제", diffs);
+        changeLogService.saveChangeLogWithDetails(changeLog, diffs);
+
+        log.info("직원 삭제 완료 - ID: {}", id);
+        employeeRepository.delete(employee);
+    }
+
+    /**
+     * 지정된 그룹 기준을으로 직원 분포 통계
+     *
+     * @param groupBy 그룹 기준 필드 (예: 부서명, 직함 등)
+     * @param status 직원 상태 필터 (enum값, 예: ACTIVE)
+     * @return 그룹별 분포 결과 리스트 (비율 포함)
+     */
+    @Transactional(readOnly = true)
+    @Override
+    public List<EmployeeDistributionDto> getEmployeeDistribution(String groupBy,
+        EmployeeStatus status) {
+        try {
+            // 전체 직원 수 조회 (퍼센티지 계산용)
+            long totalCount = employeeRepository.countByStatus(status);
+
+            // 직원 수 없을 때
+            if (totalCount == 0) {
+                throw new InsufficientEmployeeDataException();
+            }
+
+            // 그룹별 직원 수 조회
+            List<EmployeeDistributionDto> distributions = employeeRepository.getDistributionByGroup(
+                groupBy, status);
+
+            if (distributions.isEmpty()) {
+                log.warn("분포 데이터 없음 groupBy: {}, status: {}, totalCount: {}",
+                    groupBy, status, totalCount);
+                throw new InsufficientEmployeeDataException();
+            }
+
+            // 퍼센티지 계산
+            return distributions.stream()
+                .map(dist -> new EmployeeDistributionDto(
+                    dist.groupKey(),
+                    dist.count(),
+                    totalCount > 0 ? (double) dist.count() / totalCount * 100.0 : 0.0
+                ))
+                .collect(Collectors.toList());
+
+        } catch (InsufficientEmployeeDataException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("직원 분포 조회 중 오류 발생. groupBy: {}, status: {}", groupBy, status, e);
+            throw new InvalidStatFieldException();
+        }
     }
 }
