@@ -1,8 +1,10 @@
 package com.fource.hrbank.controller;
 
 import com.fource.hrbank.domain.ChangeType;
+import com.fource.hrbank.dto.changelog.ChangeLogDto;
 import com.fource.hrbank.dto.changelog.DiffsDto;
 import com.fource.hrbank.dto.changelog.CursorPageResponseChangeLogDto;
+import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.service.changelog.ChangeLogService;
 import java.time.Instant;
 import java.util.List;
@@ -22,7 +24,7 @@ public class ChangeLogController{
     private final ChangeLogService changeLogService;
 
     @GetMapping
-    public ResponseEntity<CursorPageResponseChangeLogDto> getAllChangeLogs(
+    public ResponseEntity<CursorPageResponse<ChangeLogDto>> getAllChangeLogs(
         @RequestParam(required = false) String employeeNumber,
         @RequestParam(required = false) ChangeType type,
         @RequestParam(required = false) String memo,
@@ -35,7 +37,7 @@ public class ChangeLogController{
         @RequestParam(required = false) Instant atFrom,
         @RequestParam(required = false) Instant atTo
     ) {
-        CursorPageResponseChangeLogDto response  = changeLogService.getAllChangeLogs(
+        CursorPageResponse<ChangeLogDto> response  = changeLogService.getAllChangeLogs(
             employeeNumber, type, memo, ipAddress, idAfter, cursor, size, sortField, sortDirection, atFrom, atTo
         );
         return ResponseEntity.ok(response);
