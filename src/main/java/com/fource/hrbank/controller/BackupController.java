@@ -3,7 +3,6 @@ package com.fource.hrbank.controller;
 import com.fource.hrbank.controller.api.BackupApi;
 import com.fource.hrbank.domain.BackupStatus;
 import com.fource.hrbank.dto.backup.BackupDto;
-import com.fource.hrbank.dto.backup.CursorPageResponseBackupDto;
 import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.service.backup.BackupService;
 import com.fource.hrbank.service.storage.FileStorage;

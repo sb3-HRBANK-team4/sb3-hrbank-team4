@@ -2,7 +2,6 @@ package com.fource.hrbank.service.backup;
 
 import com.fource.hrbank.domain.BackupStatus;
 import com.fource.hrbank.dto.backup.BackupDto;
-import com.fource.hrbank.dto.backup.CursorPageResponseBackupDto;
 import com.fource.hrbank.dto.common.CursorPageResponse;
 
 import java.time.Instant;

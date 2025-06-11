@@ -2,7 +2,6 @@ package com.fource.hrbank.repository.change;
 
 import com.fource.hrbank.domain.ChangeType;
 import com.fource.hrbank.dto.changelog.ChangeLogDto;
-import com.fource.hrbank.dto.changelog.CursorPageResponseChangeLogDto;
 import com.fource.hrbank.dto.common.CursorPageResponse;
 
 import java.time.Instant;

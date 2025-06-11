@@ -3,7 +3,6 @@ package com.fource.hrbank.controller;
 import com.fource.hrbank.domain.ChangeType;
 import com.fource.hrbank.dto.changelog.ChangeLogDto;
 import com.fource.hrbank.dto.changelog.DiffsDto;
-import com.fource.hrbank.dto.changelog.CursorPageResponseChangeLogDto;
 import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.service.changelog.ChangeLogService;
 import java.time.Instant;
