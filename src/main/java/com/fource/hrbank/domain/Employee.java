@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 @Entity
@@ -29,6 +30,7 @@ public class Employee extends BaseEntity {
     @JoinColumn(name = "profile_image_id")
     private FileMetadata profile;
 
+    @Setter
     @ManyToOne
     @JoinColumn(name = "department_id")
     private Department department;
@@ -54,7 +56,6 @@ public class Employee extends BaseEntity {
 
     @Column(name = "updated_at")
     private Instant updatedAt;
-
 
     public void update(String newName, String newEmail, Department newDepartment,
         String newPosition, LocalDate newHireDate,

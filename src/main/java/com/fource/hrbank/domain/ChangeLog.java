@@ -28,10 +28,6 @@ import lombok.ToString;
 @Table(name = "tbl_change_log")
 public class ChangeLog extends BaseEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employee_id")
-    private Employee employee;
-
     @Column(name = "employee_number")
     private String employeeNumber;
 

@@ -6,13 +6,11 @@ import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
 import com.fource.hrbank.dto.employee.EmployeeDto;
-import com.fource.hrbank.dto.employee.EmployeeTrendDto;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.fource.hrbank.service.dashboard.DashboardService;
 import com.fource.hrbank.service.employee.EmployeeService;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -107,18 +105,13 @@ public class EmployeeController implements EmployeeApi {
         @RequestParam(required = false, defaultValue = "department") String groupBy,
         @RequestParam(required = false, defaultValue = "ACTIVE") EmployeeStatus status
     ) {
-        // 지원하지 않는 그룹화 기준 검증
-        if (!groupBy.equals("department") && !groupBy.equals("position")) {
-            throw new IllegalArgumentException("지원하지 않는 그룹화 기준입니다: " + groupBy);
-        }
-
-        List<EmployeeDistributionDto> distribution = employeeService.getEmployeeDistribution(
+        List<EmployeeDistributionDto> distribution = dashboardService.getEmployeeDistribution(
             groupBy, status);
         return ResponseEntity.ok(distribution);
     }
 
     @GetMapping("/stats/trend")
-    public ResponseEntity<List<EmployeeTrendDto>> getEmployeeTrend(
+    public ResponseEntity<List<com.fource.hrbank.dto.employee.EmployeeTrendDto>> getEmployeeTrend(
         @RequestParam(name = "from", required = false)
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
 
@@ -127,7 +120,7 @@ public class EmployeeController implements EmployeeApi {
 
         @RequestParam(name = "unit", defaultValue = "month") String unit
     ) {
-        List<EmployeeTrendDto> trend = dashboardService.getEmployeeTrend(from, to, unit);
+        List<com.fource.hrbank.dto.employee.EmployeeTrendDto> trend = dashboardService.getEmployeeTrend(from, to, unit);
         return ResponseEntity.ok(trend);
     }
 
