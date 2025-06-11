@@ -50,6 +50,13 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>,
     WHERE (:status IS NULL OR e.status = :status)
 """)
     long countAllByStatus(@Param("status") EmployeeStatus status);
+
+    @Query("""
+  SELECT COUNT(e)
+  FROM Employee e
+  WHERE e.status = 'ACTIVE' AND e.hireDate <= :date
+""")
+    long countByDateRange(@Param("date") LocalDate date);
 }
 
 
