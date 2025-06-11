@@ -14,6 +14,7 @@ import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,23 +46,28 @@ public class DepartmentServiceTest {
     @Autowired
     private EntityManager entityManager;
 
+    @Value("${spring.profiles.active}")
+    private String profile;
+
     @BeforeEach
     void setUp() {
-        // 테이블 삭제
-        employeeRepository.deleteAll();
-        departmentRepository.deleteAll();
+        if (!profile.equals("local")) {
+            // 테이블 삭제
+            employeeRepository.deleteAll();
+            departmentRepository.deleteAll();
 
-        // 시퀀스를 "테이블의 MAX(id) + 1"로 세팅
-        jdbcTemplate.execute("""
+            // 시퀀스를 "테이블의 MAX(id) + 1"로 세팅
+            jdbcTemplate.execute("""
                 SELECT setval('tbl_department_id_seq', 
                               COALESCE((SELECT MAX(id) FROM tbl_department), 0) + 1,
                               false)
             """);
-        jdbcTemplate.execute("""
+            jdbcTemplate.execute("""
                 SELECT setval('tbl_employees_id_seq', 
                               COALESCE((SELECT MAX(id) FROM tbl_employees), 0) + 1,
                               false)
             """);
+        }
     }
 
     @Test

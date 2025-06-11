@@ -24,6 +24,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -50,11 +51,16 @@ class EmployeeServiceTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Value("${spring.profiles.active}")
+    private String profile;
+
     @BeforeEach
     void setUp() {
-        //시퀀스 초기화
-        jdbcTemplate.execute(
-            "TRUNCATE TABLE tbl_change_detail, tbl_change_log, tbl_employees RESTART IDENTITY CASCADE");
+        if (!profile.equals("local")) {
+            //시퀀스 초기화
+            jdbcTemplate.execute(
+                    "TRUNCATE TABLE tbl_change_detail, tbl_change_log, tbl_employees RESTART IDENTITY CASCADE");
+        }
     }
 
     @Test
