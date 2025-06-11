@@ -26,7 +26,7 @@ public interface ChangeLogService {
 
     List<DiffsDto> findDiffs(Long changeLogId);
 
-    ChangeLog create(Employee employee, ChangeType type, String memo,
+    ChangeLog create(String employeeNumber, ChangeType type, String memo,
         List<DiffsDto> diffsDtos);
 
     List<DiffsDto> createEmployeeDiffs(Employee before, Employee after);

@@ -109,18 +109,18 @@ public class ChangeLogServiceImpl implements ChangeLogService {
     /**
      * 변경 로그를 생성하고 저장
      *
-     * @param employee  직원 객체
+     * @param employeeNumber  사원 번호
      * @param type      변경 유형
      * @param memo      변경 메모
      * @param diffsDtos 변경 상세 항목 리스트
      * @return 저장된 변경 로그
      */
     @Override
-    public ChangeLog create(Employee employee, ChangeType type, String memo, List<DiffsDto> diffsDtos) {
+    public ChangeLog create(String employeeNumber, ChangeType type, String memo, List<DiffsDto> diffsDtos) {
         String ipAddress = IpUtils.getCurrentClientIp();
 
         ChangeLog changeLog = new ChangeLog(
-            employee.getEmployeeNumber(),
+            employeeNumber,
             Instant.now(),
             ipAddress,
             type,
@@ -141,9 +141,9 @@ public class ChangeLogServiceImpl implements ChangeLogService {
             changeDetailRepository.saveAll(changeDetails);
 
             log.info("변경 로그 저장 완료 - Employee: {}, Type: {}, Changes: {}",
-                employee.getEmployeeNumber(), type, diffsDtos.size());
+                employeeNumber, type, diffsDtos.size());
         } else {
-            log.debug("변경사항이 없어 상세 내역은 저장하지 않습니다. Employee ID: {}", employee.getId());
+            log.debug("변경사항이 없어 상세 내역은 저장하지 않습니다. EmployeeNumber: {}", employeeNumber);
         }
 
         return savedChangeLog;

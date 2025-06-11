@@ -84,7 +84,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee savedEmployee = employeeRepository.save(employee);
 
         List<DiffsDto> diffs = changeLogService.createEmployeeDiffs(null, savedEmployee);
-        changeLogService.create(savedEmployee, ChangeType.CREATED, request.memo(), diffs);
+        changeLogService.create(savedEmployee.getEmployeeNumber(), ChangeType.CREATED, request.memo(), diffs);
 
         return employeeMapper.toDto(savedEmployee);
     }
@@ -163,7 +163,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee afterEmployee = createUpdatedEmployee(employee, request, department, profile);
         List<DiffsDto> diffs = changeLogService.createEmployeeDiffs(employee, afterEmployee);
 
-        changeLogService.create(employee, ChangeType.UPDATED, request.memo(), diffs);
+        changeLogService.create(employee.getEmployeeNumber(), ChangeType.UPDATED, request.memo(), diffs);
 
         //실제 업데이트
         employee.update(request.name(), request.email(), department,
@@ -180,16 +180,30 @@ public class EmployeeServiceImpl implements EmployeeService {
      *
      * @param id 삭제할 직원의 고유 ID
      */
+    @Transactional
     @Override
     public void deleteById(Long id) {
-       Employee employee = findEmployeeById(id);
+        Employee employee = findEmployeeById(id);
 
-       deleteProfileImageIfExists(employee);
+        List<DiffsDto> diffs = changeLogService.createEmployeeDiffs(employee, null);
+        changeLogService.create(employee.getEmployeeNumber(), ChangeType.DELETED, "직원 삭제", diffs);
 
-       List<DiffsDto> diffs = changeLogService.createEmployeeDiffs(employee, null);
-       changeLogService.create(employee, ChangeType.DELETED, "직원 삭제", diffs);
+        employeeRepository.delete(employee);
 
-       employeeRepository.delete(employee);
+        FileMetadata profile = employee.getProfile();
+        if (profile != null) {
+            try {
+                // DB에서 메타데이터 삭제
+                fileMetadataRepository.delete(profile);
+                log.info("프로필 이미지 삭제 완료 - ID: {}", profile.getId());
+            } catch (Exception e) {
+                log.warn("프로필 이미지 삭제 실패: {}", e.getMessage());
+            }
+        } else {
+            log.info("삭제할 프로필 이미지가 없습니다.");
+        }
+
+
     }
 
 
@@ -239,7 +253,6 @@ public class EmployeeServiceImpl implements EmployeeService {
                 ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
         }
     }
-
 
     // 사원 번호 생성, 예시 : EMP-2025-158861485055084
     private String generateEmployeeNumber() {
@@ -324,21 +337,5 @@ public class EmployeeServiceImpl implements EmployeeService {
             request.status(),
             Instant.now()
         );
-    }
-
-    // 프로필 이미지 삭제
-    private void deleteProfileImageIfExists(Employee employee) {
-        FileMetadata profile = employee.getProfile();
-        if (profile != null) {
-            try {
-                // DB에서 메타데이터 삭제
-                fileMetadataRepository.delete(profile);
-                log.info("프로필 이미지 삭제 완료 - ID: {}", profile.getId());
-            } catch (Exception e) {
-                log.warn("프로필 이미지 삭제 실패: {}", e.getMessage());
-            }
-        } else {
-            log.info("삭제할 프로필 이미지가 없습니다.");
-        }
     }
 }
