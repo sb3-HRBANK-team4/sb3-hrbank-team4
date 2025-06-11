@@ -4,7 +4,6 @@ import com.fource.hrbank.controller.api.EmployeeApi;
 import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.dto.dashboard.EmployeeTrendDto;
-import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
 import com.fource.hrbank.dto.employee.EmployeeDto;

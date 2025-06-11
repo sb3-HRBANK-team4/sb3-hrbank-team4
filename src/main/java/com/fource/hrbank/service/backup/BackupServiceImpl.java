@@ -5,7 +5,6 @@ import com.fource.hrbank.domain.BackupLog;
 import com.fource.hrbank.domain.BackupStatus;
 import com.fource.hrbank.domain.FileMetadata;
 import com.fource.hrbank.dto.backup.BackupDto;
-import com.fource.hrbank.dto.backup.CursorPageResponseBackupDto;
 import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.dto.common.ResponseDetails;
 import com.fource.hrbank.dto.common.ResponseMessage;
