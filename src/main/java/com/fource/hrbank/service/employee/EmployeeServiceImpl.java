@@ -171,8 +171,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Transactional(readOnly = true)
     @Override
     public CursorPageResponseEmployeeDto findAll(String nameOrEmail, String employeeNumber,
-        String departmentName,
-        String position, EmployeeStatus status, String sortField, String sortDirection,
+        String departmentName, String position, EmployeeStatus status, LocalDate hireDateFrom, LocalDate hireDateTo, String sortField, String sortDirection,
         String cursor, Long idAfter, int size) {
 
         // 1. 정렬 방향
@@ -188,7 +187,10 @@ public class EmployeeServiceImpl implements EmployeeService {
             .where(EmployeeSpecification.nameOrEmailLike(nameOrEmail))
             .and(EmployeeSpecification.departmentContains(departmentName))
             .and(EmployeeSpecification.positionContains(position))
+            .and(EmployeeSpecification.employeeNumber(employeeNumber))
             .and(EmployeeSpecification.statusEquals(status))
+            .and(EmployeeSpecification.hireDateFrom(hireDateFrom))
+            .and(EmployeeSpecification.hireDateTo(hireDateTo))
             .and(EmployeeSpecification.buildCursorSpec(sortField, cursor, idAfter));
 
         // 4. 데이터 조회
