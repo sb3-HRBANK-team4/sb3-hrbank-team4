@@ -127,7 +127,7 @@ public class BackupServiceTest {
     void findLatestByStatus_정상조회_최근백업반환() {
         // given
         BackupLog oldLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(3600), Instant.now().minusSeconds(3590), BackupStatus.COMPLETED, null);
-        BackupLog newLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(1800), Instant.now().minusSeconds(1790), BackupStatus.COMPLETED, null);
+        BackupLog newLog = new BackupLog("127.0.0.1", Instant.now(), Instant.now(), BackupStatus.COMPLETED, null);
         List<BackupLog> logs = List.of(oldLog, newLog);
         backupLogRepository.saveAll(logs);
 
@@ -142,7 +142,7 @@ public class BackupServiceTest {
     }
 
     @Test
-    void findLatestByStatus_조회결과없음_예외발생() {
+    void findLatestByStatus_조회결과없음_null값반환() {
         // given
         BackupLog oldLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(3600), Instant.now().minusSeconds(3590), BackupStatus.COMPLETED, null);
         BackupLog newLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(1800), Instant.now().minusSeconds(1790), BackupStatus.COMPLETED, null);
@@ -150,9 +150,7 @@ public class BackupServiceTest {
         backupLogRepository.saveAll(logs);
 
         // when & then
-        assertThatThrownBy(() -> backupService.findLatestByStatus(BackupStatus.SKIPPED))
-                .isInstanceOf(BackupLogNotFoundException.class)
-                .hasMessage(ResponseMessage.BACKUPLOG_NOT_FOUND_ERROR_MESSAGE);
+        assertThat(backupService.findLatestByStatus(BackupStatus.SKIPPED)).isNull();
     }
 
     @Test
