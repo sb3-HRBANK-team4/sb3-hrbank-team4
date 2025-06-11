@@ -75,7 +75,7 @@ public class EmployeeController implements EmployeeApi {
         @RequestParam(defaultValue = "asc") String sortDirection
     ) {
         CursorPageResponse<EmployeeDto> employees = employeeService.findAll(
-            nameOrEmail, employeeNumber, departmentName, position, status, sortField, sortDirection,
+            nameOrEmail, employeeNumber, departmentName, position, status, hireDateFrom, hireDateTo, sortField, sortDirection,
             cursor, idAfter, size
         );
 

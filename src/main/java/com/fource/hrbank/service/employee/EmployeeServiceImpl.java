@@ -12,7 +12,6 @@ import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.dto.common.ResponseDetails;
 import com.fource.hrbank.dto.common.ResponseMessage;
 import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
-import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
@@ -173,7 +172,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public CursorPageResponse<EmployeeDto> findAll(String nameOrEmail, String employeeNumber,
                                       String departmentName,
-                                      String position, EmployeeStatus status, String sortField, String sortDirection,
+                                      String position, EmployeeStatus status, LocalDate hireDateFrom, LocalDate hireDateTo, String sortField, String sortDirection,
                                       String cursor, Long idAfter, int size) {
 
         // 1. 정렬 방향
