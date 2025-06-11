@@ -21,7 +21,7 @@ public interface EmployeeService {
 
     public CursorPageResponseEmployeeDto findAll(
         String nameOrEmail, String employeeNumber, String departmentName, String position,
-        EmployeeStatus status,
+        EmployeeStatus status, LocalDate hireDateFrom, LocalDate hireDateTo,
         String sortField, String sortDirection, String cursor, Long idAfter, int size);
 
     public EmployeeDto update(Long employeeId, EmployeeUpdateRequest request,

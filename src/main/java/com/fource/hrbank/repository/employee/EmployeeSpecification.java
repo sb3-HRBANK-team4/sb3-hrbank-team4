@@ -25,6 +25,32 @@ public class EmployeeSpecification {
         };
     }
 
+    public static Specification<Employee> employeeNumber(String employeeNumber) {
+        return (root, query, cb) -> {
+            if (employeeNumber == null || employeeNumber.isBlank()) {
+                return null;
+            }
+            String like = "%" + employeeNumber + "%";
+            return cb.or(
+                    cb.like(root.get("employeeNumber"), like)
+            );
+        };
+    }
+
+    public static Specification<Employee> hireDateFrom(LocalDate from) {
+        return (root, query, cb) -> {
+            if (from == null) return null;
+            return cb.greaterThanOrEqualTo(root.get("hireDate"), from);
+        };
+    }
+
+    public static Specification<Employee> hireDateTo(LocalDate to) {
+        return (root, query, cb) -> {
+            if (to == null) return null;
+            return cb.lessThanOrEqualTo(root.get("hireDate"), to);
+        };
+    }
+
     public static Specification<Employee> departmentContains(String department) {
         return (root, query, cb) -> {
             if (department == null || department.isBlank()) {
