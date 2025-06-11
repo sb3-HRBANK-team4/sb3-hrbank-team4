@@ -27,7 +27,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>,
     @Query("""
     SELECT e.department.name, COUNT(e)
     FROM Employee e
-    WHERE e.deleted = false AND (:status IS NULL OR e.status = :status)
+    WHERE (:status IS NULL OR e.status = :status)
     GROUP BY e.department.name
 """)
     List<Object[]> countByDepartmentGroup(@Param("status") EmployeeStatus status);
@@ -35,7 +35,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>,
     @Query("""
     SELECT e.position, COUNT(e)
     FROM Employee e
-    WHERE e.deleted = false AND (:status IS NULL OR e.status = :status)
+    WHERE (:status IS NULL OR e.status = :status)
     GROUP BY e.position
 """)
     List<Object[]> countByPositionGroup(@Param("status") EmployeeStatus status);
@@ -43,14 +43,14 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>,
     @Query("""
     SELECT COUNT(e)
     FROM Employee e
-    WHERE e.deleted = false AND (:status IS NULL OR e.status = :status)
+    WHERE (:status IS NULL OR e.status = :status)
 """)
     long countAllByStatus(@Param("status") EmployeeStatus status);
 
     @Query("""
       SELECT COUNT(e)
       FROM Employee e
-      WHERE e.deleted = false AND  e.status = 'ACTIVE' AND e.hireDate <= :date
+      WHERE e.status = 'ACTIVE' AND e.hireDate <= :date
     """)
     long countByDateRange(@Param("date") LocalDate date);
 }
