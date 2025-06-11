@@ -35,7 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
-application.yaml
 
 ##DS_Store##
 .DS_Store
@@ -45,3 +44,8 @@ application.yaml
 
 # 파일 추가
 .hrbank
+
+# 환경설정
+application.yaml
+application-local.yaml
+application-prod.yaml
