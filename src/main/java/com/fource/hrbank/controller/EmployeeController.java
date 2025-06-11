@@ -104,31 +104,26 @@ public class EmployeeController implements EmployeeApi {
         @RequestParam(required = false, defaultValue = "department") String groupBy,
         @RequestParam(required = false, defaultValue = "ACTIVE") EmployeeStatus status
     ) {
-        // 지원하지 않는 그룹화 기준 검증
-        if (!groupBy.equals("department") && !groupBy.equals("position")) {
-            throw new IllegalArgumentException("지원하지 않는 그룹화 기준입니다: " + groupBy);
-        }
-
-        List<EmployeeDistributionDto> distribution = employeeService.getEmployeeDistribution(
+        List<EmployeeDistributionDto> distribution = dashboardService.getEmployeeDistribution(
             groupBy, status);
         return ResponseEntity.ok(distribution);
     }
 
-    @GetMapping("/count")
-    public ResponseEntity<EmployeeTrendDto> getEmployeeCount(
-        @RequestParam(required = false) EmployeeStatus status,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
-    ) {
-        EmployeeTrendDto response = dashboardService.getEmployeeCount(status, fromDate, toDate);
-        return ResponseEntity.ok(response);
-    }
+//    @GetMapping("/count")
+//    public ResponseEntity<EmployeeTrendDto> getEmployeeCount(
+//        @RequestParam(required = false) EmployeeStatus status,
+//        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+//        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
+//    ) {
+//        EmployeeTrendDto response = dashboardService.getEmployeeCount(status, fromDate, toDate);
+//        return ResponseEntity.ok(response);
+//    }
 
     @GetMapping("/stats/trend")
     public ResponseEntity<List<EmployeeTrendDto>> getEmployeeTrend(
-        @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-        @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
-        @RequestParam("unit") String unit // 예: "month", "week"
+        @RequestParam(name = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+        @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+        @RequestParam(value = "unit", required = false) String unit // 예: "month", "week"
     ) {
         List<EmployeeTrendDto> trend = dashboardService.getEmployeeTrend(from, to, unit);
         return ResponseEntity.ok(trend);

@@ -2,11 +2,9 @@ package com.fource.hrbank.service.changelog;
 
 import com.fource.hrbank.domain.ChangeLog;
 import com.fource.hrbank.domain.ChangeType;
-import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
-import com.fource.hrbank.dto.changelog.DiffsDto;
 import com.fource.hrbank.dto.changelog.CursorPageResponseChangeLogDto;
-import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
+import com.fource.hrbank.dto.changelog.DiffsDto;
 import java.time.Instant;
 import java.util.List;
 
@@ -31,8 +29,5 @@ public interface ChangeLogService {
     ChangeLog create(Employee employee, ChangeType type, String memo,
         List<DiffsDto> diffsDtos);
 
-    List<DiffsDto> detectChanges(Employee employee, EmployeeUpdateRequest request,
-        Department department);
-
-    void saveChangeLogWithDetails(ChangeLog changeLog, List<DiffsDto> dtos);
+    List<DiffsDto> createEmployeeDiffs(Employee before, Employee after);
 }
