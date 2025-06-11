@@ -1,6 +1,7 @@
 package com.fource.hrbank.service.employee;
 
 import com.fource.hrbank.domain.EmployeeStatus;
+import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
 import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
@@ -19,7 +20,7 @@ public interface EmployeeService {
 
     public EmployeeDto findById(Long id);
 
-    public CursorPageResponseEmployeeDto findAll(
+    public CursorPageResponse<EmployeeDto> findAll(
         String nameOrEmail, String employeeNumber, String departmentName, String position,
         EmployeeStatus status, LocalDate hireDateFrom, LocalDate hireDateTo,
         String sortField, String sortDirection, String cursor, Long idAfter, int size);

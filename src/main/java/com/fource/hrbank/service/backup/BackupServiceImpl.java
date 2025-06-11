@@ -5,7 +5,7 @@ import com.fource.hrbank.domain.BackupLog;
 import com.fource.hrbank.domain.BackupStatus;
 import com.fource.hrbank.domain.FileMetadata;
 import com.fource.hrbank.dto.backup.BackupDto;
-import com.fource.hrbank.dto.backup.CursorPageResponseBackupDto;
+import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.dto.common.ResponseDetails;
 import com.fource.hrbank.dto.common.ResponseMessage;
 import com.fource.hrbank.dto.employee.EmployeeDto;
@@ -62,10 +62,10 @@ public class BackupServiceImpl implements BackupService {
      */
     @Override
     @Transactional(readOnly = true)
-    public CursorPageResponseBackupDto findAll(String worker, BackupStatus status,
-        Instant startedAtFrom,
-        Instant startedAtTo, Long idAfter, String cursor, int size, String sortField,
-        String sortDirection) {
+    public CursorPageResponse<BackupDto> findAll(String worker, BackupStatus status,
+                                      Instant startedAtFrom,
+                                      Instant startedAtTo, Long idAfter, String cursor, int size, String sortField,
+                                      String sortDirection) {
 
         Pageable pageable = PageRequest.of(0, size + 1);
 
@@ -81,7 +81,7 @@ public class BackupServiceImpl implements BackupService {
         Long totalElements = backupLogRepository.countByCondition(worker, startedAtFrom,
             startedAtTo, status);
 
-        return new CursorPageResponseBackupDto(
+        return new CursorPageResponse<BackupDto>(
             backupLogs.stream().map(backupLogMapper::toDto).collect(Collectors.toList()),
             nextCursor,
             nextIdAfter,

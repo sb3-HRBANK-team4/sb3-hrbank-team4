@@ -4,6 +4,7 @@ import com.fource.hrbank.controller.api.BackupApi;
 import com.fource.hrbank.domain.BackupStatus;
 import com.fource.hrbank.dto.backup.BackupDto;
 import com.fource.hrbank.dto.backup.CursorPageResponseBackupDto;
+import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.service.backup.BackupService;
 import com.fource.hrbank.service.storage.FileStorage;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,7 +35,7 @@ public class BackupController implements BackupApi {
      * @return 백업 로그 DTO 리스트 (HTTP 200 OK)
      */
     @GetMapping
-    public ResponseEntity<CursorPageResponseBackupDto> findAll(
+    public ResponseEntity<CursorPageResponse<BackupDto>> findAll(
         @RequestParam(required = false) String worker,
         @RequestParam(required = false) BackupStatus status,
         @RequestParam(required = false) Instant startedAtFrom,
@@ -45,7 +46,7 @@ public class BackupController implements BackupApi {
         @RequestParam String sortField,
         @RequestParam String sortDirection
     ) {
-        CursorPageResponseBackupDto cursorPageResponseBackupDto = backupService.findAll(worker,
+        CursorPageResponse<BackupDto> cursorPageResponseBackupDto = backupService.findAll(worker,
             status, startedAtFrom, startedAtTo, idAfter, cursor, size, sortField, sortDirection);
 
         return ResponseEntity

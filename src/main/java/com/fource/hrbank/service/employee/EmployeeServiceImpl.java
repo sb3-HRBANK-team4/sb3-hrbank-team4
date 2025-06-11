@@ -8,6 +8,7 @@ import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.domain.FileMetadata;
 import com.fource.hrbank.dto.changelog.DiffsDto;
+import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.dto.common.ResponseDetails;
 import com.fource.hrbank.dto.common.ResponseMessage;
 import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
@@ -170,9 +171,10 @@ public class EmployeeServiceImpl implements EmployeeService {
      */
     @Transactional(readOnly = true)
     @Override
-    public CursorPageResponseEmployeeDto findAll(String nameOrEmail, String employeeNumber,
-        String departmentName, String position, EmployeeStatus status, LocalDate hireDateFrom, LocalDate hireDateTo, String sortField, String sortDirection,
-        String cursor, Long idAfter, int size) {
+    public CursorPageResponse<EmployeeDto> findAll(String nameOrEmail, String employeeNumber,
+                                      String departmentName,
+                                      String position, EmployeeStatus status, String sortField, String sortDirection,
+                                      String cursor, Long idAfter, int size) {
 
         // 1. 정렬 방향
         Sort.Direction direction = Sort.Direction.fromOptionalString(sortDirection)
@@ -209,7 +211,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             hasNext ? extractCursorValue(sortField, content.get(content.size() - 1)) : null;
         Long nextId = hasNext ? content.get(content.size() - 1).id() : null;
 
-        return new CursorPageResponseEmployeeDto(
+        return new CursorPageResponse<EmployeeDto>(
             content,
             nextCursor,
             nextId,
