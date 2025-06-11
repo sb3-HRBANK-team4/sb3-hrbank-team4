@@ -1,7 +1,10 @@
 package com.fource.hrbank.controller.api;
 
+
+import com.fource.hrbank.domain.BackupStatus;
 import com.fource.hrbank.dto.backup.BackupDto;
-import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
+import com.fource.hrbank.dto.common.CursorPageResponse;
+import com.fource.hrbank.dto.common.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -9,15 +12,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.RequestParam;
 
-
-@Tag(name = "데이터 백업 관리", description = "데이터 백업 관리 API")
+@Tag(name = "데이터 백업 관리")
 public interface BackupApi {
 
     @Operation(
@@ -28,7 +30,7 @@ public interface BackupApi {
     @ApiResponses(value = {
         @ApiResponse(
             responseCode = "200", description = "조회 성공",
-            content = @Content(schema = @Schema(implementation = CursorPageResponseBackupDto.class))
+            content = @Content(schema = @Schema(implementation = CursorPageResponse.class))
         ),
         @ApiResponse(
             responseCode = "400", description = "잘못된 요청 또는 지원하지 않는 정렬 필드",
@@ -39,32 +41,32 @@ public interface BackupApi {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))
         )
     })
-    ResponseEntity<CursorPageResponseEmployeeDto> getAllBackups(
+    ResponseEntity<CursorPageResponse<BackupDto>> getAllBackups(
         @Parameter(description = "작업자")
         @RequestParam(value = "worker", required = false) String worker,
 
         @Parameter(description = "상태 (IN_PROGRESS, COMPLETED, FAILED)")
-        @RequestParam(value = "status", required = false) String status,
+        @RequestParam(value = "status", required = false) BackupStatus status,
 
         @Parameter(description = "시작 시간(부터)")
-        @RequestParam(value = "startedAtFrom", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startedAtFrom,
+        @RequestParam(value = "startedAtFrom", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Instant startedAtFrom,
 
         @Parameter(description = "시작 시간(까지)")
-        @RequestParam(value = "startedAtTo", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startedAtTo,
+        @RequestParam(value = "startedAtTo", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Instant startedAtTo,
 
         @Parameter(description = "이전 페이지 마지막 요소 ID")
-        @RequestParam(value = "idAfter", required = false) Integer idAfter,
+        @RequestParam(value = "idAfter", required = false) Long idAfter,
 
-        @Parameter(description = "커서 (다음 페이지 시작점)")
+        @Parameter(description = "커서 (이전 페이지의 마지막 ID)")
         @RequestParam(value = "cursor", required = false) String cursor,
 
-        @Parameter(description = "페이지 크기 (기본값: 10)")
-        @RequestParam(value = "size", required = false, defaultValue = "10") Integer size,
+        @Parameter(description = "페이지 크기")
+        @RequestParam(value = "size", required = false, defaultValue = "10") int size,
 
-        @Parameter(description = "정렬 필드 (name, employeeNumber, hireDate)")
+        @Parameter(description = "정렬 필드 (startedAt, endedAt, status)")
         @RequestParam(value = "sortField", required = false, defaultValue = "name") String sortField,
 
-        @Parameter(description = "정렬 방향 (asc 또는 desc, 기본값: asc)")
+        @Parameter(description = "정렬 방향 (ASC, DESC)")
         @RequestParam(value = "sortDirection", required = false, defaultValue = "asc") String sortDirection
     );
 
@@ -92,7 +94,7 @@ public interface BackupApi {
         )
     })
     ResponseEntity<BackupDto> createBackup(
-        BackupCreateResponse backupCreateResponse
+        HttpServletRequest request
     );
 
     @Operation(
@@ -115,10 +117,8 @@ public interface BackupApi {
         )
     })
     ResponseEntity<BackupDto> getLatestBackup(
-        @Parameter(
-            description = "백업 상태 (COMPLETED, FAILED, IN_PROGRESS, 기본값: COMPLETED)"
-        )
+        @Parameter(description = "백업 상태 (COMPLETED, FAILED, IN_PROGRESS, 기본값: COMPLETED)")
         @RequestParam(value = "status", required = false, defaultValue = "COMPLETED")
-        String status
+        BackupStatus status
     );
 }

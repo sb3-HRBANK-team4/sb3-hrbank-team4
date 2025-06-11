@@ -1,5 +1,6 @@
 package com.fource.hrbank.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fource.hrbank.domain.common.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -27,10 +28,10 @@ import lombok.ToString;
 @Table(name = "tbl_change_log")
 public class ChangeLog extends BaseEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employee_id")
-    private Employee employee;
+    @Column(name = "employee_number")
+    private String employeeNumber;
 
+    @JsonFormat(pattern = "yyyy.MM.dd HH:mm:ss", timezone = "Asia/Seoul")
     @Column(name = "changed_at")
     private Instant changedAt;
 

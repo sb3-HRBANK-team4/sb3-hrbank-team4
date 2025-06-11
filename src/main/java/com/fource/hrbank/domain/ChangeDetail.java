@@ -10,10 +10,12 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 @Entity
 @Getter
+@Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,11 +27,11 @@ public class ChangeDetail extends BaseEntity {
     private ChangeLog changeLog;
 
     @Column(name = "field_name")
-    private String fieldName;
+    private String propertyName;
 
     @Column(name = "old_value")
-    private String oldValue;
+    private String before;
 
     @Column(name = "new_value")
-    private String newValue;
+    private String after;
 }

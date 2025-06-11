@@ -1,9 +1,25 @@
 package com.fource.hrbank.service.backup;
 
+import com.fource.hrbank.domain.BackupStatus;
 import com.fource.hrbank.dto.backup.BackupDto;
-import java.util.List;
+import com.fource.hrbank.dto.common.CursorPageResponse;
+
+import java.time.Instant;
 
 public interface BackupService {
 
-    List<BackupDto> findAll();
+    CursorPageResponse<BackupDto> findAll(
+        String worker, BackupStatus status,
+        Instant startedAtFrom, Instant startedAtTo,
+        Long idAfter, String cursor, int size,
+        String sortField, String sortDirection
+    );
+
+    BackupDto findLatestByStatus(BackupStatus status);
+
+    BackupDto create(String ipAdress);
+
+    BackupDto backup(BackupDto backupDto);
+
+    BackupDto batchBackup();
 }

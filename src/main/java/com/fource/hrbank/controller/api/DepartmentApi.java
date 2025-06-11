@@ -1,8 +1,9 @@
 package com.fource.hrbank.controller.api;
 
-import com.fource.hrbank.dto.department.CursorPageResponseDepartmentDto;
+import com.fource.hrbank.dto.common.CursorPageResponse;
+import com.fource.hrbank.dto.department.DepartmentCreateRequest;
 import com.fource.hrbank.dto.department.DepartmentDto;
-import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
+import com.fource.hrbank.dto.department.DepartmentUpdateRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,7 +28,7 @@ public interface DepartmentApi {
     @ApiResponses(value = {
         @ApiResponse(
             responseCode = "200", description = "조회 성공",
-            content = @Content(schema = @Schema(implementation = CursorPageResponseDepartmentDto.class))
+            content = @Content(schema = @Schema(implementation = CursorPageResponse.class))
         ),
         @ApiResponse(
             responseCode = "400", description = "잘못된 요청",
@@ -38,20 +39,20 @@ public interface DepartmentApi {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))
         )
     })
-    ResponseEntity<CursorPageResponseEmployeeDto> getAllEmployees(
+    ResponseEntity<CursorPageResponse<DepartmentDto>> getAllEmployees(
         @Parameter(description = "부서 이름 또는 설명")
         @RequestParam(value = "nameOrDescription", required = false) String nameOrDescription,
 
         @Parameter(description = "이전 페이지 마지막 요소 ID")
-        @RequestParam(value = "idAfter", required = false) Integer idAfter,
+        @RequestParam(value = "idAfter", required = false) Long idAfter,
 
         @Parameter(description = "커서 (다음 페이지 시작점)")
         @RequestParam(value = "cursor", required = false) String cursor,
 
         @Parameter(description = "페이지 크기 (기본값: 10)")
-        @RequestParam(value = "size", required = false, defaultValue = "10") Integer size,
+        @RequestParam(value = "size", required = false, defaultValue = "10") int size,
 
-        @Parameter(description = "정렬 필드 (name, employeeNumber, hireDate)")
+        @Parameter(description = "정렬 필드 (name 또는 establishedDate)")
         @RequestParam(value = "sortField", required = false, defaultValue = "name") String sortField,
 
         @Parameter(description = "정렬 방향 (asc 또는 desc, 기본값: asc)")
@@ -80,29 +81,29 @@ public interface DepartmentApi {
     ResponseEntity<DepartmentDto> createDepartment(
         @RequestParam DepartmentCreateRequest departmentCreateRequest
     );
-
-    @Operation(
-        summary = "부서 상세 조회",
-        description = "부서 상세 정보를 조회합니다.",
-        operationId = "getDepartmentById"
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200", description = "조회 성공",
-            content = @Content(schema = @Schema(implementation = DepartmentDto.class))
-        ),
-        @ApiResponse(
-            responseCode = "404", description = "부서를 찾을 수 없음",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-        ),
-        @ApiResponse(
-            responseCode = "500", description = "서버 오류",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-        )
-    })
-    ResponseEntity<DepartmentDto> getDepartmentById(
-        @Parameter(required = true, description = "부서 ID") Long id
-    );
+//
+//    @Operation(
+//        summary = "부서 상세 조회",
+//        description = "부서 상세 정보를 조회합니다.",
+//        operationId = "getDepartmentById"
+//    )
+//    @ApiResponses(value = {
+//        @ApiResponse(
+//            responseCode = "200", description = "조회 성공",
+//            content = @Content(schema = @Schema(implementation = DepartmentDto.class))
+//        ),
+//        @ApiResponse(
+//            responseCode = "404", description = "부서를 찾을 수 없음",
+//            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+//        ),
+//        @ApiResponse(
+//            responseCode = "500", description = "서버 오류",
+//            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+//        )
+//    })
+//    ResponseEntity<DepartmentDto> getDepartmentById(
+//        @Parameter(required = true, description = "부서 ID") Long id
+//    );
 
     @Operation(
         summary = "부서 삭제",

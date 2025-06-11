@@ -35,5 +35,17 @@ out/
 
 ### VS Code ###
 .vscode/
-application.yaml
 
+##DS_Store##
+.DS_Store
+
+# MapStruct generated code
+/src/main/generated/
+
+# 파일 추가
+.hrbank
+
+# 환경설정
+application.yaml
+application-local.yaml
+application-prod.yaml

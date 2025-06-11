@@ -1,14 +1,21 @@
 package com.fource.hrbank.controller;
 
 import com.fource.hrbank.controller.api.BackupApi;
+import com.fource.hrbank.domain.BackupStatus;
 import com.fource.hrbank.dto.backup.BackupDto;
+import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.service.backup.BackupService;
-import java.util.List;
+import com.fource.hrbank.service.storage.FileStorage;
+import jakarta.servlet.http.HttpServletRequest;
+import java.time.Instant;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -26,14 +33,58 @@ public class BackupController implements BackupApi {
      *
      * @return 백업 로그 DTO 리스트 (HTTP 200 OK)
      */
-    @Override
     @GetMapping
-    public ResponseEntity<List<BackupDto>> findAll() {
-
-        List<BackupDto> backupDtos = backupService.findAll();
+    public ResponseEntity<CursorPageResponse<BackupDto>> getAllBackups(
+        @RequestParam(required = false) String worker,
+        @RequestParam(required = false) BackupStatus status,
+        @RequestParam(required = false) Instant startedAtFrom,
+        @RequestParam(required = false) Instant startedAtTo,
+        @RequestParam(required = false) Long idAfter,
+        @RequestParam(required = false) String cursor,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) String sortField,
+        @RequestParam(required = false) String sortDirection
+    ) {
+        CursorPageResponse<BackupDto> cursorPageResponseBackupDto = backupService.findAll(worker,
+            status, startedAtFrom, startedAtTo, idAfter, cursor, size, sortField, sortDirection);
 
         return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(backupDtos);
+            .status(HttpStatus.OK)
+            .body(cursorPageResponseBackupDto);
+    }
+
+    /**
+     * 데이터 백업을 생성합니다.
+     *
+     * @param request 클라이언트 요청 정보
+     * @return 생성된 데이터 백업 이력
+     */
+    @PostMapping
+    public ResponseEntity<BackupDto> createBackup(HttpServletRequest request) {
+        String ipAdress = request.getRemoteAddr();
+
+        BackupDto createBackupDto = backupService.create(ipAdress); // 백업 이력 등록
+        BackupDto updateBackupDto = backupService.backup(createBackupDto);  // 데이터 백업 수행
+
+        return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(updateBackupDto);
+    }
+
+    /**
+     * 지정된 상태의 가장 최근 백업 정보를 조회합니다. (기본값 :COMPLETED)
+     *
+     * @param status 백업 상태
+     * @return 가장 최근 백업 정보
+     */
+    @GetMapping("/latest")
+    public ResponseEntity<BackupDto> getLatestBackup(
+        @RequestParam(required = false) BackupStatus status) {
+
+        BackupDto backupDto = backupService.findLatestByStatus(status);
+
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(backupDto);
     }
 }

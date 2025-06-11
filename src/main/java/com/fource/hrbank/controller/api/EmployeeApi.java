@@ -1,8 +1,11 @@
 package com.fource.hrbank.controller.api;
 
-import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
+import com.fource.hrbank.domain.EmployeeStatus;
+import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
+import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
 import com.fource.hrbank.dto.employee.EmployeeDto;
+import com.fource.hrbank.dto.employee.EmployeeTrendDto;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDate;
+import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
@@ -31,7 +35,7 @@ public interface EmployeeApi {
     @ApiResponses(value = {
         @ApiResponse(
             responseCode = "200", description = "조회 성공",
-            content = @Content(schema = @Schema(implementation = CursorPageResponseEmployeeDto.class))
+            content = @Content(schema = @Schema(implementation = CursorPageResponse.class))
         ),
         @ApiResponse(
             responseCode = "400", description = "잘못된 요청",
@@ -42,7 +46,7 @@ public interface EmployeeApi {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))
         )
     })
-    ResponseEntity<CursorPageResponseEmployeeDto> getAllEmployees(
+    ResponseEntity<CursorPageResponse<EmployeeDto>> getAllEmployees(
         @Parameter(description = "직원 이름 또는 이메일")
         @RequestParam(value = "nameOrEmail", required = false) String nameOrEmail,
 
@@ -62,16 +66,16 @@ public interface EmployeeApi {
         @RequestParam(value = "hireDateTo", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hireDateTo,
 
         @Parameter(description = "상태 (재직중, 휴직중, 퇴사)")
-        @RequestParam(value = "status", required = false) String status,
+        @RequestParam(value = "status", required = false) EmployeeStatus status,
 
         @Parameter(description = "이전 페이지 마지막 요소 ID")
-        @RequestParam(value = "idAfter", required = false) Integer idAfter,
+        @RequestParam(value = "idAfter", required = false) Long idAfter,
 
         @Parameter(description = "커서 (다음 페이지 시작점)")
         @RequestParam(value = "cursor", required = false) String cursor,
 
         @Parameter(description = "페이지 크기 (기본값: 10)")
-        @RequestParam(value = "size", required = false, defaultValue = "10") Integer size,
+        @RequestParam(value = "size", required = false, defaultValue = "10") int size,
 
         @Parameter(description = "정렬 필드 (name, employeeNumber, hireDate)")
         @RequestParam(value = "sortField", required = false, defaultValue = "name") String sortField,
@@ -212,7 +216,7 @@ public interface EmployeeApi {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))
         )
     })
-    ResponseEntity<EmployeeTrendDto> getTrend(
+    ResponseEntity<List<EmployeeTrendDto>> getTrend(
         @Parameter(description = "시작 일시 (기본값: 현재로부터 unit 기준 12개 이전)")
         @RequestParam(value = "from", required = false)
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
@@ -244,42 +248,42 @@ public interface EmployeeApi {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))
         )
     })
-    ResponseEntity<EmployeeDistributionDto> getDistribution(
+    ResponseEntity<List<EmployeeDistributionDto>> getDistribution(
         @Parameter(description = "그룹화 기준 (department: 부서별, position: 직무별, 기본값: department)")
         @RequestParam(value = "groupBy", required = false, defaultValue = "department") String groupBy,
 
         @Parameter(description = "직원 상태 (재직중, 휴직중, 퇴사, 기본값: 재직중)")
-        @RequestParam(value = "status", required = false, defaultValue = "ACTIVE") String status
+        @RequestParam(value = "status", required = false, defaultValue = "ACTIVE") EmployeeStatus status
     );
 
-    @Operation(
-        summary = "직원 수 조회",
-        description = "지정된 조건에 맞는 직원 수를 조회합니다. 상태 필터링 및 입사일 기간 필터링이 가능합니다.",
-        operationId = "getEmployeeCount"
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200", description = "조회 성공"
-        ),
-        @ApiResponse(
-            responseCode = "400", description = "잘못된 요청",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-        ),
-        @ApiResponse(
-            responseCode = "500", description = "서버 오류",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-        )
-    })
-    ResponseEntity<EmployeeDistributionDto> getEmployeeCount(
-        @Parameter(description = "직원 상태 (ACTIVE, ON_LEAVE, RESIGNED)")
-        @RequestParam(value = "status", required = false) String status,
-
-        @Parameter(description = "입사일 시작 (해당 기간 내 입사한 직원 수 조회)")
-        @RequestParam(value = "fromDate", required = false)
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-
-        @Parameter(description = "입사일 종료 (기본값: 현재 일시)")
-        @RequestParam(value = "toDate", required = false)
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
-    );
+//    @Operation(
+//        summary = "직원 수 조회",
+//        description = "지정된 조건에 맞는 직원 수를 조회합니다. 상태 필터링 및 입사일 기간 필터링이 가능합니다.",
+//        operationId = "getEmployeeCount"
+//    )
+//    @ApiResponses(value = {
+//        @ApiResponse(
+//            responseCode = "200", description = "조회 성공"
+//        ),
+//        @ApiResponse(
+//            responseCode = "400", description = "잘못된 요청",
+//            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+//        ),
+//        @ApiResponse(
+//            responseCode = "500", description = "서버 오류",
+//            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+//        )
+//    })
+//    ResponseEntity<EmployeeDistributionDto> getEmployeeCount(
+//        @Parameter(description = "직원 상태 (ACTIVE, ON_LEAVE, RESIGNED)")
+//        @RequestParam(value = "status", required = false) EmployeeStatus status,
+//
+//        @Parameter(description = "입사일 시작 (해당 기간 내 입사한 직원 수 조회)")
+//        @RequestParam(value = "fromDate", required = false)
+//        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+//
+//        @Parameter(description = "입사일 종료 (기본값: 현재 일시)")
+//        @RequestParam(value = "toDate", required = false)
+//        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
+//    );
 }
