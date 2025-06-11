@@ -189,7 +189,10 @@ public class EmployeeServiceImpl implements EmployeeService {
             .where(EmployeeSpecification.nameOrEmailLike(nameOrEmail))
             .and(EmployeeSpecification.departmentContains(departmentName))
             .and(EmployeeSpecification.positionContains(position))
+            .and(EmployeeSpecification.employeeNumber(employeeNumber))
             .and(EmployeeSpecification.statusEquals(status))
+            .and(EmployeeSpecification.hireDateFrom(hireDateFrom))
+            .and(EmployeeSpecification.hireDateTo(hireDateTo))
             .and(EmployeeSpecification.buildCursorSpec(sortField, cursor, idAfter));
 
         // 4. 데이터 조회
