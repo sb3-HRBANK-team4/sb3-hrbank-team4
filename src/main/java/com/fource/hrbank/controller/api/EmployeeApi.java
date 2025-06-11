@@ -1,6 +1,7 @@
 package com.fource.hrbank.controller.api;
 
 import com.fource.hrbank.domain.EmployeeStatus;
+import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDto;
@@ -66,7 +67,7 @@ public interface EmployeeApi {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))
         )
     })
-    ResponseEntity<CursorPageResponseEmployeeDto> getAllEmployees(
+    ResponseEntity<CursorPageResponse<EmployeeDto>> getAllEmployees(
         @Parameter(description = "직원 이름 또는 이메일")
         @RequestParam(value = "nameOrEmail", required = false) String nameOrEmail,
 
