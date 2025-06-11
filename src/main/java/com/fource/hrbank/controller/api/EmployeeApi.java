@@ -1,7 +1,7 @@
 package com.fource.hrbank.controller.api;
 
 import com.fource.hrbank.domain.EmployeeStatus;
-import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
+import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
+import java.time.Instant;
 import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -55,7 +57,7 @@ public interface EmployeeApi {
     @ApiResponses(value = {
         @ApiResponse(
             responseCode = "200", description = "조회 성공",
-            content = @Content(schema = @Schema(implementation = CursorPageResponseEmployeeDto.class))
+            content = @Content(schema = @Schema(implementation = CursorPageResponse.class))
         ),
         @ApiResponse(
             responseCode = "400", description = "잘못된 요청",
@@ -66,7 +68,7 @@ public interface EmployeeApi {
             content = @Content(schema = @Schema(implementation = ErrorResponse.class))
         )
     })
-    ResponseEntity<CursorPageResponseEmployeeDto> getAllEmployees(
+    ResponseEntity<CursorPageResponse<EmployeeDto>> getAllEmployees(
         @Parameter(description = "직원 이름 또는 이메일")
         @RequestParam(value = "nameOrEmail", required = false) String nameOrEmail,
 

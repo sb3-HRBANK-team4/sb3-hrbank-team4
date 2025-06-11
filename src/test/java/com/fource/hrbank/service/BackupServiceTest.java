@@ -33,6 +33,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -81,11 +82,16 @@ public class BackupServiceTest {
         }
     }
 
+    @Value("${spring.profiles.active}")
+    private String profile;
+
     @BeforeEach
     void setUp() {
         // 테이블 ID 시퀀스 초기화
-        jdbcTemplate.execute("TRUNCATE TABLE tbl_file_metadata RESTART IDENTITY CASCADE");
-        jdbcTemplate.execute("TRUNCATE TABLE tbl_backup_history RESTART IDENTITY CASCADE");
+        if (!profile.equals("local")) {
+            jdbcTemplate.execute("TRUNCATE TABLE tbl_file_metadata RESTART IDENTITY CASCADE");
+            jdbcTemplate.execute("TRUNCATE TABLE tbl_backup_history RESTART IDENTITY CASCADE");
+        }
     }
 
     @Test
@@ -159,7 +165,7 @@ public class BackupServiceTest {
         Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
         employeeRepository.save(employee);
 
-        ChangeLog changeLog = new ChangeLog(employee, Instant.now(), "127.0.0.1", ChangeType.UPDATED, null, null);
+        ChangeLog changeLog = new ChangeLog(employee, "EMP-001",Instant.now(), "127.0.0.1", ChangeType.UPDATED, null, null);
         changeLogRepository.save(changeLog);
 
         // when
@@ -180,7 +186,7 @@ public class BackupServiceTest {
         Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
         employeeRepository.save(employee);
 
-        ChangeLog changeLog = new ChangeLog(employee, Instant.now().minusSeconds(3600), "127.0.0.1", ChangeType.UPDATED, null, null);
+        ChangeLog changeLog = new ChangeLog(employee, "EMP-001", Instant.now().minusSeconds(3600), "127.0.0.1", ChangeType.UPDATED, null, null);
         changeLogRepository.save(changeLog);
 
         // when
@@ -232,7 +238,7 @@ public class BackupServiceTest {
         employeeRepository.save(employee);
 
         // 첫번째 put() : 예외, 두번째는 성공
-        when(fileStorage.put(eq(backupDto.id()),any()))
+        when(fileStorage.put(any(),any()))
                 .thenThrow(new RuntimeException("파일 저장 실패"))
                 .thenReturn(backupDto.id());
 

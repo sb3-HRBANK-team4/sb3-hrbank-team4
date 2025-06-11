@@ -6,8 +6,9 @@ import com.fource.hrbank.domain.ChangeLog;
 import com.fource.hrbank.domain.ChangeType;
 import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
-import com.fource.hrbank.dto.changelog.CursorPageResponseChangeLogDto;
+import com.fource.hrbank.dto.changelog.ChangeLogDto;
 import com.fource.hrbank.dto.changelog.DiffsDto;
+import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.fource.hrbank.exception.ChangeLogNotFoundException;
 import com.fource.hrbank.mapper.ChangeDetailMapper;
@@ -52,9 +53,19 @@ public class ChangeLogServiceImpl implements ChangeLogService {
      * @return 페이징된 변경 로그 목록
      */
     @Override
-    public CursorPageResponseChangeLogDto getAllChangeLogs(String employeeNumber, ChangeType type,
-        String memo, String ipAddress, Long idAfter, String cursor, int size, String sortField,
-        String sortDirection, Instant atFrom, Instant atTo) {
+    public CursorPageResponse<ChangeLogDto> getAllChangeLogs(
+            String employeeNumber,
+            ChangeType type,
+            String memo,
+            String ipAddress,
+            Long idAfter,
+            String cursor,
+            int size,
+            String sortField,
+            String sortDirection,
+            Instant atFrom,
+            Instant atTo
+    ) {
 
         // 기본값 설정
         if (size <= 0) {

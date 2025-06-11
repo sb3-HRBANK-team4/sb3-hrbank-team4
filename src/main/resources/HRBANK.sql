@@ -40,6 +40,7 @@ CREATE TABLE tbl_employees
     position         VARCHAR     NOT NULL,
     hire_date        DATE        NOT NULL,
     status           VARCHAR     NOT NULL,
+    is_deleted       BOOLEAN     NOT NULL,
     created_at       TIMESTAMPTZ NOT NULL,
     updated_at       TIMESTAMPTZ
 );
@@ -94,7 +95,7 @@ ALTER TABLE tbl_employees
 
 ALTER TABLE tbl_change_log
     ADD CONSTRAINT fk_change_log_employee
-        FOREIGN KEY (employee_id) REFERENCES tbl_employees (id) ON DELETE SET NULL;
+        FOREIGN KEY (employee_id) REFERENCES tbl_employees (id);
 
 ALTER TABLE tbl_backup_history
     ADD CONSTRAINT fk_backup_history_file

@@ -1,6 +1,6 @@
 package com.fource.hrbank.controller;
 
-import com.fource.hrbank.dto.department.CursorPageResponseDepartmentDto;
+import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.dto.department.DepartmentCreateRequest;
 import com.fource.hrbank.dto.department.DepartmentDto;
 import com.fource.hrbank.dto.department.DepartmentUpdateRequest;
@@ -31,7 +31,7 @@ public class DepartmentController {
     private final DepartmentService departmentService;
 
     @GetMapping
-    public ResponseEntity<CursorPageResponseDepartmentDto> findAll(
+    public ResponseEntity<CursorPageResponse<DepartmentDto>> findAll(
         @RequestParam(required = false) String nameOrDescription,
         @RequestParam(required = false) Long idAfter,
         @RequestParam(required = false) String cursor,
@@ -39,7 +39,7 @@ public class DepartmentController {
         @RequestParam(defaultValue = "name") String sortField,
         @RequestParam(defaultValue = "asc") String sortDirection
     ) {
-        CursorPageResponseDepartmentDto departments = departmentService.findAll(nameOrDescription,
+        CursorPageResponse<DepartmentDto> departments = departmentService.findAll(nameOrDescription,
             idAfter, cursor, size, sortField, sortDirection);
         return ResponseEntity
             .status(HttpStatus.OK)
