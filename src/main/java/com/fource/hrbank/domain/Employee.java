@@ -15,7 +15,10 @@ import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 @Entity
 @Getter
@@ -23,6 +26,8 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "tbl_employees")
+@SQLDelete(sql = "UPDATE tbl_employees SET is_deleted = true WHERE id = ?")
+@Where(clause = "is_deleted = false")
 public class Employee extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -55,6 +60,9 @@ public class Employee extends BaseEntity {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
+    @Setter
+    @Column(name = "is_deleted")
+    private Boolean deleted = false;
 
     public void update(String newName, String newEmail, Department newDepartment,
         String newPosition, LocalDate newHireDate,

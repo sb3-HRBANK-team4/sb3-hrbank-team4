@@ -28,6 +28,7 @@ import com.fource.hrbank.service.backup.BackupService;
 import com.fource.hrbank.service.storage.FileStorage;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,8 +40,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -162,7 +166,7 @@ public class BackupServiceTest {
         BackupLog backupLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(1800), Instant.now().minusSeconds(1790), BackupStatus.COMPLETED, null);
         backupLogRepository.save(backupLog);
 
-        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
+        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now(), false);
         employeeRepository.save(employee);
 
         ChangeLog changeLog = new ChangeLog(employee, "EMP-001",Instant.now(), "127.0.0.1", ChangeType.UPDATED, null, null);
@@ -183,7 +187,7 @@ public class BackupServiceTest {
         BackupLog backupLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(1800), Instant.now().minusSeconds(1790), BackupStatus.COMPLETED, null);
         backupLogRepository.save(backupLog);
 
-        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
+        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now(), false);
         employeeRepository.save(employee);
 
         ChangeLog changeLog = new ChangeLog(employee, "EMP-001", Instant.now().minusSeconds(3600), "127.0.0.1", ChangeType.UPDATED, null, null);
@@ -234,7 +238,7 @@ public class BackupServiceTest {
         backupLogRepository.save(backupLog);
         BackupDto backupDto = backupLogMapper.toDto(backupLog);
 
-        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
+        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now(), false);
         employeeRepository.save(employee);
 
         // 첫번째 put() : 예외, 두번째는 성공
@@ -256,7 +260,7 @@ public class BackupServiceTest {
         backupLogRepository.save(backupLog);
         BackupDto backupDto = backupLogMapper.toDto(backupLog);
 
-        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
+        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now(), false);
         employeeRepository.save(employee);
 
         // 예외 발생
