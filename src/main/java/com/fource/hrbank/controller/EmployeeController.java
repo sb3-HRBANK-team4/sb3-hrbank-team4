@@ -73,7 +73,8 @@ public class EmployeeController implements EmployeeApi {
         @RequestParam(defaultValue = "asc") String sortDirection
     ) {
         CursorPageResponse<EmployeeDto> employees = employeeService.findAll(
-            nameOrEmail, employeeNumber, departmentName, position, status, hireDateFrom, hireDateTo, sortField, sortDirection,
+            nameOrEmail, employeeNumber, departmentName, position, status, hireDateFrom, hireDateTo,
+            sortField, sortDirection,
             cursor, idAfter, size
         );
 
@@ -109,23 +110,32 @@ public class EmployeeController implements EmployeeApi {
         return ResponseEntity.ok(distribution);
     }
 
-//    @GetMapping("/count")
-//    public ResponseEntity<EmployeeTrendDto> getEmployeeCount(
-//        @RequestParam(required = false) EmployeeStatus status,
-//        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-//        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
-//    ) {
-//        EmployeeTrendDto response = dashboardService.getEmployeeCount(status, fromDate, toDate);
-//        return ResponseEntity.ok(response);
-//    }
-
     @GetMapping("/stats/trend")
     public ResponseEntity<List<EmployeeTrendDto>> getTrend(
-        @RequestParam(name = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-        @RequestParam(value = "to", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
-        @RequestParam(value = "unit", required = false) String unit // 예: "month", "week"
+        @RequestParam(name = "from", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+
+        @RequestParam(name = "to", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+
+        @RequestParam(name = "unit", defaultValue = "month") String unit
     ) {
-        List<EmployeeTrendDto> trend = dashboardService.getEmployeeTrend(from, to, unit);
+        List<com.fource.hrbank.dto.employee.EmployeeTrendDto> trend = dashboardService.getEmployeeTrend(
+            from, to, unit);
         return ResponseEntity.ok(trend);
     }
+
+    @GetMapping("/count")
+    public ResponseEntity<Long> getEmployeeCount(
+        @RequestParam(required = false) EmployeeStatus status,
+        @RequestParam(required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+        @RequestParam(required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
+    ) {
+        long count = employeeService.getEmployeeCount(status, fromDate, toDate);
+        return ResponseEntity.ok(count);
+    }
+
+
 }

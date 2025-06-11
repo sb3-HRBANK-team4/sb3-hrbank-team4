@@ -17,6 +17,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @RequiredArgsConstructor
 public class ChangeLogCustomRepositoryImpl implements ChangeLogCustomRepository {
+
     private final JPAQueryFactory queryFactory;
     private final QChangeLog changeLog = QChangeLog.changeLog;
 
@@ -101,7 +102,7 @@ public class ChangeLogCustomRepositoryImpl implements ChangeLogCustomRepository 
     }
 
     private BooleanBuilder createWhereCondition(String employeeNumber, ChangeType type,
-        String memo, String ipAddress, Long idAfter, Instant atFrom, Instant atTo){
+        String memo, String ipAddress, Long idAfter, Instant atFrom, Instant atTo) {
         BooleanBuilder builder = new BooleanBuilder();
 
         // 부분 일치 조건

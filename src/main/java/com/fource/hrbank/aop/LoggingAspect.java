@@ -29,8 +29,8 @@ public class LoggingAspect {
             log.info("[리턴값] : {} with result {}", methodName, result);
             return result;
         } catch (Exception e) {
-          log.error("[예외 발생] : {} with message = {}", methodName, e.getMessage());
-          throw e;
+            log.error("[예외 발생] : {} with message = {}", methodName, e.getMessage());
+            throw e;
         } finally {
             long end = System.currentTimeMillis();
             long time = end - start;

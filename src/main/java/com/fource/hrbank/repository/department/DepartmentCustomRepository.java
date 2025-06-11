@@ -1,7 +1,6 @@
 package com.fource.hrbank.repository.department;
 
 import com.fource.hrbank.domain.Department;
-
 import java.util.List;
 import java.util.Map;
 

@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 부서 관련 요청을 처리하는 RestController 입니다.
- *
+ * <p>
  * 추가, 수정, 삭제, 조회 등의 기능을 제공합니다.
  */
 @RestController
@@ -48,7 +48,8 @@ public class DepartmentController implements DepartmentApi {
     }
 
     @PostMapping
-    public ResponseEntity<DepartmentDto> createDepartment(@RequestBody DepartmentCreateRequest request) {
+    public ResponseEntity<DepartmentDto> createDepartment(
+        @RequestBody DepartmentCreateRequest request) {
         DepartmentDto department = departmentService.create(request);
 
         return ResponseEntity

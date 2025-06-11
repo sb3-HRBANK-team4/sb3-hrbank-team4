@@ -50,17 +50,16 @@ import org.springframework.web.multipart.MultipartFile;
 @Logging
 public class EmployeeServiceImpl implements EmployeeService {
 
+    // 정렬 필드 상수
+    public static final Set<String> VALID_SORT_FIELDS = Set.of(
+        "name", "employeeNumber", "hireDate"
+    );
     private final EmployeeRepository employeeRepository;
     private final EmployeeMapper employeeMapper;
     private final DepartmentRepository departmentRepository;
     private final FileStorage fileStorage;
     private final FileMetadataRepository fileMetadataRepository;
     private final ChangeLogService changeLogService;
-
-    // 정렬 필드 상수
-    public static final Set<String> VALID_SORT_FIELDS = Set.of(
-        "name", "employeeNumber", "hireDate"
-    );
 
     /**
      * 직원 등록 이메일 중복 검증 프로필 이미지 파일 저장 (선택) 사원번호 자동 생성 (형식: EMP-YYYY-timestamp) 직원 상태를 ACTIVE로 초기화 변경
@@ -84,7 +83,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee savedEmployee = employeeRepository.save(employee);
 
         List<DiffsDto> diffs = changeLogService.createEmployeeDiffs(null, savedEmployee);
-        changeLogService.create(savedEmployee, ChangeType.CREATED, request.memo(), diffs);
+        changeLogService.create(savedEmployee.getEmployeeNumber(), ChangeType.CREATED,
+            request.memo(), diffs);
 
         return employeeMapper.toDto(savedEmployee);
     }
@@ -114,9 +114,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Transactional(readOnly = true)
     @Override
     public CursorPageResponse<EmployeeDto> findAll(String nameOrEmail, String employeeNumber,
-                                      String departmentName,
-                                      String position, EmployeeStatus status, LocalDate hireDateFrom, LocalDate hireDateTo, String sortField, String sortDirection,
-                                      String cursor, Long idAfter, int size) {
+        String departmentName,
+        String position, EmployeeStatus status, LocalDate hireDateFrom, LocalDate hireDateTo,
+        String sortField, String sortDirection,
+        String cursor, Long idAfter, int size) {
 
         validateSortField(sortField);
 
@@ -130,7 +131,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         // 3. Specification 조합 (검색 조건 + 커서 조건)
         Specification<Employee> spec = buildSearchSpecification(
-            nameOrEmail, departmentName, position, employeeNumber, status, hireDateFrom, hireDateTo, sortField, cursor, idAfter);
+            nameOrEmail, departmentName, position, employeeNumber, status, hireDateFrom, hireDateTo,
+            sortField, cursor, idAfter);
 
         // 4. 데이터 조회
         List<Employee> employees = employeeRepository.findAll(spec, pageable).getContent();
@@ -163,7 +165,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee afterEmployee = createUpdatedEmployee(employee, request, department, profile);
         List<DiffsDto> diffs = changeLogService.createEmployeeDiffs(employee, afterEmployee);
 
-        changeLogService.create(employee, ChangeType.UPDATED, request.memo(), diffs);
+        changeLogService.create(employee.getEmployeeNumber(), ChangeType.UPDATED, request.memo(),
+            diffs);
 
         //실제 업데이트
         employee.update(request.name(), request.email(), department,
@@ -173,23 +176,36 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     /**
-     * id로 직원 삭제, 프로필 이미지가 존재할 경우 함께 삭제
-     * 삭제 이력과 상세변경 내용도 함께 저장됨
-     *
+     * id로 직원 삭제, 프로필 이미지가 존재할 경우 함께 삭제 삭제 이력과 상세변경 내용도 함께 저장됨
+     * <p>
      * 직원의 삭제 여부(deleted)를 true로 설정한 후 저장하고
      *
      * @param id 삭제할 직원의 고유 ID
      */
+    @Transactional
     @Override
     public void deleteById(Long id) {
-       Employee employee = findEmployeeById(id);
+        Employee employee = findEmployeeById(id);
 
-       deleteProfileImageIfExists(employee);
+        List<DiffsDto> diffs = changeLogService.createEmployeeDiffs(employee, null);
+        changeLogService.create(employee.getEmployeeNumber(), ChangeType.DELETED, "직원 삭제", diffs);
 
-       List<DiffsDto> diffs = changeLogService.createEmployeeDiffs(employee, null);
-       changeLogService.create(employee, ChangeType.DELETED, "직원 삭제", diffs);
+        employeeRepository.delete(employee);
 
-       employeeRepository.delete(employee);
+        FileMetadata profile = employee.getProfile();
+        if (profile != null) {
+            try {
+                // DB에서 메타데이터 삭제
+                fileMetadataRepository.delete(profile);
+                log.info("프로필 이미지 삭제 완료 - ID: {}", profile.getId());
+            } catch (Exception e) {
+                log.warn("프로필 이미지 삭제 실패: {}", e.getMessage());
+            }
+        } else {
+            log.info("삭제할 프로필 이미지가 없습니다.");
+        }
+
+
     }
 
 
@@ -240,7 +256,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
     }
 
-
     // 사원 번호 생성, 예시 : EMP-2025-158861485055084
     private String generateEmployeeNumber() {
         return String.format("EMP-%d-%d", Year.now().getValue(), System.currentTimeMillis());
@@ -264,8 +279,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     // 검색 조건 구성
-    private Specification<Employee> buildSearchSpecification(String nameOrEmail, String departmentName,
-        String position, String employeeNumber, EmployeeStatus status, LocalDate hireDateFrom, LocalDate hireDateTo, String sortField, String cursor, Long idAfter) {
+    private Specification<Employee> buildSearchSpecification(String nameOrEmail,
+        String departmentName,
+        String position, String employeeNumber, EmployeeStatus status, LocalDate hireDateFrom,
+        LocalDate hireDateTo, String sortField, String cursor, Long idAfter) {
         return Specification
             .where(EmployeeSpecification.nameOrEmailLike(nameOrEmail))
             .and(EmployeeSpecification.departmentContains(departmentName))
@@ -278,7 +295,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     // 커서 페이지 응답 구성
-    private CursorPageResponse<EmployeeDto> buildCursorPageResponse(List<Employee> employees, int size, String sortField) {
+    private CursorPageResponse<EmployeeDto> buildCursorPageResponse(List<Employee> employees,
+        int size, String sortField) {
         boolean hasNext = employees.size() > size;
 
         List<EmployeeDto> content = employees.stream()
@@ -286,10 +304,12 @@ public class EmployeeServiceImpl implements EmployeeService {
             .map(employeeMapper::toDto)
             .toList();
 
-        String nextCursor = hasNext ? extractCursorValue(sortField, content.get(content.size() - 1)) : null;
+        String nextCursor =
+            hasNext ? extractCursorValue(sortField, content.get(content.size() - 1)) : null;
         Long nextId = hasNext ? content.get(content.size() - 1).id() : null;
+        long totalElements = employeeRepository.count();
 
-        return new CursorPageResponse<>(content, nextCursor, nextId, size, null, hasNext);
+        return new CursorPageResponse<>(content, nextCursor, nextId, size, totalElements, hasNext);
     }
 
     // 커서 값 생성을 위해 정렬 필드의 값만 추출해 String으로 넘김
@@ -303,7 +323,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     // 프로필 이미지 업데이트
-    private FileMetadata updateProfileImageIfPresent(Employee employee, Optional<MultipartFile> profileImage) {
+    private FileMetadata updateProfileImageIfPresent(Employee employee,
+        Optional<MultipartFile> profileImage) {
         if (profileImage.isPresent() && !profileImage.get().isEmpty()) {
             return handleProfileImageUpload(profileImage);
         }
@@ -326,19 +347,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         );
     }
 
-    // 프로필 이미지 삭제
-    private void deleteProfileImageIfExists(Employee employee) {
-        FileMetadata profile = employee.getProfile();
-        if (profile != null) {
-            try {
-                // DB에서 메타데이터 삭제
-                fileMetadataRepository.delete(profile);
-                log.info("프로필 이미지 삭제 완료 - ID: {}", profile.getId());
-            } catch (Exception e) {
-                log.warn("프로필 이미지 삭제 실패: {}", e.getMessage());
-            }
-        } else {
-            log.info("삭제할 프로필 이미지가 없습니다.");
-        }
+    @Override
+    public long getEmployeeCount(EmployeeStatus status, LocalDate fromDate, LocalDate toDate) {
+        return employeeRepository.countByFilters(status, fromDate, toDate);
     }
 }

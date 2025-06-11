@@ -256,34 +256,34 @@ public interface EmployeeApi {
         @RequestParam(value = "status", required = false, defaultValue = "ACTIVE") EmployeeStatus status
     );
 
-//    @Operation(
-//        summary = "직원 수 조회",
-//        description = "지정된 조건에 맞는 직원 수를 조회합니다. 상태 필터링 및 입사일 기간 필터링이 가능합니다.",
-//        operationId = "getEmployeeCount"
-//    )
-//    @ApiResponses(value = {
-//        @ApiResponse(
-//            responseCode = "200", description = "조회 성공"
-//        ),
-//        @ApiResponse(
-//            responseCode = "400", description = "잘못된 요청",
-//            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-//        ),
-//        @ApiResponse(
-//            responseCode = "500", description = "서버 오류",
-//            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-//        )
-//    })
-//    ResponseEntity<EmployeeDistributionDto> getEmployeeCount(
-//        @Parameter(description = "직원 상태 (ACTIVE, ON_LEAVE, RESIGNED)")
-//        @RequestParam(value = "status", required = false) EmployeeStatus status,
-//
-//        @Parameter(description = "입사일 시작 (해당 기간 내 입사한 직원 수 조회)")
-//        @RequestParam(value = "fromDate", required = false)
-//        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-//
-//        @Parameter(description = "입사일 종료 (기본값: 현재 일시)")
-//        @RequestParam(value = "toDate", required = false)
-//        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
-//    );
+    @Operation(
+        summary = "직원 수 조회",
+        description = "지정된 조건에 맞는 직원 수를 조회합니다. 상태 필터링 및 입사일 기간 필터링이 가능합니다.",
+        operationId = "getEmployeeCount"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200", description = "조회 성공"
+        ),
+        @ApiResponse(
+            responseCode = "400", description = "잘못된 요청",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "500", description = "서버 오류",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+        )
+    })
+    ResponseEntity<Long> getEmployeeCount(
+        @Parameter(description = "직원 상태 (ACTIVE, ON_LEAVE, RESIGNED)")
+        @RequestParam(value = "status", required = false) EmployeeStatus status,
+
+        @Parameter(description = "입사일 시작 (해당 기간 내 입사한 직원 수 조회)")
+        @RequestParam(value = "fromDate", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+
+        @Parameter(description = "입사일 종료 (기본값: 현재 일시)")
+        @RequestParam(value = "toDate", required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
+    );
 }

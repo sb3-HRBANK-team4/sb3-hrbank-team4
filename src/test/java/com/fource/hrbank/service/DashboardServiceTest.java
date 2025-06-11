@@ -1,5 +1,7 @@
 package com.fource.hrbank.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.dto.employee.EmployeeTrendDto;
 import com.fource.hrbank.service.dashboard.DashboardService;
@@ -11,8 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
@@ -53,8 +53,9 @@ class DashboardServiceTest {
     @Test
     void getEmployeeCount_조건있음() {
         LocalDate from = LocalDate.of(2024, 1, 1);
-        LocalDate to = LocalDate.of(2024,12,31);
-        EmployeeTrendDto result = dashboardService.getEmployeeCount(EmployeeStatus.ACTIVE, from, to);
+        LocalDate to = LocalDate.of(2024, 12, 31);
+        EmployeeTrendDto result = dashboardService.getEmployeeCount(EmployeeStatus.ACTIVE, from,
+            to);
 
         assertThat(result.count()).isGreaterThanOrEqualTo(0);
     }

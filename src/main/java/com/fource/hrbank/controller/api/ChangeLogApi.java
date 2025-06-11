@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "직원 정보 수정 이력 관리", description = "직원 정보 수정 이력 관리 API")
 public interface ChangeLogApi {
+
     @Operation(
         summary = "직원 정보 수정 이력 목록 조회",
         description = "직원 정보 수정 이력 목록을 조회합니다. 상세 변경 내용은 포함되지 않습니다.",
@@ -60,7 +60,7 @@ public interface ChangeLogApi {
         @RequestParam(value = "cursor", required = false) String cursor,
 
         @Parameter(description = "페이지 크기")
-        @RequestParam(value = "size", required = false, defaultValue = "10") Integer size,
+        @RequestParam(value = "size", required = false, defaultValue = "10") int size,
 
         @Parameter(description = "정렬 필드 (ipAddress, at)")
         @RequestParam(value = "sortField", required = false, defaultValue = "at") String sortField,
@@ -70,11 +70,11 @@ public interface ChangeLogApi {
 
         @Parameter(description = "수정 일시(부터)")
         @RequestParam(value = "atFrom", required = false)
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate atFrom,
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant atFrom,
 
         @Parameter(description = "수정 일시(까지)")
         @RequestParam(value = "atTo", required = false)
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate atTo
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant atTo
     );
 
     @Operation(
@@ -120,13 +120,11 @@ public interface ChangeLogApi {
     ResponseEntity<Long> getChangeLogsCount(
         @Parameter(description = "시작 일시 (기본값: 7일 전)")
         @RequestParam(value = "fromDate", required = false)
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-        LocalDate fromDate,
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant fromDate,
 
         @Parameter(description = "종료 일시 (기본값: 현재)")
         @RequestParam(value = "toDate", required = false)
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-        LocalDate toDate
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant toDate
     );
 
 }

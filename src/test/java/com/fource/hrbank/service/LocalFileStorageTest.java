@@ -26,27 +26,20 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 @SpringBootTest
 @Transactional
 public class LocalFileStorageTest {
 
-    @Autowired
-    private LocalFileStorage fileStorage;
-
-    @Autowired
-    private FileMetadataRepository fileMetadataRepository;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     @TempDir
     Path tempDir;
-
+    @Autowired
+    private LocalFileStorage fileStorage;
+    @Autowired
+    private FileMetadataRepository fileMetadataRepository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
     @Value("${spring.profiles.active}")
     private String profile;
 
@@ -120,7 +113,8 @@ public class LocalFileStorageTest {
         // when & then
         assertThatThrownBy(() -> fileStorage.put(id, content))
             .isInstanceOf(FileIOException.class)
-            .hasMessage(ResponseMessage.FILE_SAVE_ERROR_MESSAGE, ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
+            .hasMessage(ResponseMessage.FILE_SAVE_ERROR_MESSAGE,
+                ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
     }
 
     @Test

@@ -6,9 +6,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ChangeLogRepository extends JpaRepository<ChangeLog, Long> ,ChangeLogCustomRepository {
+public interface ChangeLogRepository extends JpaRepository<ChangeLog, Long>,
+    ChangeLogCustomRepository {
 
     boolean findByChangedAtAfter(Instant changedAtAfter);
 
     boolean existsByChangedAtAfter(Instant changedAtAfter);
+
+    long countByCreatedAtBetween(Instant from, Instant to);
+
 }

@@ -9,7 +9,7 @@ import com.fource.hrbank.dto.department.DepartmentUpdateRequest;
 public interface DepartmentService {
 
     public CursorPageResponse<DepartmentDto> findAll(String nameOrDescription, Long idAfter,
-                                      String cursor, int size, String sortField, String sortDirection);
+        String cursor, int size, String sortField, String sortDirection);
 
     public DepartmentDto create(DepartmentCreateRequest request);
 
