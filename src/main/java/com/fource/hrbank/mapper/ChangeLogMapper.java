@@ -10,7 +10,7 @@ public class ChangeLogMapper {
     public ChangeLogDto toDto(ChangeLog changeLog) {
         return new ChangeLogDto(
             changeLog.getId(),
-            changeLog.getEmployee().getEmployeeNumber(),
+            changeLog.getEmployeeNumber(),
             changeLog.getChangedAt(),
             changeLog.getChangedIp(),
             changeLog.getType(),

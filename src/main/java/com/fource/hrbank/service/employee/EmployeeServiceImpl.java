@@ -189,8 +189,7 @@ public class EmployeeServiceImpl implements EmployeeService {
        List<DiffsDto> diffs = changeLogService.createEmployeeDiffs(employee, null);
        changeLogService.create(employee, ChangeType.DELETED, "직원 삭제", diffs);
 
-       employee.setDeleted(true);
-       employeeRepository.save(employee);
+       employeeRepository.delete(employee);
     }
 
 
@@ -253,7 +252,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         return new Employee(
             profile, department, request.name(), request.email(), employeeNumber,
-            request.position(), request.hireDate(), EmployeeStatus.ACTIVE, null, false
+            request.position(), request.hireDate(), EmployeeStatus.ACTIVE, null
         );
     }
 
@@ -323,8 +322,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             request.position(),
             request.hireDate(),
             request.status(),
-            Instant.now(),
-            false // deleted
+            Instant.now()
         );
     }
 

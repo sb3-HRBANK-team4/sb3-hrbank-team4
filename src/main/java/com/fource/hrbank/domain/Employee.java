@@ -17,8 +17,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 @Entity
 @Getter
@@ -26,14 +24,13 @@ import org.hibernate.annotations.Where;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "tbl_employees")
-@SQLDelete(sql = "UPDATE tbl_employees SET is_deleted = true WHERE id = ?")
-@Where(clause = "is_deleted = false")
 public class Employee extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_image_id")
     private FileMetadata profile;
 
+    @Setter
     @ManyToOne
     @JoinColumn(name = "department_id")
     private Department department;
@@ -59,10 +56,6 @@ public class Employee extends BaseEntity {
 
     @Column(name = "updated_at")
     private Instant updatedAt;
-
-    @Setter
-    @Column(name = "is_deleted")
-    private Boolean deleted = false;
 
     public void update(String newName, String newEmail, Department newDepartment,
         String newPosition, LocalDate newHireDate,

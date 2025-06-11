@@ -120,7 +120,6 @@ public class ChangeLogServiceImpl implements ChangeLogService {
         String ipAddress = IpUtils.getCurrentClientIp();
 
         ChangeLog changeLog = new ChangeLog(
-            employee,
             employee.getEmployeeNumber(),
             Instant.now(),
             ipAddress,
