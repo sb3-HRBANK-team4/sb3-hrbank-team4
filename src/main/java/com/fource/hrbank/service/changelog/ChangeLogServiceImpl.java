@@ -223,4 +223,9 @@ public class ChangeLogServiceImpl implements ChangeLogService {
         detail.setAfter(dto.getAfter());
         return detail;
     }
+
+    @Override
+    public long countByCreatedAtBetween(Instant from, Instant to) {
+        return changeLogRepository.countByCreatedAtBetween(from, to);
+    }
 }

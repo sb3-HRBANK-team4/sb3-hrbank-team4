@@ -47,4 +47,13 @@ public class ChangeLogController{
         List<DiffsDto> result = changeLogService.findDiffs(id);
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/count")
+    public ResponseEntity<Long> count(
+        @RequestParam(required = false) Instant atFrom,
+        @RequestParam(required = false) Instant atTo
+    ) {
+        long count = changeLogService.countByCreatedAtBetween(atFrom, atTo);
+        return ResponseEntity.ok(count);
+    }
 }

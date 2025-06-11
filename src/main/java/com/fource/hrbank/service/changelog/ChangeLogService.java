@@ -31,4 +31,6 @@ public interface ChangeLogService {
         List<DiffsDto> diffsDtos);
 
     List<DiffsDto> createEmployeeDiffs(Employee before, Employee after);
+
+    long countByCreatedAtBetween(Instant from, Instant to);
 }
