@@ -8,6 +8,7 @@ import com.fource.hrbank.service.changelog.ChangeLogService;
 import java.time.Instant;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,10 +51,19 @@ public class ChangeLogController{
 
     @GetMapping("/count")
     public ResponseEntity<Long> count(
-        @RequestParam(required = false) Instant atFrom,
-        @RequestParam(required = false) Instant atTo
+        @RequestParam(required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant atFrom,
+        @RequestParam(required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant atTo
     ) {
-        long count = changeLogService.countByCreatedAtBetween(atFrom, atTo);
-        return ResponseEntity.ok(count);
+
+        // null일 경우 기본값 지정 (최근 7일)
+        Instant now = Instant.now();
+        if (atTo == null) {
+            atTo = now;
+        }
+        if (atFrom == null) {
+            atFrom = atTo.minusSeconds(7 * 24 * 60 * 60); // 7일 전
+        }
     }
 }

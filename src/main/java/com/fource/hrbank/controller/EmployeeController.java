@@ -9,7 +9,6 @@ import com.fource.hrbank.dto.employee.EmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.fource.hrbank.service.dashboard.DashboardService;
 import com.fource.hrbank.service.employee.EmployeeService;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -125,17 +124,15 @@ public class EmployeeController implements EmployeeApi {
     }
 
     @GetMapping("/count")
-    public ResponseEntity<Long> countChangeLogs(
+    public ResponseEntity<Long> countEmployees(
         @RequestParam(required = false)
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate fromDate,
         @RequestParam(required = false)
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate toDate
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate toDate,
+        @RequestParam(required = false)
+        EmployeeStatus status
     ) {
-        long count = dashboardService.getEmployeeTrend(
-            fromDate,
-            toDate,
-            "day"
-        ).size();
+        long count = employeeService.getEmployeeCount(status, fromDate, toDate);
         return ResponseEntity.ok(count);
     }
 }
