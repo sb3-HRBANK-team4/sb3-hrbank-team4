@@ -19,8 +19,6 @@ import com.fource.hrbank.repository.employee.EmployeeRepository;
 import com.fource.hrbank.service.changelog.ChangeLogService;
 import com.fource.hrbank.service.employee.EmployeeService;
 import com.fource.hrbank.service.storage.FileStorage;
-import com.fource.hrbank.service.storage.LocalFileStorage;
-import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -29,7 +27,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -114,13 +111,11 @@ public class ChangeLogServiceTest {
             "테스트개발자",
             LocalDate.of(2024, 1, 1),
             EmployeeStatus.ACTIVE,
-            Instant.now(),
-            false
+            Instant.now()
         );
         employeeRepository.save(employee);
 
         ChangeLog entity = new ChangeLog(
-            employee,
             employee.getEmployeeNumber(),
             Instant.now(),
             "127.0.0.1",
@@ -164,8 +159,7 @@ public class ChangeLogServiceTest {
             "개발자",
             LocalDate.of(2024, 1, 1),
             EmployeeStatus.ACTIVE,
-            Instant.now(),
-            false
+            Instant.now()
         );
         employeeRepository.save(employee);
 
@@ -215,13 +209,11 @@ public class ChangeLogServiceTest {
             "정렬개발자",
             LocalDate.of(2024, 5, 1),
             EmployeeStatus.ACTIVE,
-            Instant.now(),
-            false
+            Instant.now()
         );
         employeeRepository.save(employee);
 
         ChangeLog changeLog1 = new ChangeLog(
-            employee,
             employee.getEmployeeNumber(),
             Instant.now().minusSeconds(60),
             "100.10.1.1",
@@ -230,7 +222,6 @@ public class ChangeLogServiceTest {
             null
         );
         ChangeLog changeLog2 = new ChangeLog(
-            employee,
             employee.getEmployeeNumber(),
             Instant.now().minusSeconds(30),
             "100.10.1.2",
@@ -239,7 +230,6 @@ public class ChangeLogServiceTest {
             null
         );
         ChangeLog changeLog3 = new ChangeLog(
-            employee,
             employee.getEmployeeNumber(),
             Instant.now(),
             "100.10.1.3",

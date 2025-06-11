@@ -1,5 +1,9 @@
 package com.fource.hrbank.service;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
@@ -11,6 +15,9 @@ import com.fource.hrbank.repository.department.DepartmentRepository;
 import com.fource.hrbank.repository.employee.EmployeeRepository;
 import com.fource.hrbank.service.department.DepartmentService;
 import jakarta.persistence.EntityManager;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +25,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
@@ -137,7 +136,7 @@ public class DepartmentServiceTest {
         Department department = new Department("지원", "부서 지원", LocalDate.now(), Instant.now());
         departmentRepository.save(department);
 
-        Employee employee = new Employee(null, department, "강호", "kang@naver.com", "EMP-2025-123312", "사원", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now(), false);
+        Employee employee = new Employee(null, department, "강호", "kang@naver.com", "EMP-2025-123312", "사원", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
         employeeRepository.save(employee);
 
         entityManager.flush();
@@ -155,7 +154,7 @@ public class DepartmentServiceTest {
         departmentRepository.save(department);
 
         // 직원 추가 후 제거
-        Employee employee = new Employee(null, department, "강호", "kang@naver.com", "EMP-2025-1233213", "사원", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now(), false);
+        Employee employee = new Employee(null, department, "강호", "kang@naver.com", "EMP-2025-1233213", "사원", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
         employeeRepository.save(employee);
 
         // 직원 먼저 제거(물리적 삭제)
