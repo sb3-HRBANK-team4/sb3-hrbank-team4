@@ -36,4 +36,6 @@ public interface ChangeLogService {
         Department department);
 
     void saveChangeLogWithDetails(ChangeLog changeLog, List<DiffsDto> dtos);
+
+    long countByCreatedAtBetween(Instant from, Instant to);
 }

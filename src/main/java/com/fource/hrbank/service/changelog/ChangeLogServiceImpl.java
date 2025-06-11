@@ -209,4 +209,9 @@ public class ChangeLogServiceImpl implements ChangeLogService {
 
         changeDetailRepository.saveAll(entities);
     }
+
+    @Override
+    public long countByCreatedAtBetween(Instant from, Instant to) {
+        return changeLogRepository.countByCreatedAtBetween(from, to);
+    }
 }

@@ -7,7 +7,7 @@ import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
-import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
+import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
@@ -82,6 +82,10 @@ class EmployeeServiceTest {
 
     @Test
     void findAll_검색조건없음_커서페이지네이션_정상작동() {
+
+        LocalDate hireDateFrom = null;
+        LocalDate hireDateTo = null;
+
         Department department = departmentRepository.save(
             new Department("백엔드 개발팀", "서버 개발을 담당합니다.", LocalDate.now(), Instant.now())
         );
@@ -108,8 +112,9 @@ class EmployeeServiceTest {
         int size = 2;
 
         // when
-        CursorPageResponseEmployeeDto result = employeeService.findAll(
+        CursorPageResponse<EmployeeDto> result = employeeService.findAll(
             nameOrEmail, employeeNumber, departmentName, position, status,
+            hireDateFrom, hireDateTo,
             sortField, sortDirection, cursor, idAfter, size
         );
 
@@ -123,6 +128,9 @@ class EmployeeServiceTest {
 
     @Test
     void findAll_이름내림차순정렬_확인() {
+
+        LocalDate hireDateFrom = LocalDate.of(2023, 1, 1);
+        LocalDate hireDateTo = LocalDate.of(2023, 12, 31);
 
         Department department = departmentRepository.save(
             new Department("백엔드 개발팀", "서버 개발을 담당합니다.", LocalDate.now(), Instant.now())
@@ -138,10 +146,19 @@ class EmployeeServiceTest {
         ));
 
         // when
-        CursorPageResponseEmployeeDto result = employeeService.findAll(
-            null, null, department.getName(), null, null,
-            "name", "desc",
-            null, null, 10
+        CursorPageResponse<EmployeeDto> result = employeeService.findAll(
+            null,                           // nameOrEmail
+            null,                           // employeeNumber
+            department.getName(),           // departmentName
+            null,                           // position
+            null,                           // status
+            hireDateFrom,                   // hireDateFrom
+            hireDateTo,                     // hireDateTo
+            "name",                         // sortField
+            "desc",                         // sortDirection
+            null,                           // cursor
+            null,                           // idAfter
+            10                              // size
         );
 
         // then
@@ -389,11 +406,11 @@ class EmployeeServiceTest {
         assertThat(trendList.get(0).date()).isEqualTo(LocalDate.of(2025, 1, 1));
         assertThat(trendList.get(0).count()).isEqualTo(1);
         assertThat(trendList.get(0).change()).isEqualTo(0); // 첫 달이므로 비교 대상 없음
-        assertThat(trendList.get(0).percentage()).isEqualTo(0.0);
+        assertThat(trendList.get(0).changeRate()).isEqualTo(0.0);
 
         assertThat(trendList.get(1).count()).isEqualTo(2); // 1→2
         assertThat(trendList.get(1).change()).isEqualTo(1);
-        assertThat(trendList.get(1).percentage()).isEqualTo(100.0);
+        assertThat(trendList.get(1).changeRate()).isEqualTo(100.0);
 
         assertThat(trendList.get(2).count()).isEqualTo(3);
         assertThat(trendList.get(3).count()).isEqualTo(4);

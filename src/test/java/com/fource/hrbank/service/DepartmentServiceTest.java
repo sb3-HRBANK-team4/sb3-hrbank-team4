@@ -3,7 +3,7 @@ package com.fource.hrbank.service;
 import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
-import com.fource.hrbank.dto.department.CursorPageResponseDepartmentDto;
+import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.dto.department.DepartmentDto;
 import com.fource.hrbank.dto.department.DepartmentUpdateRequest;
 import com.fource.hrbank.exception.DepartmentDeleteException;
@@ -87,7 +87,7 @@ public class DepartmentServiceTest {
         String sortDirection = "asc";
 
         // when
-        CursorPageResponseDepartmentDto result = departmentService.findAll(
+        CursorPageResponse<DepartmentDto> result = departmentService.findAll(
             nameOrDescription, idAfter, cursor, size, sortField, sortDirection);
 
         // then
