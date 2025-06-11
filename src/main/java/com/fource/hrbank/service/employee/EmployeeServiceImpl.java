@@ -301,8 +301,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         String nextCursor = hasNext ? extractCursorValue(sortField, content.get(content.size() - 1)) : null;
         Long nextId = hasNext ? content.get(content.size() - 1).id() : null;
+        long totalElements = employeeRepository.count();
 
-        return new CursorPageResponse<>(content, nextCursor, nextId, size, null, hasNext);
+        return new CursorPageResponse<>(content, nextCursor, nextId, size, totalElements, hasNext);
     }
 
     // 커서 값 생성을 위해 정렬 필드의 값만 추출해 String으로 넘김
