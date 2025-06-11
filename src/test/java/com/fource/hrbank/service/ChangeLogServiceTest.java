@@ -19,6 +19,8 @@ import com.fource.hrbank.repository.employee.EmployeeRepository;
 import com.fource.hrbank.service.changelog.ChangeLogService;
 import com.fource.hrbank.service.employee.EmployeeService;
 import com.fource.hrbank.service.storage.FileStorage;
+import com.fource.hrbank.service.storage.LocalFileStorage;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -27,8 +29,10 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -76,10 +80,17 @@ public class ChangeLogServiceTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Value("${spring.profiles.active}")
+    private String profile;
+
     @BeforeEach
     void setUp() {
-        jdbcTemplate.execute(
-            "TRUNCATE TABLE tbl_change_detail, tbl_change_log, tbl_employees, tbl_department RESTART IDENTITY CASCADE");
+        // 테이블 ID 시퀀스 초기화
+        if (!profile.equals("local")) {
+            jdbcTemplate.execute(
+                "TRUNCATE TABLE tbl_change_detail, tbl_change_log, tbl_employees, tbl_department RESTART IDENTITY CASCADE");
+        }
+
 
         MockHttpServletRequest mockRequest = new MockHttpServletRequest();
         mockRequest.setRemoteAddr("127.0.0.1");

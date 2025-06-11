@@ -54,9 +54,6 @@ class EmployeeServiceTest {
     private DashboardService dashboardService;
 
     @Autowired
-    private ChangeLogService changeLogService;
-
-    @Autowired
     private ChangeLogRepository changeLogRepository;
 
     @Autowired
