@@ -18,5 +18,7 @@ public interface DepartmentCustomRepository {
 
     long countByKeyword(String keyword);
 
+    long countEmployeeByDepartmentId(Long departmentId);
+
     Map<Long, Long> countByDepartmentIds(List<Long> departmentIds);
 }

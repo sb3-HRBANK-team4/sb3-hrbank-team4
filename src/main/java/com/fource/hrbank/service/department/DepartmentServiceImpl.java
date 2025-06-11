@@ -91,6 +91,8 @@ public class DepartmentServiceImpl implements DepartmentService {
      */
     @Override
     public DepartmentDto create(DepartmentCreateRequest request) {
+        if (departmentRepository.existsByName(request.getName())) throw new DuplicateDepartmentException();
+
         Department department = new Department(
             request.getName(),
             request.getDescription(),
@@ -98,7 +100,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             Instant.now()
         );
 
-        return departmentMapper.toDto(departmentRepository.save(department), null);
+        return departmentMapper.toDto(departmentRepository.save(department), departmentRepository.countEmployeeByDepartmentId(department.getId()));
     }
 
     /**
@@ -119,7 +121,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         department.update(request);
 
-        return departmentMapper.toDto(department, null);
+        return departmentMapper.toDto(department, departmentRepository.countEmployeeByDepartmentId(department.getId()));
     }
 
     @Override

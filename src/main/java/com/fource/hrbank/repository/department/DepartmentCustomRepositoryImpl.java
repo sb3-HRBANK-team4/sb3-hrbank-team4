@@ -93,6 +93,17 @@ public class DepartmentCustomRepositoryImpl implements DepartmentCustomRepositor
     }
 
     @Override
+    public long countEmployeeByDepartmentId(Long departmentId) {
+        QEmployee e = QEmployee.employee;
+
+        return queryFactory
+                .select(e.count())
+                .from(e)
+                .where(e.department.id.eq(departmentId))
+                .fetchOne();
+    }
+
+    @Override
     public Map<Long, Long> countByDepartmentIds(List<Long> departmentIds) {
         QEmployee e = QEmployee.employee;
 
