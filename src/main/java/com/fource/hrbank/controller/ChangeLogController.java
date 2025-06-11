@@ -65,5 +65,8 @@ public class ChangeLogController{
         if (atFrom == null) {
             atFrom = atTo.minusSeconds(7 * 24 * 60 * 60); // 7일 전
         }
+
+        long count = changeLogService.countByCreatedAtBetween(atFrom, atTo);
+        return ResponseEntity.ok(count);
     }
 }
