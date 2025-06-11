@@ -19,8 +19,6 @@ import com.fource.hrbank.repository.employee.EmployeeRepository;
 import com.fource.hrbank.service.changelog.ChangeLogService;
 import com.fource.hrbank.service.employee.EmployeeService;
 import com.fource.hrbank.service.storage.FileStorage;
-import com.fource.hrbank.service.storage.LocalFileStorage;
-import java.nio.file.Path;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -29,7 +27,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -124,7 +121,7 @@ public class ChangeLogServiceTest {
             "127.0.0.1",
             ChangeType.CREATED,
             "단건조회 테스트",
-            null  // or Collections.emptyList()
+            null
         );
         ChangeLog saved = changeLogRepository.save(entity);
 
@@ -202,7 +199,7 @@ public class ChangeLogServiceTest {
             new Department("마케팅팀", "마케팅 업무", LocalDate.of(2025, 1, 1), Instant.now())
         );
 
-// given
+        // given
         Employee employee = new Employee(
             null,
             department,
@@ -213,7 +210,7 @@ public class ChangeLogServiceTest {
             LocalDate.of(2024, 5, 1),
             EmployeeStatus.ACTIVE,
             Instant.now()
-        ); // 'false' 인자 제거
+        );
         employeeRepository.save(employee);
 
         ChangeLog changeLog1 = new ChangeLog(
@@ -224,7 +221,6 @@ public class ChangeLogServiceTest {
             "메모1",
             null
         );
-
         ChangeLog changeLog2 = new ChangeLog(
             employee.getEmployeeNumber(),
             Instant.now().minusSeconds(30),
@@ -233,7 +229,6 @@ public class ChangeLogServiceTest {
             "메모2",
             null
         );
-
         ChangeLog changeLog3 = new ChangeLog(
             employee.getEmployeeNumber(),
             Instant.now(),
