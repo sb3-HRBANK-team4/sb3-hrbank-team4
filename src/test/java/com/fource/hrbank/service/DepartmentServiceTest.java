@@ -3,7 +3,7 @@ package com.fource.hrbank.service;
 import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
-import com.fource.hrbank.dto.department.CursorPageResponseDepartmentDto;
+import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.dto.department.DepartmentDto;
 import com.fource.hrbank.dto.department.DepartmentUpdateRequest;
 import com.fource.hrbank.exception.DepartmentDeleteException;
@@ -14,6 +14,7 @@ import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,26 +46,28 @@ public class DepartmentServiceTest {
     @Autowired
     private EntityManager entityManager;
 
+    @Value("${spring.profiles.active}")
+    private String profile;
+
     @BeforeEach
     void setUp() {
-        // 테이블 삭제
-        employeeRepository.deleteAll();
-        departmentRepository.deleteAll();
+        if (!profile.equals("local")) {
+            // 테이블 삭제
+            employeeRepository.deleteAll();
+            departmentRepository.deleteAll();
 
-        // 시퀀스를 "테이블의 MAX(id) + 1"로 세팅
-        jdbcTemplate.execute("""
+            // 시퀀스를 "테이블의 MAX(id) + 1"로 세팅
+            jdbcTemplate.execute("""
                 SELECT setval('tbl_department_id_seq', 
                               COALESCE((SELECT MAX(id) FROM tbl_department), 0) + 1,
                               false)
             """);
-        jdbcTemplate.execute("""
+            jdbcTemplate.execute("""
                 SELECT setval('tbl_employees_id_seq', 
                               COALESCE((SELECT MAX(id) FROM tbl_employees), 0) + 1,
                               false)
             """);
-
-        jdbcTemplate.execute(
-            "TRUNCATE TABLE tbl_change_detail, tbl_change_log, tbl_employees RESTART IDENTITY CASCADE");
+        }
     }
 
     @Test
@@ -84,7 +87,7 @@ public class DepartmentServiceTest {
         String sortDirection = "asc";
 
         // when
-        CursorPageResponseDepartmentDto result = departmentService.findAll(
+        CursorPageResponse<DepartmentDto> result = departmentService.findAll(
             nameOrDescription, idAfter, cursor, size, sortField, sortDirection);
 
         // then
@@ -144,8 +147,6 @@ public class DepartmentServiceTest {
         assertThrows(DepartmentDeleteException.class,
                 () -> departmentService.delete(department.getId()));
     }
-
-
 
     @Test
     void 부서_삭제_성공() {

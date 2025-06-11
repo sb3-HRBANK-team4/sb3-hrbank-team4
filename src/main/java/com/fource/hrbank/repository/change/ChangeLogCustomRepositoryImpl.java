@@ -3,7 +3,7 @@ package com.fource.hrbank.repository.change;
 import com.fource.hrbank.domain.ChangeType;
 import com.fource.hrbank.domain.QChangeLog;
 import com.fource.hrbank.dto.changelog.ChangeLogDto;
-import com.fource.hrbank.dto.changelog.CursorPageResponseChangeLogDto;
+import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
@@ -22,7 +22,7 @@ public class ChangeLogCustomRepositoryImpl implements ChangeLogCustomRepository 
 
 
     @Override
-    public CursorPageResponseChangeLogDto searchChangeLogsWithSorting(
+    public CursorPageResponse<ChangeLogDto> searchChangeLogsWithSorting(
         String employeeNumber,
         ChangeType type,
         String memo,
@@ -90,7 +90,7 @@ public class ChangeLogCustomRepositoryImpl implements ChangeLogCustomRepository 
             .where(createWhereConditionForCount(employeeNumber, type, memo, ipAddress))
             .fetchOne();
 
-        return new CursorPageResponseChangeLogDto(
+        return new CursorPageResponse<ChangeLogDto>(
             content,
             nextCursor,
             nextIdAfter,

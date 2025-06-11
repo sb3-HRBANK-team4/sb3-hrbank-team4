@@ -3,14 +3,14 @@ package com.fource.hrbank.service.changelog;
 import com.fource.hrbank.domain.ChangeLog;
 import com.fource.hrbank.domain.ChangeType;
 import com.fource.hrbank.domain.Employee;
-import com.fource.hrbank.dto.changelog.CursorPageResponseChangeLogDto;
 import com.fource.hrbank.dto.changelog.DiffsDto;
+import com.fource.hrbank.dto.common.CursorPageResponse;
 import java.time.Instant;
 import java.util.List;
 
 public interface ChangeLogService {
 
-    CursorPageResponseChangeLogDto getAllChangeLogs(
+    CursorPageResponse getAllChangeLogs(
         String employeeNumber,
         ChangeType type,
         String memo,

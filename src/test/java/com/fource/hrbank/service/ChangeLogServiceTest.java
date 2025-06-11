@@ -9,8 +9,8 @@ import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.dto.changelog.ChangeLogDto;
-import com.fource.hrbank.dto.changelog.CursorPageResponseChangeLogDto;
 import com.fource.hrbank.dto.changelog.DiffsDto;
+import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.fource.hrbank.repository.change.ChangeDetailRepository;
 import com.fource.hrbank.repository.change.ChangeLogRepository;
@@ -244,7 +244,7 @@ public class ChangeLogServiceTest {
         Instant atFrom = Instant.now().minusSeconds(120); // 이전 시점
         Instant atTo = Instant.now().plusSeconds(10);     // 현재 이후 시점
 
-        CursorPageResponseChangeLogDto result = changeLogService.getAllChangeLogs(
+        CursorPageResponse<ChangeLogDto> result = changeLogService.getAllChangeLogs(
             null, null, null, null, null, null,
             10, "changedAt", "DESC", atFrom, atTo
         );

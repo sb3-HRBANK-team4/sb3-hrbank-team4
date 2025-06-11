@@ -2,7 +2,7 @@ package com.fource.hrbank.controller;
 
 import com.fource.hrbank.controller.api.EmployeeApi;
 import com.fource.hrbank.domain.EmployeeStatus;
-import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
+import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
 import com.fource.hrbank.dto.employee.EmployeeDto;
@@ -10,6 +10,8 @@ import com.fource.hrbank.dto.employee.EmployeeTrendDto;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.fource.hrbank.service.dashboard.DashboardService;
 import com.fource.hrbank.service.employee.EmployeeService;
+
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -58,7 +60,7 @@ public class EmployeeController implements EmployeeApi {
     }
 
     @GetMapping
-    public ResponseEntity<CursorPageResponseEmployeeDto> getAllEmployees(
+    public ResponseEntity<CursorPageResponse<EmployeeDto>> getAllEmployees(
         @RequestParam(required = false) String nameOrEmail,
         @RequestParam(required = false) String employeeNumber,
         @RequestParam(required = false) String departmentName,
@@ -72,8 +74,8 @@ public class EmployeeController implements EmployeeApi {
         @RequestParam(defaultValue = "name") String sortField,
         @RequestParam(defaultValue = "asc") String sortDirection
     ) {
-        CursorPageResponseEmployeeDto employees = employeeService.findAll(
-            nameOrEmail, employeeNumber, departmentName, position, status, sortField, sortDirection,
+        CursorPageResponse<EmployeeDto> employees = employeeService.findAll(
+            nameOrEmail, employeeNumber, departmentName, position, status, hireDateFrom, hireDateTo, sortField, sortDirection,
             cursor, idAfter, size
         );
 

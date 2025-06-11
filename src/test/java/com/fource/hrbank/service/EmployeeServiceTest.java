@@ -8,9 +8,9 @@ import com.fource.hrbank.domain.ChangeType;
 import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
-import com.fource.hrbank.dto.changelog.DiffsDto;
+import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
-import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
+
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
@@ -29,13 +29,13 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @SpringBootTest
 @Transactional
@@ -62,11 +62,16 @@ class EmployeeServiceTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Value("${spring.profiles.active}")
+    private String profile;
+
     @BeforeEach
     void setUp() {
-        //시퀀스 초기화
-        jdbcTemplate.execute(
-            "TRUNCATE TABLE tbl_change_detail, tbl_change_log, tbl_employees RESTART IDENTITY CASCADE");
+        if (!profile.equals("local")) {
+            //시퀀스 초기화
+            jdbcTemplate.execute(
+                    "TRUNCATE TABLE tbl_change_detail, tbl_change_log, tbl_employees RESTART IDENTITY CASCADE");
+        }
     }
 
     @Test
@@ -112,10 +117,13 @@ class EmployeeServiceTest {
         String cursor = null;
         Long idAfter = null;
         int size = 2;
+        LocalDate hireDateFrom = LocalDate.of(2023, 1, 1);
+        LocalDate hireDateTo = LocalDate.of(2025, 1, 1);
+
 
         // when
-        CursorPageResponseEmployeeDto result = employeeService.findAll(
-            nameOrEmail, employeeNumber, departmentName, position, status,
+        CursorPageResponse<EmployeeDto> result = employeeService.findAll(
+            nameOrEmail, employeeNumber, departmentName, position,  status, hireDateFrom, hireDateTo,
             sortField, sortDirection, cursor, idAfter, size
         );
 
@@ -143,9 +151,13 @@ class EmployeeServiceTest {
                 LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now(), false)
         ));
 
+        LocalDate hireDateFrom = LocalDate.of(2023, 1, 1);
+        LocalDate hireDateTo = LocalDate.of(2025, 1, 1);
+
         // when
-        CursorPageResponseEmployeeDto result = employeeService.findAll(
+        CursorPageResponse<EmployeeDto> result = employeeService.findAll(
             null, null, department.getName(), null, null,
+            hireDateFrom, hireDateTo,
             "name", "desc",
             null, null, 10
         );

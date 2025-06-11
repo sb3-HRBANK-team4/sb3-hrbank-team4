@@ -7,9 +7,9 @@ import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.domain.FileMetadata;
 import com.fource.hrbank.dto.changelog.DiffsDto;
+import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.dto.common.ResponseDetails;
 import com.fource.hrbank.dto.common.ResponseMessage;
-import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
@@ -26,6 +26,7 @@ import com.fource.hrbank.service.changelog.ChangeLogService;
 import com.fource.hrbank.service.storage.FileStorage;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.Year;
 import java.util.List;
 import java.util.Optional;
@@ -112,10 +113,10 @@ public class EmployeeServiceImpl implements EmployeeService {
      */
     @Transactional(readOnly = true)
     @Override
-    public CursorPageResponseEmployeeDto findAll(String nameOrEmail, String employeeNumber,
-        String departmentName,
-        String position, EmployeeStatus status, String sortField, String sortDirection,
-        String cursor, Long idAfter, int size) {
+    public CursorPageResponse<EmployeeDto> findAll(String nameOrEmail, String employeeNumber,
+                                      String departmentName,
+                                      String position, EmployeeStatus status, LocalDate hireDateFrom, LocalDate hireDateTo, String sortField, String sortDirection,
+                                      String cursor, Long idAfter, int size) {
 
         validateSortField(sortField);
 
@@ -129,7 +130,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         // 3. Specification 조합 (검색 조건 + 커서 조건)
         Specification<Employee> spec = buildSearchSpecification(
-            nameOrEmail, departmentName, position, status, sortField, cursor, idAfter);
+            nameOrEmail, departmentName, position, employeeNumber, status, hireDateFrom, hireDateTo, sortField, cursor, idAfter);
 
         // 4. 데이터 조회
         List<Employee> employees = employeeRepository.findAll(spec, pageable).getContent();
@@ -265,17 +266,20 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     // 검색 조건 구성
     private Specification<Employee> buildSearchSpecification(String nameOrEmail, String departmentName,
-        String position, EmployeeStatus status, String sortField, String cursor, Long idAfter) {
+        String position, String employeeNumber, EmployeeStatus status, LocalDate hireDateFrom, LocalDate hireDateTo, String sortField, String cursor, Long idAfter) {
         return Specification
             .where(EmployeeSpecification.nameOrEmailLike(nameOrEmail))
             .and(EmployeeSpecification.departmentContains(departmentName))
             .and(EmployeeSpecification.positionContains(position))
+            .and(EmployeeSpecification.employeeNumber(employeeNumber))
             .and(EmployeeSpecification.statusEquals(status))
+            .and(EmployeeSpecification.hireDateFrom(hireDateFrom))
+            .and(EmployeeSpecification.hireDateTo(hireDateTo))
             .and(EmployeeSpecification.buildCursorSpec(sortField, cursor, idAfter));
     }
 
     // 커서 페이지 응답 구성
-    private CursorPageResponseEmployeeDto buildCursorPageResponse(List<Employee> employees, int size, String sortField) {
+    private CursorPageResponse<EmployeeDto> buildCursorPageResponse(List<Employee> employees, int size, String sortField) {
         boolean hasNext = employees.size() > size;
 
         List<EmployeeDto> content = employees.stream()
@@ -286,7 +290,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         String nextCursor = hasNext ? extractCursorValue(sortField, content.get(content.size() - 1)) : null;
         Long nextId = hasNext ? content.get(content.size() - 1).id() : null;
 
-        return new CursorPageResponseEmployeeDto(content, nextCursor, nextId, size, null, hasNext);
+        return new CursorPageResponse<>(content, nextCursor, nextId, size, null, hasNext);
     }
 
     // 커서 값 생성을 위해 정렬 필드의 값만 추출해 String으로 넘김
@@ -329,12 +333,14 @@ public class EmployeeServiceImpl implements EmployeeService {
         FileMetadata profile = employee.getProfile();
         if (profile != null) {
             try {
+                // DB에서 메타데이터 삭제
                 fileMetadataRepository.delete(profile);
                 log.info("프로필 이미지 삭제 완료 - ID: {}", profile.getId());
             } catch (Exception e) {
                 log.warn("프로필 이미지 삭제 실패: {}", e.getMessage());
             }
+        } else {
+            log.info("삭제할 프로필 이미지가 없습니다.");
         }
     }
 }
-
