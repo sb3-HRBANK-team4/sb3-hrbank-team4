@@ -19,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -43,13 +44,18 @@ public class LocalFileStorageTest {
     @TempDir
     Path tempDir;
 
+    @Value("${spring.profiles.active}")
+    private String profile;
+
     @BeforeEach
     void setUp() {
         fileStorage = new LocalFileStorage(tempDir.toString());
         fileStorage.init();
 
         // 테이블 ID 시퀀스 초기화
-        jdbcTemplate.execute("TRUNCATE TABLE tbl_file_metadata RESTART IDENTITY CASCADE");
+        if (!profile.equals("local")) {
+            jdbcTemplate.execute("TRUNCATE TABLE tbl_file_metadata RESTART IDENTITY CASCADE");
+        }
     }
 
     @Test
@@ -139,7 +145,7 @@ public class LocalFileStorageTest {
         // when
         assertThatThrownBy(() -> fileStorage.get(id))
             .isInstanceOf(FileNotFoundException.class)
-            .hasMessage(ResponseDetails.FILE_NOT_FOUND_ERROR_MESSAGE);
+            .hasMessage(ResponseMessage.FILE_NOT_FOUND_ERROR_MESSAGE);
     }
 
     @Test
