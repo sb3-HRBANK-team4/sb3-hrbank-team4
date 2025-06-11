@@ -101,10 +101,10 @@ public class BackupServiceImpl implements BackupService {
     @Override
     @Transactional(readOnly = true)
     public BackupDto findLatestByStatus(BackupStatus status) {
-        BackupLog backupLog = backupLogRepository.findLatestByStatus(status)
-            .orElseThrow(BackupLogNotFoundException::new);
 
-        return backupLogMapper.toDto(backupLog);
+        return backupLogRepository.findLatestByStatus(status)
+                .map(backupLogMapper::toDto)
+                .orElse(null);
     }
 
     /**
