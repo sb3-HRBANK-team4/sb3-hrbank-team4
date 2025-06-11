@@ -3,7 +3,6 @@ package com.fource.hrbank.service;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -20,15 +19,14 @@ import com.fource.hrbank.dto.common.ResponseMessage;
 import com.fource.hrbank.exception.BackupLogNotFoundException;
 import com.fource.hrbank.exception.FileIOException;
 import com.fource.hrbank.mapper.BackupLogMapper;
-import com.fource.hrbank.repository.change.ChangeLogRepository;
-import com.fource.hrbank.repository.employee.EmployeeRepository;
 import com.fource.hrbank.repository.FileMetadataRepository;
 import com.fource.hrbank.repository.backup.BackupLogRepository;
+import com.fource.hrbank.repository.change.ChangeLogRepository;
+import com.fource.hrbank.repository.employee.EmployeeRepository;
 import com.fource.hrbank.service.backup.BackupService;
 import com.fource.hrbank.service.storage.FileStorage;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,11 +38,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -166,10 +161,10 @@ public class BackupServiceTest {
         BackupLog backupLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(1800), Instant.now().minusSeconds(1790), BackupStatus.COMPLETED, null);
         backupLogRepository.save(backupLog);
 
-        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now(), false);
+        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
         employeeRepository.save(employee);
 
-        ChangeLog changeLog = new ChangeLog(employee, "EMP-001",Instant.now(), "127.0.0.1", ChangeType.UPDATED, null, null);
+        ChangeLog changeLog = new ChangeLog("EMP-001",Instant.now(), "127.0.0.1", ChangeType.UPDATED, null, null);
         changeLogRepository.save(changeLog);
 
         // when
@@ -187,10 +182,10 @@ public class BackupServiceTest {
         BackupLog backupLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(1800), Instant.now().minusSeconds(1790), BackupStatus.COMPLETED, null);
         backupLogRepository.save(backupLog);
 
-        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now(), false);
+        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
         employeeRepository.save(employee);
 
-        ChangeLog changeLog = new ChangeLog(employee, "EMP-001", Instant.now().minusSeconds(3600), "127.0.0.1", ChangeType.UPDATED, null, null);
+        ChangeLog changeLog = new ChangeLog("EMP-001", Instant.now().minusSeconds(3600), "127.0.0.1", ChangeType.UPDATED, null, null);
         changeLogRepository.save(changeLog);
 
         // when
@@ -238,7 +233,7 @@ public class BackupServiceTest {
         backupLogRepository.save(backupLog);
         BackupDto backupDto = backupLogMapper.toDto(backupLog);
 
-        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now(), false);
+        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
         employeeRepository.save(employee);
 
         // 첫번째 put() : 예외, 두번째는 성공
@@ -260,7 +255,7 @@ public class BackupServiceTest {
         backupLogRepository.save(backupLog);
         BackupDto backupDto = backupLogMapper.toDto(backupLog);
 
-        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now(), false);
+        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
         employeeRepository.save(employee);
 
         // 예외 발생
