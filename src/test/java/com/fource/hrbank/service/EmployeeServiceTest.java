@@ -3,9 +3,12 @@ package com.fource.hrbank.service;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
+import com.fource.hrbank.domain.ChangeLog;
+import com.fource.hrbank.domain.ChangeType;
 import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
+import com.fource.hrbank.dto.changelog.DiffsDto;
 import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
 import com.fource.hrbank.dto.employee.CursorPageResponseEmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
@@ -13,8 +16,10 @@ import com.fource.hrbank.dto.employee.EmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.fource.hrbank.exception.DuplicateEmailException;
 import com.fource.hrbank.exception.EmployeeNotFoundException;
+import com.fource.hrbank.repository.change.ChangeLogRepository;
 import com.fource.hrbank.repository.department.DepartmentRepository;
 import com.fource.hrbank.repository.employee.EmployeeRepository;
+import com.fource.hrbank.service.changelog.ChangeLogService;
 import com.fource.hrbank.service.dashboard.DashboardService;
 import com.fource.hrbank.service.employee.EmployeeService;
 import java.time.Instant;
@@ -30,6 +35,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @SpringBootTest
 @Transactional
@@ -48,6 +54,12 @@ class EmployeeServiceTest {
     private DashboardService dashboardService;
 
     @Autowired
+    private ChangeLogService changeLogService;
+
+    @Autowired
+    private ChangeLogRepository changeLogRepository;
+
+    @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @BeforeEach
@@ -64,7 +76,7 @@ class EmployeeServiceTest {
         );
 
         Employee emp1 = new Employee(null, department, "김가", "a@email.com", "EMP-2025-", "주임",
-            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now());
+            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now(), false);
         Employee savedEmp1 = employeeRepository.save(emp1);
 
         EmployeeDto result = employeeService.findById(savedEmp1.getId());
@@ -81,11 +93,11 @@ class EmployeeServiceTest {
         );
 
         Employee emp1 = new Employee(null, department, "가", "a@email.com", "EMP-2025-", "주임",
-            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now());
+            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now(),false);
         Employee emp2 = new Employee(null, department, "나", "b@email.com", "EMP-2025-", "주임",
-            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now());
+            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now(),false);
         Employee emp3 = new Employee(null, department, "다", "c@email.com", "EMP-2025-", "주임",
-            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now());
+            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now(), false);
 
         employeeRepository.saveAll(List.of(emp1, emp2, emp3));
 
@@ -124,11 +136,11 @@ class EmployeeServiceTest {
 
         employeeRepository.saveAll(List.of(
             new Employee(null, department, "가", "a@email.com", "EMP-001", "주임",
-                LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now()),
+                LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now(), false),
             new Employee(null, department, "나", "b@email.com", "EMP-002", "사원",
-                LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now()),
+                LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now(),false),
             new Employee(null, department, "다", "c@email.com", "EMP-003", "과장",
-                LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now())
+                LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now(), false)
         ));
 
         // when
@@ -278,9 +290,6 @@ class EmployeeServiceTest {
             new Department("개발팀", "소프트웨어 개발을 담당합니다.", LocalDate.now(), Instant.now())
         );
 
-        MockHttpServletRequest mockRequest = new MockHttpServletRequest();
-        mockRequest.setRemoteAddr("127.0.0.1");
-
         // 첫 번째 직원 생성
         EmployeeCreateRequest createRequest1 = new EmployeeCreateRequest(
             "김철수", "kimcs@example.com", department.getId(), "사원", LocalDate.of(2025, 1, 1), "신규 등록"
@@ -336,13 +345,13 @@ class EmployeeServiceTest {
         Department dept4 = departmentRepository.save(new Department("디자인", "디자인팀", LocalDate.now(), Instant.now()));
 
         employeeRepository.save(new Employee(null, dept1, "A", "a1@email.com", "EMP-001", "주임",
-            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now()));
+            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now(), false));
         employeeRepository.save(new Employee(null, dept2, "B", "b1@email.com", "EMP-002", "주임",
-            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now()));
+            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now(), false));
         employeeRepository.save(new Employee(null, dept3, "C", "c1@email.com", "EMP-003", "주임",
-            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now()));
+            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now(), false));
         employeeRepository.save(new Employee(null, dept4, "D", "d1@email.com", "EMP-004", "주임",
-            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now()));
+            LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now(), false));
 
         // when
         List<EmployeeDistributionDto> result = dashboardService.getEmployeeDistribution("department", EmployeeStatus.ACTIVE);
@@ -363,13 +372,13 @@ class EmployeeServiceTest {
 
         // 월별 고르게 입사자를 배치 (2025-01 ~ 2025-04)
         employeeRepository.save(new Employee(null, dept, "A", "a@email.com", "EMP-001", "주임",
-            LocalDate.of(2025, 1, 10), EmployeeStatus.ACTIVE, Instant.now()));
+            LocalDate.of(2025, 1, 10), EmployeeStatus.ACTIVE, Instant.now(), false));
         employeeRepository.save(new Employee(null, dept, "B", "b@email.com", "EMP-002", "사원",
-            LocalDate.of(2025, 2, 5), EmployeeStatus.ACTIVE, Instant.now()));
+            LocalDate.of(2025, 2, 5), EmployeeStatus.ACTIVE, Instant.now(), false));
         employeeRepository.save(new Employee(null, dept, "C", "c@email.com", "EMP-003", "과장",
-            LocalDate.of(2025, 3, 1), EmployeeStatus.ACTIVE, Instant.now()));
+            LocalDate.of(2025, 3, 1), EmployeeStatus.ACTIVE, Instant.now(), false));
         employeeRepository.save(new Employee(null, dept, "D", "d@email.com", "EMP-004", "대리",
-            LocalDate.of(2025, 4, 25), EmployeeStatus.ACTIVE, Instant.now()));
+            LocalDate.of(2025, 4, 25), EmployeeStatus.ACTIVE, Instant.now(), false));
 
         LocalDate from = LocalDate.of(2025, 1, 1);
         LocalDate to = LocalDate.of(2025, 4, 30);
@@ -392,4 +401,30 @@ class EmployeeServiceTest {
         assertThat(trendList.get(2).count()).isEqualTo(3);
         assertThat(trendList.get(3).count()).isEqualTo(4);
     }
+
+    @Test
+    void deleteById_정상삭제() {
+        Department department = departmentRepository.save(
+            new Department("백엔드 개발팀", "서버 개발을 담당합니다.", LocalDate.now(), Instant.now())
+        );
+
+        Employee employee = new Employee(null, department, "조현아", "hyun@gmail.com", "emp-2025-000", "사원", LocalDate.of(2025, 6, 2), EmployeeStatus.ACTIVE, Instant.now(), false);
+        employeeRepository.save(employee);
+
+        // when
+        employeeService.deleteById(employee.getId());
+
+        // then
+        Employee deletedEmployee = employeeRepository.findById(employee.getId()).orElseThrow();
+        assertThat(deletedEmployee.getDeleted()).isTrue(); // soft delete 확인
+
+        List<ChangeLog> logs = changeLogRepository.findAll();
+        assertThat(logs).hasSize(1);
+        ChangeLog log = logs.get(0);
+        assertThat(log.getType()).isEqualTo(ChangeType.DELETED);
+        assertThat(log.getMemo()).isEqualTo("직원 삭제");
+        assertThat(log.getChangedIp()).isEqualTo("127.0.0.1");
+
+    }
+
 }
