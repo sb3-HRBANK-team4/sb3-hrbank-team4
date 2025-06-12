@@ -3,6 +3,7 @@ package com.fource.hrbank.service.department;
 import com.fource.hrbank.annotation.Logging;
 import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.dto.common.CursorPageResponse;
+import com.fource.hrbank.dto.common.ResponseMessage;
 import com.fource.hrbank.dto.department.DepartmentCreateRequest;
 import com.fource.hrbank.dto.department.DepartmentDto;
 import com.fource.hrbank.dto.department.DepartmentUpdateRequest;
@@ -94,7 +95,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public DepartmentDto create(DepartmentCreateRequest request) {
         if (departmentRepository.existsByName(request.getName())) {
-            throw new DuplicateDepartmentException();
+            throw new DuplicateDepartmentException(ResponseMessage.DEPARTMENT_CREATE_FAIL);
         }
 
         Department department = new Department(
@@ -120,7 +121,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         if (request.getName() != null && !request.getName().equals(department.getName())) {
             if (departmentRepository.existsByName(request.getName())) {
-                throw new DuplicateDepartmentException();
+                throw new DuplicateDepartmentException(ResponseMessage.DUPLICATE_DEPARTMENT);
             }
         }
 

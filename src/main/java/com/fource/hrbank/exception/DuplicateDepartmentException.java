@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 
 public class DuplicateDepartmentException extends BaseException {
 
+    private final String message;
+
     @Override
     public HttpStatus getHttpStatus() {
         return HttpStatus.BAD_REQUEST;
@@ -15,7 +17,7 @@ public class DuplicateDepartmentException extends BaseException {
 
     @Override
     public String getMessage() {
-        return ResponseMessage.DUPLICATE_DEPARTMENT;
+        return message;
     }
 
     @Override
@@ -26,5 +28,9 @@ public class DuplicateDepartmentException extends BaseException {
     @Override
     public Instant timestamp() {
         return Instant.now();
+    }
+
+    public DuplicateDepartmentException(String message) {
+        this.message = message;
     }
 }
