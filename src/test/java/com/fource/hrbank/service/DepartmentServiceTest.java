@@ -57,15 +57,15 @@ public class DepartmentServiceTest {
 
             // 시퀀스를 "테이블의 MAX(id) + 1"로 세팅
             jdbcTemplate.execute("""
-                SELECT setval('tbl_department_id_seq', 
-                              COALESCE((SELECT MAX(id) FROM tbl_department), 0) + 1,
-                              false)
-            """);
+                    SELECT setval('tbl_department_id_seq', 
+                                  COALESCE((SELECT MAX(id) FROM tbl_department), 0) + 1,
+                                  false)
+                """);
             jdbcTemplate.execute("""
-                SELECT setval('tbl_employees_id_seq', 
-                              COALESCE((SELECT MAX(id) FROM tbl_employees), 0) + 1,
-                              false)
-            """);
+                    SELECT setval('tbl_employees_id_seq', 
+                                  COALESCE((SELECT MAX(id) FROM tbl_employees), 0) + 1,
+                                  false)
+                """);
         }
     }
 
@@ -136,7 +136,8 @@ public class DepartmentServiceTest {
         Department department = new Department("지원", "부서 지원", LocalDate.now(), Instant.now());
         departmentRepository.save(department);
 
-        Employee employee = new Employee(null, department, "강호", "kang@naver.com", "EMP-2025-123312", "사원", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
+        Employee employee = new Employee(null, department, "강호", "kang@naver.com",
+            "EMP-2025-123312", "사원", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
         employeeRepository.save(employee);
 
         entityManager.flush();
@@ -144,7 +145,7 @@ public class DepartmentServiceTest {
 
         // when & then
         assertThrows(DepartmentDeleteException.class,
-                () -> departmentService.delete(department.getId()));
+            () -> departmentService.delete(department.getId()));
     }
 
     @Test
@@ -154,11 +155,13 @@ public class DepartmentServiceTest {
         departmentRepository.save(department);
 
         // 직원 추가 후 제거
-        Employee employee = new Employee(null, department, "강호", "kang@naver.com", "EMP-2025-1233213", "사원", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
+        Employee employee = new Employee(null, department, "강호", "kang@naver.com",
+            "EMP-2025-1233213", "사원", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
         employeeRepository.save(employee);
 
         // 직원 먼저 제거(물리적 삭제)
-        jdbcTemplate.execute("DELETE FROM tbl_employees WHERE department_id = " + department.getId());
+        jdbcTemplate.execute(
+            "DELETE FROM tbl_employees WHERE department_id = " + department.getId());
         employeeRepository.deleteAll();
 
         entityManager.flush();

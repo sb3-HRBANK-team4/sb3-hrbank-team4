@@ -5,7 +5,6 @@ import com.fource.hrbank.domain.QEmployee;
 import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.Expression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -43,9 +42,15 @@ public class EmployeeCustomRepositoryImpl implements EmployeeCustomRepository {
 
         TypedQuery<Long> query = em.createQuery(jpql.toString(), Long.class);
 
-        if (status != null) query.setParameter("status", status);
-        if (from != null) query.setParameter("from", from);
-        if (to != null) query.setParameter("to", to);
+        if (status != null) {
+            query.setParameter("status", status);
+        }
+        if (from != null) {
+            query.setParameter("from", from);
+        }
+        if (to != null) {
+            query.setParameter("to", to);
+        }
 
         return query.getSingleResult();
     }
@@ -68,7 +73,8 @@ public class EmployeeCustomRepositoryImpl implements EmployeeCustomRepository {
     }
 
     // 그룹별 분포 조회
-    public List<EmployeeDistributionDto> getDistributionByGroup(String groupBy, EmployeeStatus status) {
+    public List<EmployeeDistributionDto> getDistributionByGroup(String groupBy,
+        EmployeeStatus status) {
         BooleanBuilder where = new BooleanBuilder();
 
         if (status != null) {

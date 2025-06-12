@@ -9,8 +9,8 @@ import com.fource.hrbank.domain.Department;
 import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.dto.common.CursorPageResponse;
-import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
+import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
 import com.fource.hrbank.dto.employee.EmployeeDto;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.fource.hrbank.exception.DuplicateEmailException;
@@ -65,7 +65,7 @@ class EmployeeServiceTest {
         if (!profile.equals("local")) {
             //시퀀스 초기화
             jdbcTemplate.execute(
-                    "TRUNCATE TABLE tbl_change_detail, tbl_change_log, tbl_employees RESTART IDENTITY CASCADE");
+                "TRUNCATE TABLE tbl_change_detail, tbl_change_log, tbl_employees RESTART IDENTITY CASCADE");
         }
     }
 
@@ -115,10 +115,9 @@ class EmployeeServiceTest {
         LocalDate hireDateFrom = LocalDate.of(2023, 1, 1);
         LocalDate hireDateTo = LocalDate.of(2025, 1, 1);
 
-
         // when
         CursorPageResponse<EmployeeDto> result = employeeService.findAll(
-            nameOrEmail, employeeNumber, departmentName, position,  status, hireDateFrom, hireDateTo,
+            nameOrEmail, employeeNumber, departmentName, position, status, hireDateFrom, hireDateTo,
             sortField, sortDirection, cursor, idAfter, size
         );
 
@@ -346,10 +345,14 @@ class EmployeeServiceTest {
     @Test
     void getEmployeeDistribution_부서기준_비율확인() {
         // given
-        Department dept1 = departmentRepository.save(new Department("백엔드", "백엔드팀", LocalDate.now(), Instant.now()));
-        Department dept2 = departmentRepository.save(new Department("프론트엔드", "프론트엔드팀", LocalDate.now(), Instant.now()));
-        Department dept3 = departmentRepository.save(new Department("기획", "기획팀", LocalDate.now(), Instant.now()));
-        Department dept4 = departmentRepository.save(new Department("디자인", "디자인팀", LocalDate.now(), Instant.now()));
+        Department dept1 = departmentRepository.save(
+            new Department("백엔드", "백엔드팀", LocalDate.now(), Instant.now()));
+        Department dept2 = departmentRepository.save(
+            new Department("프론트엔드", "프론트엔드팀", LocalDate.now(), Instant.now()));
+        Department dept3 = departmentRepository.save(
+            new Department("기획", "기획팀", LocalDate.now(), Instant.now()));
+        Department dept4 = departmentRepository.save(
+            new Department("디자인", "디자인팀", LocalDate.now(), Instant.now()));
 
         employeeRepository.save(new Employee(null, dept1, "A", "a1@email.com", "EMP-001", "주임",
             LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now()));
@@ -361,7 +364,8 @@ class EmployeeServiceTest {
             LocalDate.of(2023, 1, 1), EmployeeStatus.ACTIVE, Instant.now()));
 
         // when
-        List<EmployeeDistributionDto> result = dashboardService.getEmployeeDistribution("department", EmployeeStatus.ACTIVE);
+        List<EmployeeDistributionDto> result = dashboardService.getEmployeeDistribution(
+            "department", EmployeeStatus.ACTIVE);
 
         // then
         assertThat(result).hasSize(4);
@@ -415,7 +419,8 @@ class EmployeeServiceTest {
             new Department("백엔드 개발팀", "서버 개발을 담당합니다.", LocalDate.now(), Instant.now())
         );
 
-        Employee employee = new Employee(null, department, "조현아", "hyun@gmail.com", "emp-2025-000", "사원", LocalDate.of(2025, 6, 2), EmployeeStatus.ACTIVE, Instant.now());
+        Employee employee = new Employee(null, department, "조현아", "hyun@gmail.com", "emp-2025-000",
+            "사원", LocalDate.of(2025, 6, 2), EmployeeStatus.ACTIVE, Instant.now());
         employeeRepository.save(employee);
 
         // when

@@ -1,5 +1,6 @@
 package com.fource.hrbank.controller;
 
+import com.fource.hrbank.controller.api.DepartmentApi;
 import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.dto.department.DepartmentCreateRequest;
 import com.fource.hrbank.dto.department.DepartmentDto;
@@ -20,18 +21,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 부서 관련 요청을 처리하는 RestController 입니다.
- *
+ * <p>
  * 추가, 수정, 삭제, 조회 등의 기능을 제공합니다.
  */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/departments")
-public class DepartmentController {
+public class DepartmentController implements DepartmentApi {
 
     private final DepartmentService departmentService;
 
     @GetMapping
-    public ResponseEntity<CursorPageResponse<DepartmentDto>> findAll(
+    public ResponseEntity<CursorPageResponse<DepartmentDto>> getAllEmployees(
         @RequestParam(required = false) String nameOrDescription,
         @RequestParam(required = false) Long idAfter,
         @RequestParam(required = false) String cursor,
@@ -47,7 +48,8 @@ public class DepartmentController {
     }
 
     @PostMapping
-    public ResponseEntity<DepartmentDto> create(@RequestBody DepartmentCreateRequest request) {
+    public ResponseEntity<DepartmentDto> createDepartment(
+        @RequestBody DepartmentCreateRequest request) {
         DepartmentDto department = departmentService.create(request);
 
         return ResponseEntity
@@ -56,7 +58,7 @@ public class DepartmentController {
     }
 
     @PatchMapping("/{departmentId}")
-    public ResponseEntity<DepartmentDto> update(@PathVariable Long departmentId,
+    public ResponseEntity<DepartmentDto> updateDepartment(@PathVariable Long departmentId,
         @RequestBody DepartmentUpdateRequest request) {
         DepartmentDto department = departmentService.update(departmentId, request);
         return ResponseEntity
@@ -65,7 +67,7 @@ public class DepartmentController {
     }
 
     @DeleteMapping("/{departmentId}")
-    public ResponseEntity<Void> delete(@PathVariable Long departmentId) {
+    public ResponseEntity<Void> deleteDepartment(@PathVariable Long departmentId) {
         departmentService.delete(departmentId);
         return ResponseEntity.noContent().build();
     }

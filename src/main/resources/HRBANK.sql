@@ -47,13 +47,13 @@ CREATE TABLE tbl_employees
 -- 변경 이력 로그 테이블
 CREATE TABLE tbl_change_log
 (
-    id          SERIAL PRIMARY KEY,
-    employee_number varchar         NOT NULL,
-    changed_at  TIMESTAMPTZ NOT NULL,
-    changed_ip  VARCHAR(50) NOT NULL,
-    type        VARCHAR     NOT NULL,
-    memo        TEXT,
-    created_at  TIMESTAMPTZ NOT NULL
+    id              SERIAL PRIMARY KEY,
+    employee_number varchar     NOT NULL,
+    changed_at      TIMESTAMPTZ NOT NULL,
+    changed_ip      VARCHAR(50) NOT NULL,
+    type            VARCHAR     NOT NULL,
+    memo            TEXT,
+    created_at      TIMESTAMPTZ NOT NULL
 );
 
 -- 변경 상세 이력 테이블

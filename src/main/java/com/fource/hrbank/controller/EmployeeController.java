@@ -6,6 +6,7 @@ import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.dto.employee.EmployeeCreateRequest;
 import com.fource.hrbank.dto.employee.EmployeeDistributionDto;
 import com.fource.hrbank.dto.employee.EmployeeDto;
+import com.fource.hrbank.dto.employee.EmployeeTrendDto;
 import com.fource.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.fource.hrbank.service.dashboard.DashboardService;
 import com.fource.hrbank.service.employee.EmployeeService;
@@ -67,7 +68,7 @@ public class EmployeeController implements EmployeeApi {
         @RequestParam(required = false) EmployeeStatus status,
         @RequestParam(required = false) Long idAfter,
         @RequestParam(required = false) String cursor,
-        @RequestParam(defaultValue = "10") Integer size,
+        @RequestParam(defaultValue = "10") int size,
         @RequestParam(defaultValue = "name") String sortField,
         @RequestParam(defaultValue = "asc") String sortDirection
     ) {
@@ -110,7 +111,7 @@ public class EmployeeController implements EmployeeApi {
     }
 
     @GetMapping("/stats/trend")
-    public ResponseEntity<List<com.fource.hrbank.dto.employee.EmployeeTrendDto>> getEmployeeTrend(
+    public ResponseEntity<List<EmployeeTrendDto>> getTrend(
         @RequestParam(name = "from", required = false)
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
 
@@ -119,20 +120,22 @@ public class EmployeeController implements EmployeeApi {
 
         @RequestParam(name = "unit", defaultValue = "month") String unit
     ) {
-        List<com.fource.hrbank.dto.employee.EmployeeTrendDto> trend = dashboardService.getEmployeeTrend(from, to, unit);
+        List<com.fource.hrbank.dto.employee.EmployeeTrendDto> trend = dashboardService.getEmployeeTrend(
+            from, to, unit);
         return ResponseEntity.ok(trend);
     }
 
     @GetMapping("/count")
-    public ResponseEntity<Long> countEmployees(
+    public ResponseEntity<Long> getEmployeeCount(
+        @RequestParam(required = false) EmployeeStatus status,
         @RequestParam(required = false)
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate fromDate,
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
         @RequestParam(required = false)
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate toDate,
-        @RequestParam(required = false)
-        EmployeeStatus status
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
     ) {
         long count = employeeService.getEmployeeCount(status, fromDate, toDate);
         return ResponseEntity.ok(count);
     }
+
+
 }

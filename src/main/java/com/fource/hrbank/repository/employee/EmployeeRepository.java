@@ -25,33 +25,33 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>,
     boolean existsByDepartmentId(Long departmentId);
 
     @Query("""
-    SELECT e.department.name, COUNT(e)
-    FROM Employee e
-    WHERE (:status IS NULL OR e.status = :status)
-    GROUP BY e.department.name
-""")
+            SELECT e.department.name, COUNT(e)
+            FROM Employee e
+            WHERE (:status IS NULL OR e.status = :status)
+            GROUP BY e.department.name
+        """)
     List<Object[]> countByDepartmentGroup(@Param("status") EmployeeStatus status);
 
     @Query("""
-    SELECT e.position, COUNT(e)
-    FROM Employee e
-    WHERE (:status IS NULL OR e.status = :status)
-    GROUP BY e.position
-""")
+            SELECT e.position, COUNT(e)
+            FROM Employee e
+            WHERE (:status IS NULL OR e.status = :status)
+            GROUP BY e.position
+        """)
     List<Object[]> countByPositionGroup(@Param("status") EmployeeStatus status);
 
     @Query("""
-    SELECT COUNT(e)
-    FROM Employee e
-    WHERE (:status IS NULL OR e.status = :status)
-""")
+            SELECT COUNT(e)
+            FROM Employee e
+            WHERE (:status IS NULL OR e.status = :status)
+        """)
     long countAllByStatus(@Param("status") EmployeeStatus status);
 
     @Query("""
-      SELECT COUNT(e)
-      FROM Employee e
-      WHERE e.status = 'ACTIVE' AND e.hireDate <= :date
-    """)
+          SELECT COUNT(e)
+          FROM Employee e
+          WHERE e.status = 'ACTIVE' AND e.hireDate <= :date
+        """)
     long countByDateRange(@Param("date") LocalDate date);
 }
 
