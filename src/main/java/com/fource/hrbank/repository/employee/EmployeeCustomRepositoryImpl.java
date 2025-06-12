@@ -7,6 +7,10 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +23,32 @@ public class EmployeeCustomRepositoryImpl implements EmployeeCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     private final QEmployee employee = QEmployee.employee;
+
+    @PersistenceContext
+    private final EntityManager em;
+
+    @Override
+    public long countByFilters(EmployeeStatus status, LocalDate from, LocalDate to) {
+        StringBuilder jpql = new StringBuilder("SELECT COUNT(e) FROM Employee e WHERE 1=1");
+
+        if (status != null) {
+            jpql.append(" AND e.status = :status");
+        }
+        if (from != null) {
+            jpql.append(" AND e.hireDate >= :from");
+        }
+        if (to != null) {
+            jpql.append(" AND e.hireDate <= :to");
+        }
+
+        TypedQuery<Long> query = em.createQuery(jpql.toString(), Long.class);
+
+        if (status != null) query.setParameter("status", status);
+        if (from != null) query.setParameter("from", from);
+        if (to != null) query.setParameter("to", to);
+
+        return query.getSingleResult();
+    }
 
     // 상태별 전체 직원 수 조회
     public long countByStatus(EmployeeStatus status) {

@@ -339,4 +339,9 @@ public class EmployeeServiceImpl implements EmployeeService {
             Instant.now()
         );
     }
+
+    @Override
+    public long getEmployeeCount(EmployeeStatus status, LocalDate fromDate, LocalDate toDate) {
+        return employeeRepository.countByFilters(status, fromDate, toDate);
+    }
 }

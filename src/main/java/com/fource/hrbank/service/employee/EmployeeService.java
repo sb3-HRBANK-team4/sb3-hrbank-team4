@@ -23,7 +23,7 @@ public interface EmployeeService {
     EmployeeDto update(Long employeeId, EmployeeUpdateRequest request,
         Optional<MultipartFile> profileImage);
 
-//    long getEmployeeCount(EmployeeStatus status, LocalDate fromDate, LocalDate toDate);
+    long getEmployeeCount(EmployeeStatus status, LocalDate fromDate, LocalDate toDate);
 
     void deleteById(Long id);
 }
