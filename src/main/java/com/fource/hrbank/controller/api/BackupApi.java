@@ -45,7 +45,7 @@ public interface BackupApi {
         @RequestParam(value = "worker", required = false) String worker,
 
         @Parameter(description = "상태 (IN_PROGRESS, COMPLETED, FAILED)")
-        @RequestParam(value = "status", required = false) BackupStatus status,
+        @RequestParam(value = "status", required = false, defaultValue = "COMPLETED") BackupStatus status,
 
         @Parameter(description = "시작 시간(부터)")
         @RequestParam(value = "startedAtFrom", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Instant startedAtFrom,
