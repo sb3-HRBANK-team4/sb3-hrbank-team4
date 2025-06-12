@@ -45,7 +45,7 @@ public interface BackupApi {
         @RequestParam(value = "worker", required = false) String worker,
 
         @Parameter(description = "상태 (IN_PROGRESS, COMPLETED, FAILED)")
-        @RequestParam(value = "status", required = false, defaultValue = "COMPLETED") BackupStatus status,
+        @RequestParam(value = "status", required = false) BackupStatus status,
 
         @Parameter(description = "시작 시간(부터)")
         @RequestParam(value = "startedAtFrom", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Instant startedAtFrom,
@@ -63,10 +63,10 @@ public interface BackupApi {
         @RequestParam(value = "size", required = false, defaultValue = "10") int size,
 
         @Parameter(description = "정렬 필드 (startedAt, endedAt, status)")
-        @RequestParam(value = "sortField", required = false, defaultValue = "name") String sortField,
+        @RequestParam(value = "sortField", required = false, defaultValue = "startedAt") String sortField,
 
         @Parameter(description = "정렬 방향 (ASC, DESC)")
-        @RequestParam(value = "sortDirection", required = false, defaultValue = "asc") String sortDirection
+        @RequestParam(value = "sortDirection", required = false, defaultValue = "DESC") String sortDirection
     );
 
     @Operation(

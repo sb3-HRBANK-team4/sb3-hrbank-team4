@@ -34,14 +34,14 @@ public class BackupController implements BackupApi {
     @GetMapping
     public ResponseEntity<CursorPageResponse<BackupDto>> getAllBackups(
         @RequestParam(required = false) String worker,
-        @RequestParam(required = false, defaultValue = "COMPLETED") BackupStatus status,
+        @RequestParam(required = false) BackupStatus status,
         @RequestParam(required = false) Instant startedAtFrom,
         @RequestParam(required = false) Instant startedAtTo,
         @RequestParam(required = false) Long idAfter,
         @RequestParam(required = false) String cursor,
         @RequestParam(defaultValue = "10") int size,
-        @RequestParam(required = false) String sortField,
-        @RequestParam(required = false) String sortDirection
+        @RequestParam(required = false, defaultValue = "startedAt") String sortField,
+        @RequestParam(required = false, defaultValue = "DESC") String sortDirection
     ) {
         CursorPageResponse<BackupDto> cursorPageResponseBackupDto = backupService.findAll(worker,
             status, startedAtFrom, startedAtTo, idAfter, cursor, size, sortField, sortDirection);
@@ -77,7 +77,7 @@ public class BackupController implements BackupApi {
      */
     @GetMapping("/latest")
     public ResponseEntity<BackupDto> getLatestBackup(
-        @RequestParam(required = false) BackupStatus status) {
+        @RequestParam(required = false, defaultValue = "COMPLETED") BackupStatus status) {
 
         BackupDto backupDto = backupService.findLatestByStatus(status);
 

@@ -54,7 +54,7 @@ public interface DepartmentApi {
         @RequestParam(value = "size", required = false, defaultValue = "10") int size,
 
         @Parameter(description = "정렬 필드 (name 또는 establishedDate)")
-        @RequestParam(value = "sortField", required = false, defaultValue = "name") String sortField,
+        @RequestParam(value = "sortField", required = false, defaultValue = "establishedDate") String sortField,
 
         @Parameter(description = "정렬 방향 (asc 또는 desc, 기본값: asc)")
         @RequestParam(value = "sortDirection", required = false, defaultValue = "asc") String sortDirection
