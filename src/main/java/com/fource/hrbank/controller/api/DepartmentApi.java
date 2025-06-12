@@ -82,29 +82,6 @@ public interface DepartmentApi {
     ResponseEntity<DepartmentDto> createDepartment(
         @RequestBody DepartmentCreateRequest departmentCreateRequest
     );
-//
-//    @Operation(
-//        summary = "부서 상세 조회",
-//        description = "부서 상세 정보를 조회합니다.",
-//        operationId = "getDepartmentById"
-//    )
-//    @ApiResponses(value = {
-//        @ApiResponse(
-//            responseCode = "200", description = "조회 성공",
-//            content = @Content(schema = @Schema(implementation = DepartmentDto.class))
-//        ),
-//        @ApiResponse(
-//            responseCode = "404", description = "부서를 찾을 수 없음",
-//            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-//        ),
-//        @ApiResponse(
-//            responseCode = "500", description = "서버 오류",
-//            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-//        )
-//    })
-//    ResponseEntity<DepartmentDto> getDepartmentById(
-//        @Parameter(required = true, description = "부서 ID") Long id
-//    );
 
     @Operation(
         summary = "부서 삭제",
