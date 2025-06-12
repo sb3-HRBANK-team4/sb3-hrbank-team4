@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface DashboardService {
+
     EmployeeTrendDto getEmployeeCount(EmployeeStatus status, LocalDate from, LocalDate to);
 
     List<EmployeeDistributionDto> getEmployeeDistribution(String groupBy, EmployeeStatus status);

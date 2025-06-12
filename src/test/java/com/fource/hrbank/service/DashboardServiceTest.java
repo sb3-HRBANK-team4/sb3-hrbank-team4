@@ -53,8 +53,9 @@ class DashboardServiceTest {
     @Test
     void getEmployeeCount_조건있음() {
         LocalDate from = LocalDate.of(2024, 1, 1);
-        LocalDate to = LocalDate.of(2024,12,31);
-        EmployeeTrendDto result = dashboardService.getEmployeeCount(EmployeeStatus.ACTIVE, from, to);
+        LocalDate to = LocalDate.of(2024, 12, 31);
+        EmployeeTrendDto result = dashboardService.getEmployeeCount(EmployeeStatus.ACTIVE, from,
+            to);
 
         assertThat(result.count()).isGreaterThanOrEqualTo(0);
     }

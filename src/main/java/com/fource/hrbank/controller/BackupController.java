@@ -5,7 +5,6 @@ import com.fource.hrbank.domain.BackupStatus;
 import com.fource.hrbank.dto.backup.BackupDto;
 import com.fource.hrbank.dto.common.CursorPageResponse;
 import com.fource.hrbank.service.backup.BackupService;
-import com.fource.hrbank.service.storage.FileStorage;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class BackupController implements BackupApi {
 
     private final BackupService backupService;
-    private final FileStorage fileStorage;
 
     /**
      * 백업 로그 전체를 조회합니다.
@@ -34,7 +32,7 @@ public class BackupController implements BackupApi {
      * @return 백업 로그 DTO 리스트 (HTTP 200 OK)
      */
     @GetMapping
-    public ResponseEntity<CursorPageResponse<BackupDto>> findAll(
+    public ResponseEntity<CursorPageResponse<BackupDto>> getAllBackups(
         @RequestParam(required = false) String worker,
         @RequestParam(required = false) BackupStatus status,
         @RequestParam(required = false) Instant startedAtFrom,
@@ -42,8 +40,8 @@ public class BackupController implements BackupApi {
         @RequestParam(required = false) Long idAfter,
         @RequestParam(required = false) String cursor,
         @RequestParam(defaultValue = "10") int size,
-        @RequestParam String sortField,
-        @RequestParam String sortDirection
+        @RequestParam(required = false, defaultValue = "startedAt") String sortField,
+        @RequestParam(required = false, defaultValue = "DESC") String sortDirection
     ) {
         CursorPageResponse<BackupDto> cursorPageResponseBackupDto = backupService.findAll(worker,
             status, startedAtFrom, startedAtTo, idAfter, cursor, size, sortField, sortDirection);
@@ -60,7 +58,7 @@ public class BackupController implements BackupApi {
      * @return 생성된 데이터 백업 이력
      */
     @PostMapping
-    public ResponseEntity<BackupDto> backup(HttpServletRequest request) {
+    public ResponseEntity<BackupDto> createBackup(HttpServletRequest request) {
         String ipAdress = request.getRemoteAddr();
 
         BackupDto createBackupDto = backupService.create(ipAdress); // 백업 이력 등록
@@ -79,7 +77,7 @@ public class BackupController implements BackupApi {
      */
     @GetMapping("/latest")
     public ResponseEntity<BackupDto> getLatestBackup(
-        @RequestParam(required = false) BackupStatus status) {
+        @RequestParam(required = false, defaultValue = "COMPLETED") BackupStatus status) {
 
         BackupDto backupDto = backupService.findLatestByStatus(status);
 

@@ -1,6 +1,5 @@
 package com.fource.hrbank.service.backup;
 
-import com.fource.hrbank.dto.backup.BackupDto;
 import jakarta.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -16,10 +15,9 @@ import org.springframework.stereotype.Component;
 @ConditionalOnProperty(name = "hrbank.batch.enabled", havingValue = "true", matchIfMissing = false)
 public class BackupScheduler {
 
+    private final BackupService backupService;
     @Value("${hrbank.batch.time}")
     private long batchTime;
-
-    private final BackupService backupService;
 
     @PostConstruct
     public void init() {
@@ -33,7 +31,7 @@ public class BackupScheduler {
             log.info("배치 백업 실행됨 - 현재 시각: {}, 배치 주기: {}ms", LocalDateTime.now(), batchTime);
             log.info("실행되고 있는 스레드 : " + Thread.currentThread().getName());
             backupService.batchBackup();
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.error("스케줄러 작업 중 오류 발생", e);
         }
     }

@@ -16,7 +16,6 @@ import com.fource.hrbank.domain.Employee;
 import com.fource.hrbank.domain.EmployeeStatus;
 import com.fource.hrbank.dto.backup.BackupDto;
 import com.fource.hrbank.dto.common.ResponseMessage;
-import com.fource.hrbank.exception.BackupLogNotFoundException;
 import com.fource.hrbank.exception.FileIOException;
 import com.fource.hrbank.mapper.BackupLogMapper;
 import com.fource.hrbank.repository.FileMetadataRepository;
@@ -72,15 +71,6 @@ public class BackupServiceTest {
 
     @Autowired
     private FileStorage fileStorage;
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public FileStorage fileStorage() {
-            return Mockito.mock(FileStorage.class);
-        }
-    }
-
     @Value("${spring.profiles.active}")
     private String profile;
 
@@ -126,8 +116,10 @@ public class BackupServiceTest {
     @Test
     void findLatestByStatus_정상조회_최근백업반환() {
         // given
-        BackupLog oldLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(3600), Instant.now().minusSeconds(3590), BackupStatus.COMPLETED, null);
-        BackupLog newLog = new BackupLog("127.0.0.1", Instant.now(), Instant.now(), BackupStatus.COMPLETED, null);
+        BackupLog oldLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(3600),
+            Instant.now().minusSeconds(3590), BackupStatus.COMPLETED, null);
+        BackupLog newLog = new BackupLog("127.0.0.1", Instant.now(), Instant.now(),
+            BackupStatus.COMPLETED, null);
         List<BackupLog> logs = List.of(oldLog, newLog);
         backupLogRepository.saveAll(logs);
 
@@ -144,8 +136,10 @@ public class BackupServiceTest {
     @Test
     void findLatestByStatus_조회결과없음_null값반환() {
         // given
-        BackupLog oldLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(3600), Instant.now().minusSeconds(3590), BackupStatus.COMPLETED, null);
-        BackupLog newLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(1800), Instant.now().minusSeconds(1790), BackupStatus.COMPLETED, null);
+        BackupLog oldLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(3600),
+            Instant.now().minusSeconds(3590), BackupStatus.COMPLETED, null);
+        BackupLog newLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(1800),
+            Instant.now().minusSeconds(1790), BackupStatus.COMPLETED, null);
         List<BackupLog> logs = List.of(oldLog, newLog);
         backupLogRepository.saveAll(logs);
 
@@ -156,13 +150,16 @@ public class BackupServiceTest {
     @Test
     void create_정상동작_백업필요() {
         // given
-        BackupLog backupLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(1800), Instant.now().minusSeconds(1790), BackupStatus.COMPLETED, null);
+        BackupLog backupLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(1800),
+            Instant.now().minusSeconds(1790), BackupStatus.COMPLETED, null);
         backupLogRepository.save(backupLog);
 
-        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
+        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임",
+            LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
         employeeRepository.save(employee);
 
-        ChangeLog changeLog = new ChangeLog("EMP-001",Instant.now(), "127.0.0.1", ChangeType.UPDATED, null, null);
+        ChangeLog changeLog = new ChangeLog("EMP-001", Instant.now(), "127.0.0.1",
+            ChangeType.UPDATED, null, null);
         changeLogRepository.save(changeLog);
 
         // when
@@ -177,13 +174,16 @@ public class BackupServiceTest {
     @Test
     void create_정상동작_백업필요없음() {
         // given
-        BackupLog backupLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(1800), Instant.now().minusSeconds(1790), BackupStatus.COMPLETED, null);
+        BackupLog backupLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(1800),
+            Instant.now().minusSeconds(1790), BackupStatus.COMPLETED, null);
         backupLogRepository.save(backupLog);
 
-        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
+        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임",
+            LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
         employeeRepository.save(employee);
 
-        ChangeLog changeLog = new ChangeLog("EMP-001", Instant.now().minusSeconds(3600), "127.0.0.1", ChangeType.UPDATED, null, null);
+        ChangeLog changeLog = new ChangeLog("EMP-001", Instant.now().minusSeconds(3600),
+            "127.0.0.1", ChangeType.UPDATED, null, null);
         changeLogRepository.save(changeLog);
 
         // when
@@ -198,7 +198,8 @@ public class BackupServiceTest {
     @Test
     void backup_정상동작_건너뜀상태반환됨() {
         // given
-        BackupLog backupLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(1800), Instant.now().minusSeconds(1790), BackupStatus.SKIPPED, null);
+        BackupLog backupLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(1800),
+            Instant.now().minusSeconds(1790), BackupStatus.SKIPPED, null);
         backupLogRepository.save(backupLog);
         BackupDto skipped = backupLogMapper.toDto(backupLog);
 
@@ -212,7 +213,8 @@ public class BackupServiceTest {
     @Test
     void backup_정상동작_백업완료() {
         // given
-        BackupLog backupLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(1800), Instant.now().minusSeconds(1790), BackupStatus.IN_PROGRESS, null);
+        BackupLog backupLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(1800),
+            Instant.now().minusSeconds(1790), BackupStatus.IN_PROGRESS, null);
         backupLogRepository.save(backupLog);
         BackupDto inProgressed = backupLogMapper.toDto(backupLog);
 
@@ -227,17 +229,19 @@ public class BackupServiceTest {
     @Test
     void backup_정상동작_백업실패() {
         // given
-        BackupLog backupLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(1800), Instant.now().minusSeconds(1790), BackupStatus.IN_PROGRESS, null);
+        BackupLog backupLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(1800),
+            Instant.now().minusSeconds(1790), BackupStatus.IN_PROGRESS, null);
         backupLogRepository.save(backupLog);
         BackupDto backupDto = backupLogMapper.toDto(backupLog);
 
-        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
+        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임",
+            LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
         employeeRepository.save(employee);
 
         // 첫번째 put() : 예외, 두번째는 성공
-        when(fileStorage.put(any(),any()))
-                .thenThrow(new RuntimeException("파일 저장 실패"))
-                .thenReturn(backupDto.id());
+        when(fileStorage.put(any(), any()))
+            .thenThrow(new RuntimeException("파일 저장 실패"))
+            .thenReturn(backupDto.id());
 
         // when
         BackupDto result = backupService.backup(backupDto);
@@ -249,22 +253,24 @@ public class BackupServiceTest {
     @Test
     void backup_동작실패_예외발생() {
         // given
-        BackupLog backupLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(1800), Instant.now().minusSeconds(1790), BackupStatus.IN_PROGRESS, null);
+        BackupLog backupLog = new BackupLog("127.0.0.1", Instant.now().minusSeconds(1800),
+            Instant.now().minusSeconds(1790), BackupStatus.IN_PROGRESS, null);
         backupLogRepository.save(backupLog);
         BackupDto backupDto = backupLogMapper.toDto(backupLog);
 
-        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임", LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
+        Employee employee = new Employee(null, null, "김가", "a@email.com", "EMP-001", "주임",
+            LocalDate.now(), EmployeeStatus.ACTIVE, Instant.now());
         employeeRepository.save(employee);
 
         // 예외 발생
-        when(fileStorage.put(any(),any()))
-                .thenThrow(new RuntimeException("파일 저장 실패"))
-                .thenThrow(new RuntimeException("에러 로그 저장 실패"));
+        when(fileStorage.put(any(), any()))
+            .thenThrow(new RuntimeException("파일 저장 실패"))
+            .thenThrow(new RuntimeException("에러 로그 저장 실패"));
 
         // when & then
-        assertThatThrownBy(()-> backupService.backup(backupDto))
-                .isInstanceOf(FileIOException.class)
-                .hasMessage(ResponseMessage.FILE_SAVE_ERROR_MESSAGE);
+        assertThatThrownBy(() -> backupService.backup(backupDto))
+            .isInstanceOf(FileIOException.class)
+            .hasMessage(ResponseMessage.FILE_SAVE_ERROR_MESSAGE);
     }
 
     @Test
@@ -274,5 +280,14 @@ public class BackupServiceTest {
 
         // then
         assertThat(backupDto.status()).isIn(BackupStatus.COMPLETED, BackupStatus.SKIPPED);
+    }
+
+    @TestConfiguration
+    static class TestConfig {
+
+        @Bean
+        public FileStorage fileStorage() {
+            return Mockito.mock(FileStorage.class);
+        }
     }
 }

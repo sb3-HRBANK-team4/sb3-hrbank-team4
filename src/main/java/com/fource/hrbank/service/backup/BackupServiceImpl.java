@@ -13,9 +13,9 @@ import com.fource.hrbank.exception.BackupLogNotFoundException;
 import com.fource.hrbank.exception.FileIOException;
 import com.fource.hrbank.mapper.BackupLogMapper;
 import com.fource.hrbank.mapper.EmployeeMapper;
-import com.fource.hrbank.repository.change.ChangeLogRepository;
 import com.fource.hrbank.repository.FileMetadataRepository;
 import com.fource.hrbank.repository.backup.BackupLogRepository;
+import com.fource.hrbank.repository.change.ChangeLogRepository;
 import com.fource.hrbank.repository.employee.EmployeeRepository;
 import com.fource.hrbank.service.storage.FileStorage;
 import java.nio.charset.StandardCharsets;
@@ -63,9 +63,9 @@ public class BackupServiceImpl implements BackupService {
     @Override
     @Transactional(readOnly = true)
     public CursorPageResponse<BackupDto> findAll(String worker, BackupStatus status,
-                                      Instant startedAtFrom,
-                                      Instant startedAtTo, Long idAfter, String cursor, int size, String sortField,
-                                      String sortDirection) {
+        Instant startedAtFrom,
+        Instant startedAtTo, Long idAfter, String cursor, int size, String sortField,
+        String sortDirection) {
 
         Pageable pageable = PageRequest.of(0, size + 1);
 
@@ -103,8 +103,8 @@ public class BackupServiceImpl implements BackupService {
     public BackupDto findLatestByStatus(BackupStatus status) {
 
         return backupLogRepository.findLatestByStatus(status)
-                .map(backupLogMapper::toDto)
-                .orElse(null);
+            .map(backupLogMapper::toDto)
+            .orElse(null);
     }
 
     /**

@@ -34,19 +34,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Logging
 public class ChangeLogServiceImpl implements ChangeLogService {
 
-    private final ChangeLogRepository changeLogRepository;
-    private final ChangeDetailRepository changeDetailRepository;
-    private final ChangeDetailMapper changeDetailMapper;
-
     // 정렬 필드 상수
     private static final Set<String> VALID_SORT_FIELDS = Set.of(
         "ipAddress", "at", "changedAt", "memo", "type"
     );
-
     // 기본값 상수
     private static final int DEFAULT_SIZE = 10;
     private static final String DEFAULT_SORT_FIELD = "at";
     private static final String DEFAULT_SORT_DIRECTION = "desc";
+    private final ChangeLogRepository changeLogRepository;
+    private final ChangeDetailRepository changeDetailRepository;
+    private final ChangeDetailMapper changeDetailMapper;
 
     /**
      * 변경 로그 목록을 조건에 따라 조회 커서 기반 페이지네이션 및 정렬
@@ -109,14 +107,15 @@ public class ChangeLogServiceImpl implements ChangeLogService {
     /**
      * 변경 로그를 생성하고 저장
      *
-     * @param employeeNumber  사원 번호
-     * @param type      변경 유형
-     * @param memo      변경 메모
-     * @param diffsDtos 변경 상세 항목 리스트
+     * @param employeeNumber 사원 번호
+     * @param type           변경 유형
+     * @param memo           변경 메모
+     * @param diffsDtos      변경 상세 항목 리스트
      * @return 저장된 변경 로그
      */
     @Override
-    public ChangeLog create(String employeeNumber, ChangeType type, String memo, List<DiffsDto> diffsDtos) {
+    public ChangeLog create(String employeeNumber, ChangeType type, String memo,
+        List<DiffsDto> diffsDtos) {
         String ipAddress = IpUtils.getCurrentClientIp();
 
         ChangeLog changeLog = new ChangeLog(
@@ -169,28 +168,36 @@ public class ChangeLogServiceImpl implements ChangeLogService {
             getEmployeeField(after, Employee::getEmail));
 
         addDiffIfChanged(diffs, "부서명",
-            getEmployeeField(before, emp -> emp.getDepartment() != null ? emp.getDepartment().getName() : null),
-            getEmployeeField(after, emp -> emp.getDepartment() != null ? emp.getDepartment().getName() : null));
+            getEmployeeField(before,
+                emp -> emp.getDepartment() != null ? emp.getDepartment().getName() : null),
+            getEmployeeField(after,
+                emp -> emp.getDepartment() != null ? emp.getDepartment().getName() : null));
 
         addDiffIfChanged(diffs, "직함",
             getEmployeeField(before, Employee::getPosition),
             getEmployeeField(after, Employee::getPosition));
 
         addDiffIfChanged(diffs, "입사일",
-            getEmployeeField(before, emp -> emp.getHireDate() != null ? emp.getHireDate().toString() : null),
-            getEmployeeField(after, emp -> emp.getHireDate() != null ? emp.getHireDate().toString() : null));
+            getEmployeeField(before,
+                emp -> emp.getHireDate() != null ? emp.getHireDate().toString() : null),
+            getEmployeeField(after,
+                emp -> emp.getHireDate() != null ? emp.getHireDate().toString() : null));
 
         addDiffIfChanged(diffs, "상태",
-            getEmployeeField(before, emp -> emp.getStatus() != null ? emp.getStatus().getLabel() : null),
-            getEmployeeField(after, emp -> emp.getStatus() != null ? emp.getStatus().getLabel() : null));
+            getEmployeeField(before,
+                emp -> emp.getStatus() != null ? emp.getStatus().getLabel() : null),
+            getEmployeeField(after,
+                emp -> emp.getStatus() != null ? emp.getStatus().getLabel() : null));
 
         return diffs;
     }
 
     // ============== Private 헬퍼 메소드들 ==============
+
     /**
      * Employee 객체에서 안전하게 필드 값을 추출
-     * @param employee Employee 객체 (null 가능)
+     *
+     * @param employee       Employee 객체 (null 가능)
      * @param fieldExtractor 필드 추출 함수
      * @return 추출된 값 (null 가능)
      */

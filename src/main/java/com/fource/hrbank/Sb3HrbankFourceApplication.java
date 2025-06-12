@@ -15,12 +15,12 @@ public class Sb3HrbankFourceApplication {
     @Value("${spring.profiles.active}")
     private String activeProfile;
 
+    public static void main(String[] args) {
+        SpringApplication.run(Sb3HrbankFourceApplication.class, args);
+    }
+
     @PostConstruct
     public void printProfile() {
         System.out.println("현재 활성화된 프로파일: " + activeProfile);
-    }
-
-    public static void main(String[] args) {
-        SpringApplication.run(Sb3HrbankFourceApplication.class, args);
     }
 }

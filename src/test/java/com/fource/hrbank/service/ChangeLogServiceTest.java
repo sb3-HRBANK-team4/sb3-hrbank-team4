@@ -46,37 +46,20 @@ public class ChangeLogServiceTest {
 
     @Autowired
     private FileStorage fileStorage;
-
-    @TestConfiguration
-    static class TestConfig {
-
-        @Bean
-        public FileStorage fileStorage() {
-            return Mockito.mock(FileStorage.class);
-        }
-    }
-
     @Autowired
     private ChangeLogService changeLogService;
-
     @Autowired
     private ChangeLogRepository changeLogRepository;
-
     @Autowired
     private EmployeeRepository employeeRepository;
-
     @Autowired
     private DepartmentRepository departmentRepository;
-
     @Autowired
     private ChangeDetailRepository changeDetailRepository;
-
     @Autowired
     private EmployeeService employeeService;
-
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
     @Value("${spring.profiles.active}")
     private String profile;
 
@@ -87,7 +70,6 @@ public class ChangeLogServiceTest {
             jdbcTemplate.execute(
                 "TRUNCATE TABLE tbl_change_detail, tbl_change_log, tbl_employees, tbl_department RESTART IDENTITY CASCADE");
         }
-
 
         MockHttpServletRequest mockRequest = new MockHttpServletRequest();
         mockRequest.setRemoteAddr("127.0.0.1");
@@ -258,5 +240,14 @@ public class ChangeLogServiceTest {
         assertThat(list).isSortedAccordingTo(
             Comparator.comparing(ChangeLogDto::getAt).reversed()
         );
+    }
+
+    @TestConfiguration
+    static class TestConfig {
+
+        @Bean
+        public FileStorage fileStorage() {
+            return Mockito.mock(FileStorage.class);
+        }
     }
 }

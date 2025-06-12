@@ -32,21 +32,25 @@ public class EmployeeSpecification {
             }
             String like = "%" + employeeNumber + "%";
             return cb.or(
-                    cb.like(root.get("employeeNumber"), like)
+                cb.like(root.get("employeeNumber"), like)
             );
         };
     }
 
     public static Specification<Employee> hireDateFrom(LocalDate from) {
         return (root, query, cb) -> {
-            if (from == null) return null;
+            if (from == null) {
+                return null;
+            }
             return cb.greaterThanOrEqualTo(root.get("hireDate"), from);
         };
     }
 
     public static Specification<Employee> hireDateTo(LocalDate to) {
         return (root, query, cb) -> {
-            if (to == null) return null;
+            if (to == null) {
+                return null;
+            }
             return cb.lessThanOrEqualTo(root.get("hireDate"), to);
         };
     }

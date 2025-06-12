@@ -32,18 +32,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class LocalFileStorageTest {
 
-    @Autowired
-    private LocalFileStorage fileStorage;
-
-    @Autowired
-    private FileMetadataRepository fileMetadataRepository;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     @TempDir
     Path tempDir;
-
+    @Autowired
+    private LocalFileStorage fileStorage;
+    @Autowired
+    private FileMetadataRepository fileMetadataRepository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
     @Value("${spring.profiles.active}")
     private String profile;
 
@@ -117,7 +113,8 @@ public class LocalFileStorageTest {
         // when & then
         assertThatThrownBy(() -> fileStorage.put(id, content))
             .isInstanceOf(FileIOException.class)
-            .hasMessage(ResponseMessage.FILE_SAVE_ERROR_MESSAGE, ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
+            .hasMessage(ResponseMessage.FILE_SAVE_ERROR_MESSAGE,
+                ResponseDetails.FILE_SAVE_ERROR_MESSAGE);
     }
 
     @Test
