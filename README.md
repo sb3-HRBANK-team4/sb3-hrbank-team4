@@ -198,4 +198,5 @@
     sb3-hrbank-team4-production.up.railway.app   → 실제 API 호출 테스트 및 배포 확인 가능
 
 ## 📎 추가 자료
-📘 [팀 노션](https://ohgiraffers.notion.site/4-207649136c1180699dbaebd37fd1d399?source=copy_link)  
+- 📘 [팀 노션](https://ohgiraffers.notion.site/4-207649136c1180699dbaebd37fd1d399?source=copy_link)  
+- 💭 [프로젝트 회고록](https://ohgiraffers.notion.site/2c3649136c1180a296cacfe6c254ddb1?source=copy_link)
